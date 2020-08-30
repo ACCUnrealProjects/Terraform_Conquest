@@ -30,7 +30,7 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 	FHitResult DownRayCast;
 
-	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
+	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Visibility, ShotParams))
 	{
 		float DistanceToFoor = FVector::Dist(DownRayCast.Location, MyPos);
 		float DistanceNormal = DistanceToFoor / HoverLenght;
