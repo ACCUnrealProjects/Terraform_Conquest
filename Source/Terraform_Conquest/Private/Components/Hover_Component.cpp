@@ -14,10 +14,12 @@ void UHover_Component::BeginPlay()
 {
 	Super::BeginPlay();
 
+	OGHoverLenght = HoverLenght;
+
 	MyPrimComponent = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
 	MyPrimComponent->SetLinearDamping(LinearDamp);
 	MyPrimComponent->SetAngularDamping(AngularDamp);
-	ShotParams.AddIgnoredActor(GetOwner());
+	HoverCollParams.AddIgnoredActor(GetOwner());
 }
 
 
@@ -25,20 +27,52 @@ void UHover_Component::BeginPlay()
 void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!HoverEnabled) { return; }
+
 	FVector MyPos = GetComponentLocation();
 	FVector RayEnd = MyPos + (-GetOwner()->GetActorUpVector() * HoverLenght);
 
 	FHitResult DownRayCast;
 
-	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Visibility, ShotParams))
+	HoverGrounded = false;
+	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Visibility, HoverCollParams))
 	{
+		HoverGrounded = true;
 		float DistanceToFoor = FVector::Dist(DownRayCast.Location, MyPos);
 		float DistanceNormal = DistanceToFoor / HoverLenght;
 		float ForceNeeded = FMath::Lerp(HoverMaxForce, 0.0f, DistanceNormal);
 
-		FVector ForceVector = DownRayCast.ImpactNormal * ForceNeeded;
+		GroundNormal = DownRayCast.ImpactNormal;
+		FVector ForceVector = GroundNormal * ForceNeeded;
 		MyPrimComponent->AddForce(ForceVector);
+		//MyPrimComponent->AddForceAtLocation(ForceVector, GetComponentLocation());
 	}
 
 }
 
+void UHover_Component::ChangeHoverState(bool HoverState)
+{
+	HoverEnabled = HoverState;
+}
+
+void UHover_Component::IncreaseHoverHeight()
+{
+	HoverLenght = HoverLenght * 1.5;
+}
+
+void UHover_Component::DecreaseHoverHeight()
+{
+	HoverLenght = OGHoverLenght;
+}
+
+
+bool UHover_Component::AmIHovering() const
+{
+	return HoverGrounded;
+}
+
+FVector UHover_Component::GetGroundNormal() const
+{
+	return GroundNormal;
+}

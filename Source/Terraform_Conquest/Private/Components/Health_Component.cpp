@@ -31,12 +31,39 @@ void UHealth_Component::BeginPlay()
 void UHealth_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (TimeSinceLastHit > 0.0f)
+	{
+		TimeSinceLastHit -= DeltaTime;
+	}
+	else if (TimeSinceLastHit <= 0.0f && Shield != MaxShield && !SheildRegenOn)
+	{
+		SheildRegenOn = true;
+		GetWorld()->GetTimerManager().SetTimer(SheildRegenTickTimer, this, &UHealth_Component::SheildRegenTick, ShieldRegenRate, false);
+	}
 }
 
-void UHealth_Component::SetMaxHealth(int32 StartHealth)
+void UHealth_Component::SheildRegenTick()
+{
+	IncreaseShield(ShieldRegenPerTick);
+	if (Shield < MaxShield)
+	{
+		GetWorld()->GetTimerManager().SetTimer(SheildRegenTickTimer, this, &UHealth_Component::SheildRegenTick, ShieldRegenRate, false);
+	}
+	else
+	{
+		SheildRegenOn = false;
+	}
+}
+
+
+void UHealth_Component::SetUp(int32 StartHealth, int32 StartShield)
 {
 	MaxHealth = StartHealth;
 	Health = StartHealth;
+
+	MaxShield = StartShield;
+	Shield = StartShield;
 }
 
 void UHealth_Component::IncreaseHealth(int32 HealthIncrease)
@@ -44,14 +71,24 @@ void UHealth_Component::IncreaseHealth(int32 HealthIncrease)
 	Health = FMath::Min(Health + HealthIncrease, MaxHealth);
 }
 
+void UHealth_Component::IncreaseShield(int32 ShieldIncrease)
+{
+	Shield = FMath::Min(Shield + ShieldIncrease, MaxShield);
+}
+
 float UHealth_Component::GetHealthPercentage() const
 {
 	return (float)Health / (float)MaxHealth;
 }
 
-bool UHealth_Component::AmIAtMaxHealth() const
+float UHealth_Component::GetShieldPercentage() const
 {
-	return Health == MaxHealth;
+	return (float)Shield / (float)MaxShield;
+}
+
+bool UHealth_Component::AmIAtMaxHealthAndShield() const
+{
+	return Health == MaxHealth && Shield == MaxShield;
 }
 
 bool UHealth_Component::AmIDead() const
@@ -73,6 +110,11 @@ void UHealth_Component::TakeDamage(AActor* DamagedActor, float Damage, const UDa
 	{
 		IHaveBeenHit.Broadcast();
 	}
+
+	//Sheild related changes
+	TimeSinceLastHit = TimeBeforeShieldRegenBegins;
+	GetWorld()->GetTimerManager().ClearTimer(SheildRegenTickTimer);
+	SheildRegenOn = false;
 }
 
 void UHealth_Component::KillMe()

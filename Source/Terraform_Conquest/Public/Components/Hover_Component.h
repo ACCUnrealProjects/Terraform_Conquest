@@ -19,18 +19,25 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float HoverLenght = 150.0f;
+	float OGHoverLenght = HoverLenght;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float HoverMaxForce = 500000.0;
+	float HoverMaxForce = 500000.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float LinearDamp = 1.0f;
+	float LinearDamp = 1.5f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float AngularDamp = 0.6f;
+	float AngularDamp = 1.5f;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	bool HoverEnabled = true;
+
+	bool HoverGrounded = false;
+	FVector GroundNormal = FVector(0.0f);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	FCollisionQueryParams ShotParams;
+	FCollisionQueryParams HoverCollParams;
 
 public:	
 
@@ -40,5 +47,12 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void ChangeHoverState(bool HoverState);
+
+	void IncreaseHoverHeight();
+	void DecreaseHoverHeight();
+
+	bool AmIHovering() const;
+	FVector GetGroundNormal() const;
 		
 };
