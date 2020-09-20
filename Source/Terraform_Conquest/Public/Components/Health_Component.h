@@ -16,10 +16,26 @@ class TERRAFORM_CONQUEST_API UHealth_Component : public UActorComponent
 
 private:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HealthSetUp", meta = (AllowPrivateAccess = "true"))
-		int32 MaxHealth = 100;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "HealthSetUp", meta = (AllowPrivateAccess = "true"))
-		int32 Health = MaxHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthSetUp", meta = (AllowPrivateAccess = "true"))
+	int32 MaxHealth = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthSetUp", meta = (AllowPrivateAccess = "true"))
+	int32 Health = MaxHealth;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShieldSetUp", meta = (AllowPrivateAccess = "true"))
+	int32 MaxShield = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShieldSetUp", meta = (AllowPrivateAccess = "true"))
+	int32 Shield = MaxShield;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ShieldRegenSetUp", meta = (AllowPrivateAccess = "true"))
+	float ShieldRegenRate = 0.5f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ShieldRegenSetUp", meta = (AllowPrivateAccess = "true"))
+	float ShieldRegenPerTick = 2.5f;
+	bool SheildRegenOn = false;
+
+	float TimeBeforeShieldRegenBegins = 5.0f;
+	float TimeSinceLastHit = 5.0f;
+	
+	FTimerHandle SheildRegenTickTimer;
 
 protected:
 	// Called when the game starts
@@ -29,27 +45,28 @@ public:
 
 	UHealth_Component();
 
-	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetMaxHealth(int32 StartHealth);
+	UFUNCTION()
+	void SheildRegenTick();
 
+	void SetUp(int32 StartHealth, int32 StartShield);
 	void IncreaseHealth(int32 HealthIncrease);
+	void IncreaseShield(int32 ShieldIncrease);
 
-	UFUNCTION(BlueprintPure, Category = "Health")
-		float GetHealthPercentage() const;
-
-	bool AmIAtMaxHealth() const;
-
+	bool AmIAtMaxHealthAndShield() const;
 	bool AmIDead() const;
 
 	void KillMe();
 
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetHealthPercentage() const;
+	UFUNCTION(BlueprintPure, Category = "Shield")
+	float GetShieldPercentage() const;
+
 	UFUNCTION()
-		void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 	FActorHasDied IHaveDied;
-
 	FActorBeenHit IHaveBeenHit;
-		
 };
