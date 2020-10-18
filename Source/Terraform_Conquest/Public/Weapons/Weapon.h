@@ -31,22 +31,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Name")
 	FName WeaponName = "TEMPLATE";
 
-	FCollisionQueryParams ShotParams;
-
 	UPROPERTY(BlueprintReadOnly, Category = "WeaponType")
 	GunType myWeaponType = GunType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	TArray<class UParticleSystemComponent*> FireEffect;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "FireSocket")
+	TArray<FString> FireSockets;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Ammo")
 	int32 CurrentTotalAmmo;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
 	int32 MaxAmmo;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Damage")
-	int32 DamagePerShot;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
+	float AmmoRegenRate = 3.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
+	int AmmoRegened = 1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Range")
 	float Range;
@@ -54,13 +56,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Firing")
 	float FireRate;
 
+	FCollisionQueryParams ShotParams;
+
+	FTimerHandle AmmoRegenTimer;
+
+	USceneComponent* MyOwnerMesh = nullptr;
+
 	float LastFire = -10.0f;
 
-	AActor* GunOwner = nullptr;
+	bool ExternalRegenOn = false;
 
 	virtual void BeginPlay() override;
 
 	virtual void Fire();
+
+	UFUNCTION()
+	virtual void AmmoRegen() PURE_VIRTUAL(AWeapon::AmmoRegen, return;);
 
 public:	
 
@@ -72,6 +83,10 @@ public:
 	virtual void OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh);
 
 	virtual void ChangeActiveState(const bool AmIActive) PURE_VIRTUAL(AWeapon::ChangeActiveState, return;);
+
+	void ExternalRegenAmmo();
+
+	void CancelRegenAmmo();
 
 	bool OutOfAmmo() const;
 

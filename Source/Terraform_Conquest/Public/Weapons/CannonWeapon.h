@@ -16,23 +16,19 @@ class TERRAFORM_CONQUEST_API ACannonWeapon : public AWeapon
 
 private:
 
-	FString FireSocket1 = "CannonFire";
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class ACannon_Projectile> ProjectileBlueprint;
 
-	FTimerHandle AmmoRegenTimer;
-
-	UFUNCTION()
-	void AmmoRegen();
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileSpeed", meta = (AllowPrivateAccess = "true"))
+	float ProjectileSpeed = 1000.0f;
 			
 protected:
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
-	float AmmoRegenRate = 3.0f;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
-	int AmmoRegened = 1;
 
 	virtual void BeginPlay() override;
 
 	virtual void Fire() override;
+
+	virtual void AmmoRegen() override;
 
 public:
 

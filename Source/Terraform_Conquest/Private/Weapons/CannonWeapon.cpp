@@ -1,7 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
-
 #include "../../Public/Weapons/CannonWeapon.h"
+#include "../../Public/Projectile/CannonProjectile/Cannon_Projectile.h"
 #include "Particles/ParticleSystemComponent.h"
 
 ACannonWeapon::ACannonWeapon()
@@ -21,6 +21,17 @@ void ACannonWeapon::BeginPlay()
 void ACannonWeapon::Fire()
 {
 	//Fire Projectile
+	for (auto Socket : FireSockets)
+	{
+		if (!ensure(ProjectileBlueprint && MyOwnerMesh->DoesSocketExist(FName(Socket)))) { return; }
+
+		//Fire Projectile
+		ACannon_Projectile* CannonProjectile = GetWorld()->SpawnActor<ACannon_Projectile>(ProjectileBlueprint, MyOwnerMesh->GetSocketLocation(FName(Socket)), MyOwnerMesh->GetSocketRotation(FName(Socket)));
+		CannonProjectile->LaunchProjectile(ProjectileSpeed, GetOwner());
+		CurrentTotalAmmo--;
+	}
+
+	AWeapon::Fire();
 }
 
 void ACannonWeapon::AmmoRegen()
@@ -32,9 +43,9 @@ void ACannonWeapon::ChangeActiveState(const bool AmIActive)
 {
 	if (AmIActive)
 	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &ACannonWeapon::AmmoRegen, AmmoRegened, false);
+		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &ACannonWeapon::AmmoRegen, AmmoRegened, true);
 	}
-	else
+	else if (!ExternalRegenOn)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
 	}
@@ -42,8 +53,16 @@ void ACannonWeapon::ChangeActiveState(const bool AmIActive)
 
 void ACannonWeapon::OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh)
 {
-	if (OwnerMesh)
+	AWeapon::OnAttach(MyOwner, OwnerMesh);
+
+	if (MyOwnerMesh)
 	{
-		FireEffect[0]->AttachToComponent(OwnerMesh, FAttachmentTransformRules::KeepRelativeTransform, FName(FireSocket1));
+		for (int32 i = 0; i < FireEffect.Num(); i++)
+		{
+			if (FireSockets.Num() < i)
+			{
+				FireEffect[i]->AttachToComponent(MyOwnerMesh, FAttachmentTransformRules::KeepRelativeTransform, FName(FireSockets[i]));
+			}
+		}
 	}
 }

@@ -16,20 +16,18 @@ class TERRAFORM_CONQUEST_API AMineWeapon : public AWeapon
 	
 private:
 
-	FString FireSocket1 = "MinePlaceSocket";
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AMine> ProjectileBlueprint;
 
 protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire();
+	virtual void Fire() override;
+
+	virtual void AmmoRegen() override;
 
 public:
 
 	AMineWeapon();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-
-	virtual void OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh);
-
 };

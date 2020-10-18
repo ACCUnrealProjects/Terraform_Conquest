@@ -18,11 +18,13 @@ private:
 
 	FVector RotationChange = FVector(0.0f);
 	float LastPitch = 0.0f;
+	float IntendedChanges = 0.0f;
 
 	//Hover Control
 	void IncreaseJumpHeight();
 	void DecreaseJumpHeight();
 	void RotationCorrection(float DeltaTime);
+	void HoverPitchControl(float DeltaTime);
 	//Movement
 	void Trusters(float Amount);
 	void Strafe(float Amount);

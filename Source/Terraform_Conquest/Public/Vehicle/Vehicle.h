@@ -13,6 +13,8 @@ class TERRAFORM_CONQUEST_API AVehicle : public APawn
 
 private:
 
+	void DestoryMe();
+
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Health")
@@ -26,6 +28,13 @@ protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void Death();
+
+	virtual void imHit();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
+	float DestroyTime = 1.0f;
 
 public:	
 	// Sets default values for this pawn's properties
