@@ -24,8 +24,12 @@ void AWeapon::Fire()
 {
 	if (FireSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+		for (auto Socket : FireSockets)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, FireSound, MyOwnerMesh->GetSocketLocation(FName(Socket)));
+		}
 	}
+
 	for (int i = 0; i < FireEffect.Num(); i++)
 	{
 		FireEffect[i]->Activate();
@@ -51,13 +55,25 @@ void AWeapon::AttemptToFire()
 			return;
 		}
 	} 
-
 }
 
 void AWeapon::OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh)
 {
-	GunOwner = MyOwner;
-	ShotParams.AddIgnoredActor(GunOwner);
+	SetOwner(MyOwner);
+	ShotParams.AddIgnoredActor(MyOwner);
+	MyOwnerMesh = OwnerMesh;
+}
+
+void AWeapon::ExternalRegenAmmo()
+{
+	ExternalRegenOn = true;
+	GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AWeapon::AmmoRegen, AmmoRegened, true);
+}
+
+void AWeapon::CancelRegenAmmo()
+{
+	ExternalRegenOn = false;
+	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
 }
 
 bool AWeapon::OutOfAmmo() const
