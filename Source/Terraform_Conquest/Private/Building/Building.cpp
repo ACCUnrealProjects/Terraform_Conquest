@@ -2,6 +2,7 @@
 
 
 #include "../../Public/Building/Building.h"
+#include "../../Public/Map/MapTile.h"
 
 // Sets default values
 ABuilding::ABuilding()
@@ -25,3 +26,15 @@ void ABuilding::Tick(float DeltaTime)
 
 }
 
+void ABuilding::SetTilesImOn(TArray<TSharedPtr<Tile>> BuiltTiles)
+{
+	TilesImOn = BuiltTiles;
+}
+
+void ABuilding::DestroyCleanUp()
+{
+	for (int i = 0; i < TilesImOn.Num(); i++)
+	{
+		//TilesImOn[i]->SetAvailablity(true);
+	}
+}

@@ -13,9 +13,25 @@ class TERRAFORM_CONQUEST_API ABuilding : public APawn
 	
 private:	
 
+	TArray<TSharedPtr<class Tile>> TilesImOn;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* BuildingMesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "OverlapSpace", meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* BuildOverlapSpace = nullptr;
+
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Health")
+	class UHealth_Component* MyHealthComp = nullptr;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	int32 TileWidthNeeded;
+	int32 TileHeightNeeded;
+	int32 CenterTile;
 
 public:	
 
@@ -24,5 +40,9 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void SetTilesImOn(TArray<TSharedPtr<Tile>> BuiltTiles);
+
+	void DestroyCleanUp();
 
 };

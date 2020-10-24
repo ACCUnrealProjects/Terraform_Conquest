@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "MapController.generated.h"
 
+class AMapTile;
+class Tile;
+
 UCLASS()
 class TERRAFORM_CONQUEST_API AMapController : public AActor
 {
@@ -13,17 +16,20 @@ class TERRAFORM_CONQUEST_API AMapController : public AActor
 	
 private:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapInfo", meta = (AllowPrivateAccess = "true"))
 	class ALandscape* LevelLandScape = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
-	float MapWidth;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
-	float MapHeight;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileMap", meta = (AllowPrivateAccess = "true"))
-	float TileSize;
+	UPROPERTY(BlueprintReadOnly, Category = "MapInfo", meta = (AllowPrivateAccess = "true"))
+	int32 MapWidth;
+	UPROPERTY(BlueprintReadOnly, Category = "MapInfo", meta = (AllowPrivateAccess = "true"))
+	int32 MapHeight;
 
-	TArray<TArray<class AMapTile*>> TileMap;
+	TArray<TArray<AMapTile*>> Tiles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileData", meta = (AllowPrivateAccess = "true"))
+	int32 TileSize = 200;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TileData", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AMapTile> TileBlueprint;
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,5 +43,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void AttemptToBuild();
+
+	void GetTileImLookingAt(FVector GroundPosition);
 
 };

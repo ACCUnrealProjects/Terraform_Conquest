@@ -22,6 +22,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
 	class UParticleSystemComponent* ActivateEffect = nullptr;
 
+	UFUNCTION()
 	void Death();
 
 	void DestoryMe();
