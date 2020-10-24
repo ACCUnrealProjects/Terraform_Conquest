@@ -21,9 +21,13 @@ private:
 
 	virtual void SetPawn(APawn* InPawn) override;
 
+	void BuildingPlacementTest();
+
 protected:
 
 	virtual void BeginPlay() override;
+
+	virtual void SetupInputComponent() override;
 
 public:
 

@@ -14,7 +14,7 @@ class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float MaxMinPitchLook = 20.0f;
+	float MaxMinPitchLook = 30.0f;
 
 	FVector RotationChange = FVector(0.0f);
 	float LastPitch = 0.0f;

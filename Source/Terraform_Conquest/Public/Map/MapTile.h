@@ -14,14 +14,17 @@ class TERRAFORM_CONQUEST_API AMapTile : public AActor
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TileInfo", meta = (AllowPrivateAccess = "true"))
-	float TileSize = 1.0f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TileInfo", meta = (AllowPrivateAccess = "true"))
-	float DefaultTileScale = 1.0f;
+	float TileSize = 200.0f; //cm
+
+	float TileScale = 2.0f; //m
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileInfo", meta = (AllowPrivateAccess = "true"))
 	bool Available = true;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* TileMesh = nullptr;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
+	//class UStaticMeshComponent* TileMesh = nullptr;
+
+	bool BuildAvailabilityCheck();
 
 protected:
 	// Called when the game starts or when spawned
@@ -31,7 +34,7 @@ public:
 	// Sets default values for this actor's properties
 	AMapTile();
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	void SetAvailablity(bool AmIAvailable);
 
+	bool AmIAvailable();
 };
