@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Map/TileIndex.h"
 #include "MapController.generated.h"
 
 class AMapTile;
-class Tile;
 
 UCLASS()
 class TERRAFORM_CONQUEST_API AMapController : public AActor
@@ -43,8 +43,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void AttemptToBuild();
+	bool CanBuildCheck(FTileIndex PosTilesFromCenter, FTileIndex NegTilesFromCenter, FVector CenterPos);
 
-	void GetTileImLookingAt(FVector GroundPosition);
+	FTileIndex GetTileImLookingAt(FVector GroundPosition);
+
+	FTileIndex GetTileIndexFromPos(FVector GroundPosition);
 
 };

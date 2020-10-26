@@ -29,10 +29,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	int32 TileWidthNeeded;
-	int32 TileHeightNeeded;
-	int32 CenterTile;
-
 public:	
 
 	// Sets default values for this actor's properties

@@ -35,12 +35,14 @@ void AMapController::BeginPlay()
 
 	TArray<AMapTile*> WidthTiles;
 
-	for (int i = 0; i < MapWidth; i += TileSize)
+	for (int x = 0; x < MapWidth; x += TileSize)
 	{
 		WidthTiles.Empty();
 		for (int y = 0; y < MapHeight; y += TileSize)
 		{
-			WidthTiles.Add(GetWorld()->SpawnActor<AMapTile>(TileBlueprint, FVector(StartingSpawnPos.X + i, StartingSpawnPos.X + y, StartingSpawnPos.Z), FRotator(0)));
+			AMapTile* NewTile = GetWorld()->SpawnActor<AMapTile>(TileBlueprint, FVector(StartingSpawnPos.X + x, StartingSpawnPos.Y + y, StartingSpawnPos.Z), FRotator(0));
+			NewTile->SetIndex(x, y);
+			WidthTiles.Add(NewTile);
 		}
 		Tiles.Add(WidthTiles);
 	}
@@ -53,25 +55,75 @@ void AMapController::Tick(float DeltaTime)
 
 }
 
-void AMapController::AttemptToBuild()
+bool AMapController::CanBuildCheck(FTileIndex PosTilesFromCenter, FTileIndex NegTilesFromCenter, FVector CenterPos)
 {
+	FTileIndex CenterTile = GetTileIndexFromPos(CenterPos);
 
+	if (Tiles[CenterTile.XIndex][CenterTile.YIndex]->AmIAvailable())
+	{
+		for (int x = 0; x < PosTilesFromCenter.XIndex; x++)
+		{
+			if (!Tiles.IsValidIndex(CenterTile.XIndex + x)) { return false; }
+
+			for (int y = 0; y < PosTilesFromCenter.YIndex; y++)
+			{
+				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y)) { return false; }
+			}
+			for (int y = 0; y < NegTilesFromCenter.YIndex; y++)
+			{
+				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y)) { return false; }
+			}
+		}
+
+		for (int x = 0; x < NegTilesFromCenter.XIndex; x++)
+		{
+			if (!Tiles.IsValidIndex(CenterTile.XIndex + x)) { return false; }
+
+			for (int y = 0; y < PosTilesFromCenter.YIndex; y++)
+			{
+				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y)) { return false; }
+			}
+			for (int y = 0; y < NegTilesFromCenter.YIndex; y++)
+			{
+				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y)) { return false; }
+			}
+		}
+	}
+	else { return false; }
+
+	return true;
 }
 
-void AMapController::GetTileImLookingAt(FVector GroundPosition)
+FTileIndex AMapController::GetTileImLookingAt(FVector GroundPosition)
 {
-	if (Tiles.Num() < 1 || Tiles[0].Num() < 1) { return; }
+	if (Tiles.Num() < 1 || Tiles[0].Num() < 1) { return FTileIndex(); }
 
+	FTileIndex TilesIndex = GetTileIndexFromPos(GroundPosition);
+	
+	if (TilesIndex.XIndex != -1 && TilesIndex.YIndex != -1)
+	{
+		FVector ClosestTilePos = Tiles[TilesIndex.XIndex][TilesIndex.YIndex]->GetActorLocation();
+		UE_LOG(LogTemp, Warning, TEXT("Closet Tile Pos is %s"), *ClosestTilePos.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("The Tile index is X: %i Y: %i"), TilesIndex.XIndex, TilesIndex.YIndex);
+	}
+
+	return TilesIndex;
+}
+
+FTileIndex AMapController::GetTileIndexFromPos(FVector GroundPosition)
+{
 	GroundPosition.X += MapWidth / 2;
 	GroundPosition.Y += MapHeight / 2;
 
-	int32 MapX = FMath::RoundToInt(GroundPosition.X / TileSize);
-	int32 MapY = FMath::RoundToInt(GroundPosition.Y / TileSize);
-	
-	if (Tiles.IsValidIndex(MapX) && Tiles[MapX].IsValidIndex(MapY))
+	FTileIndex TilesIndex;
+	TilesIndex.XIndex = FMath::RoundToInt(GroundPosition.X / TileSize);
+	TilesIndex.YIndex = FMath::RoundToInt(GroundPosition.Y / TileSize);
+
+	if(Tiles.IsValidIndex(TilesIndex.XIndex) && Tiles[TilesIndex.XIndex].IsValidIndex(TilesIndex.YIndex))
 	{
-		FVector ClosestTilePos = Tiles[MapX][MapY]->GetActorLocation();
-		UE_LOG(LogTemp, Warning, TEXT("Closet Tile Pos is %s"), *ClosestTilePos.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("The Tile index is X: %i Y: %i"), MapX, MapY);
+		TilesIndex.XIndex = -1;
+		TilesIndex.YIndex = -1;
 	}
+
+	return TilesIndex;
 }
