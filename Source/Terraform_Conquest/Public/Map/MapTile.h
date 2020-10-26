@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Map/TileIndex.h"
 #include "MapTile.generated.h"
 
 UCLASS()
@@ -21,6 +22,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileInfo", meta = (AllowPrivateAccess = "true"))
 	bool Available = true;
 
+	FTileIndex MyIndex;
+
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
 	//class UStaticMeshComponent* TileMesh = nullptr;
 
@@ -37,4 +40,6 @@ public:
 	void SetAvailablity(bool AmIAvailable);
 
 	bool AmIAvailable();
+
+	void SetIndex(int32 X, int32 Y);
 };

@@ -49,3 +49,9 @@ bool AMapTile::AmIAvailable()
 {
 	return Available;
 }
+
+void AMapTile::SetIndex(int32 X, int32 Y)
+{
+	MyIndex.XIndex = X;
+	MyIndex.YIndex = Y;
+}

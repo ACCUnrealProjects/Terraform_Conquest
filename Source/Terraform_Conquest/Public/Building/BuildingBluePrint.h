@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Map/TileIndex.h"
 #include "BuildingBluePrint.generated.h"
 
 UCLASS()
@@ -13,16 +14,27 @@ class TERRAFORM_CONQUEST_API ABuildingBluePrint : public AActor
 	
 private:
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* BuildingProtoTypeMesh = nullptr;
+	FTileIndex CurretBuildTile;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "OverlapSpace", meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* OverlapSpace = nullptr;
+	bool CanIBuild = false;
+
+	TArray<AActor> BlockingMeshes;
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TileData")
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh")
+	class UStaticMeshComponent* BuildingProtoTypeMesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "OverlapSpace")
+	class UBoxComponent* OverlapSpace = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "BuildingToSpawn")
 	TSubclassOf<class ABuilding> BuildingToBuild;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadOnly, Category = "BuildData")
+	FTileIndex PositiveTilesFromCenter;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadOnly, Category = "BuildData")
+	FTileIndex NegativeTilesFromCenter;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -33,6 +45,10 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void NewPlacement();
+
+	void BuildAttempt();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
