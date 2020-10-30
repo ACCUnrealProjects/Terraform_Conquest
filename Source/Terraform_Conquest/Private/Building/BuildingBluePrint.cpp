@@ -1,6 +1,5 @@
 // Alex Chatt Terraform_Conquest 2020
 
-
 #include "../../Public/Building/BuildingBluePrint.h"
 #include "../../Public/Map/MapTile.h"
 #include "Components/BoxComponent.h"
@@ -29,20 +28,28 @@ void ABuildingBluePrint::BeginPlay()
 void ABuildingBluePrint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-void ABuildingBluePrint::NewPlacement()
+void ABuildingBluePrint::NewPlacement(FVector Pos, FTileIndex CurrentTile)
 {
-
+	SetActorLocation(Pos);
+	CurretBuildTile = CurrentTile;
+	AreTilesAvailable = true;
 }
 
-void ABuildingBluePrint::BuildAttempt()
+void ABuildingBluePrint::SetCantBuild()
 {
-	if (!CanIBuild) 
+	AreTilesAvailable = false;
+}
+
+bool ABuildingBluePrint::BuildAttempt()
+{
+	if (!AreTilesAvailable || BlockingMeshes.Num() > 0)
 	{ 
-		return;
+		return false;
 	}
+
+	return true;
 }
 
 void ABuildingBluePrint::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

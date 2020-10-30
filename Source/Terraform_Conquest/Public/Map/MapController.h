@@ -19,6 +19,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapInfo", meta = (AllowPrivateAccess = "true"))
 	class ALandscape* LevelLandScape = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuildController", meta = (AllowPrivateAccess = "true"))
+	class ABuildController* BuildController = nullptr;
+
 	UPROPERTY(BlueprintReadOnly, Category = "MapInfo", meta = (AllowPrivateAccess = "true"))
 	int32 MapWidth;
 	UPROPERTY(BlueprintReadOnly, Category = "MapInfo", meta = (AllowPrivateAccess = "true"))
@@ -49,4 +52,5 @@ public:
 
 	FTileIndex GetTileIndexFromPos(FVector GroundPosition);
 
+	ABuildController* GetBuildController();
 };

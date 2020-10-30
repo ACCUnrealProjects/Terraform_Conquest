@@ -1,15 +1,15 @@
 // Alex Chatt Terraform_Conquest 2020
 
-
 #include "../../Public/Map/MapController.h"
 #include "../../Public/Map/MapTile.h"
+#include "../../Public/Map/BuildController.h"
 #include "Landscape.h"
 
 // Sets default values
 AMapController::AMapController()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -126,4 +126,12 @@ FTileIndex AMapController::GetTileIndexFromPos(FVector GroundPosition)
 	}
 
 	return TilesIndex;
+}
+
+ABuildController* AMapController::GetBuildController()
+{
+	if (!BuildController) { return nullptr; }
+
+	return BuildController;
+	
 }

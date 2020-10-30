@@ -6,6 +6,15 @@
 #include "GameFramework/PlayerController.h"
 #include "Main_Player_Controller.generated.h"
 
+UENUM(BlueprintType)
+enum class ControlMode : uint8
+{
+	UnitSelected        UMETA(DisplayName = "UnitSelected"),
+	BuildingPlacement	UMETA(DisplayName = "BuildingPlacement"),
+	Selection			UMETA(DisplayName = "Selection"),
+	FreeDrive		    UMETA(DisplayName = "FreeDrive"),
+};
+
 /**
  * 
  */
@@ -15,7 +24,7 @@ class TERRAFORM_CONQUEST_API AMain_Player_Controller : public APlayerController
 	GENERATED_BODY()
 
 private:
-	
+
 	UFUNCTION()
 	void MyPawnHasDied();
 
@@ -24,6 +33,9 @@ private:
 	void BuildingPlacementTest();
 
 protected:
+
+	UPROPERTY(BlueprintReadOnly, Category = "ControlMode")
+	ControlMode CurrentMode;
 
 	virtual void BeginPlay() override;
 
