@@ -16,7 +16,7 @@ private:
 
 	FTileIndex CurretBuildTile;
 
-	bool CanIBuild = false;
+	bool AreTilesAvailable = false;
 
 	TArray<AActor> BlockingMeshes;
 
@@ -33,6 +33,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadOnly, Category = "BuildData")
 	FTileIndex PositiveTilesFromCenter;
+
 	UPROPERTY(EditDefaultsOnly, BluePrintReadOnly, Category = "BuildData")
 	FTileIndex NegativeTilesFromCenter;
 
@@ -46,9 +47,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void NewPlacement();
+	void NewPlacement(FVector Pos, FTileIndex CurrentTile);
 
-	void BuildAttempt();
+	bool BuildAttempt();
+
+	void SetAreTilesAvailableFalse();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

@@ -13,6 +13,7 @@ AMain_Player_Controller::AMain_Player_Controller()
 void AMain_Player_Controller::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentMode = ControlMode::FreeDrive;
 
 }
 
