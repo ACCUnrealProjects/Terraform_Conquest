@@ -17,22 +17,12 @@ ABuildController::ABuildController()
 void ABuildController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
 // Called every frame
 void ABuildController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (MapController && PlayerController)
-	{
-		if (BuildingToBuild)
-		{
-
-		}
-	}
 }
 
 void ABuildController::CreateBuildingBlueprint(TSubclassOf<class ABuildingBluePrint> BluePrintToSpawn)
@@ -40,9 +30,24 @@ void ABuildController::CreateBuildingBlueprint(TSubclassOf<class ABuildingBluePr
 	BuildingToBuild = GetWorld()->SpawnActor<ABuildingBluePrint>(BluePrintToSpawn, FVector(0), FRotator(0));
 }
 
-bool ABuildController::AttemptedToBuild()
+void ABuildController::SetBluePrintLocation(FVector Pos, FTileIndex CurrentTile)
+{
+	if (!BuildingToBuild) { return; }
+
+	bool ChangedTile = BuildingToBuild->bHasTileImOnChanged(CurrentTile);
+	BuildingToBuild->NewPlacement(Pos, CurrentTile);
+	FTileIndex PSize, NSize;
+	BuildingToBuild->GetBuildingTileSize(PSize, NSize);
+	if (ChangedTile)
+	{
+		BuildingToBuild->SetAreTilesAvailable(MapController->CanBuildCheck(PSize, NSize, Pos));
+	}
+}
+
+bool ABuildController::AttemptedToBuild(FString &FailedMessage)
 {
 	//Also check if we have resources to build
+	//if(ResourceCheck())
 	if (BuildingToBuild->BuildAttempt())
 	{
 		//take away resources
@@ -50,11 +55,13 @@ bool ABuildController::AttemptedToBuild()
 	}
 	else
 	{
-		//UI message "cant build here" + reason
+		//UI message "cant build here" to FailedMessage
+		FailedMessage = "Can not be build here";
 	}
 
 	return false;
 }
+
 
 void ABuildController::CancelBuild()
 {

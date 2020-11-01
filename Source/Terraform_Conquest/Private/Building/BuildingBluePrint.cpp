@@ -34,18 +34,34 @@ void ABuildingBluePrint::NewPlacement(FVector Pos, FTileIndex CurrentTile)
 {
 	SetActorLocation(Pos);
 	CurretBuildTile = CurrentTile;
-	AreTilesAvailable = true;
+	bAreTilesAvailable = true;
 }
 
-void ABuildingBluePrint::SetCantBuild()
+void ABuildingBluePrint::SetAreTilesAvailable(bool bTilesAvailable)
 {
-	AreTilesAvailable = false;
+	bAreTilesAvailable = bTilesAvailable;
 }
 
 bool ABuildingBluePrint::BuildAttempt()
 {
-	if (!AreTilesAvailable || BlockingMeshes.Num() > 0)
+	if (!bAreTilesAvailable || BlockingMeshes.Num() > 0)
 	{ 
+		return false;
+	}
+
+	return true;
+}
+
+void ABuildingBluePrint::GetBuildingTileSize(FTileIndex& PosCenter, FTileIndex& NegativeCenter)
+{
+	PosCenter = PositiveTilesFromCenter;
+	NegativeCenter = NegativeTilesFromCenter;
+}
+
+bool ABuildingBluePrint::bHasTileImOnChanged(FTileIndex NewCenterTile)
+{
+	if ((NewCenterTile.XIndex == CurretBuildTile.XIndex) && (NewCenterTile.YIndex == CurretBuildTile.YIndex))
+	{
 		return false;
 	}
 
@@ -54,10 +70,12 @@ bool ABuildingBluePrint::BuildAttempt()
 
 void ABuildingBluePrint::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
+	// Check if other object is a building (or other mesh object), if so, add to list
+	BlockingMeshes.Add(OtherActor);
 }
 
 void ABuildingBluePrint::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-
+	// Check if other object is a building (or other mesh object), if so, add to list
+	BlockingMeshes.Remove(OtherActor);
 }

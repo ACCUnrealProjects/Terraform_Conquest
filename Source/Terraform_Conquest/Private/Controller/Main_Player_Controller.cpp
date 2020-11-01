@@ -3,11 +3,12 @@
 #include "../../Public/Controller/Main_Player_Controller.h"
 #include "../../Public/Components/Health_Component.h"
 #include "../../Public/Map/MapController.h"
+#include "../../Public/Map/BuildController.h"
 #include "Kismet/GameplayStatics.h"
 
 AMain_Player_Controller::AMain_Player_Controller()
 {
-
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void AMain_Player_Controller::BeginPlay()
@@ -15,6 +16,45 @@ void AMain_Player_Controller::BeginPlay()
 	Super::BeginPlay();
 	CurrentMode = ControlMode::FreeDrive;
 
+	AActor* BuildControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), ABuildController::StaticClass());
+	if (ensure(BuildControllerActor))
+	{
+		BuildingController = Cast<ABuildController>(BuildControllerActor);
+	}
+
+	AActor* MapControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapController::StaticClass());
+	if (ensure(MapControllerActor))
+	{
+		MapController = Cast<AMapController>(BuildControllerActor);
+	}
+}
+
+void AMain_Player_Controller::Tick(float DeltaTime)
+{
+	switch (CurrentMode)
+	{
+	case ControlMode::BuildingPlacement:
+	{
+		FHitResult LandscapeRay;
+		FVector RayStart = GetPawn()->GetActorLocation();
+		FVector RayEnd = RayStart + (GetPawn()->GetActorForwardVector() * 100000);
+		if (GetWorld()->LineTraceSingleByChannel(LandscapeRay, RayStart, RayEnd, ECollisionChannel::ECC_GameTraceChannel2))
+		{
+			BuildingController->SetBluePrintLocation(LandscapeRay.ImpactPoint, MapController->GetTileImLookingAt(LandscapeRay.ImpactPoint));
+		}
+	}
+	break;
+	case ControlMode::UnitSelected:
+	{
+
+	}
+	break;
+	case ControlMode::Selection:
+	{
+
+	}
+	break;
+	}
 }
 
 void AMain_Player_Controller::SetPawn(APawn* InPawn)
@@ -36,15 +76,33 @@ void AMain_Player_Controller::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	InputComponent->BindAction("LeftClickAction", EInputEvent::IE_Pressed, this, &AMain_Player_Controller::BuildingPlacementTest);
+
+	//InputComponent->BindAction("ExecuteOrder", EInputEvent::IE_Pressed, this, &AMain_Player_Controller::ExectutionAction);
+}
+
+
+void AMain_Player_Controller::ExectutionAction()
+{
+	switch (CurrentMode)
+	{
+	case ControlMode::BuildingPlacement:
+		BuildingPlacementTest();
+		break;
+
+	case ControlMode::UnitSelected:
+		break;
+
+	case ControlMode::Selection:
+
+		break;
+	}
 }
 
 void AMain_Player_Controller::BuildingPlacementTest()
 {
 	FVector GroundLocation;
 
-	TArray<AActor*> MapController;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMapController::StaticClass(), MapController);
-	if (MapController[0] != NULL)
+	if (MapController != NULL)
 	{
 		FHitResult LandscapeRay;
 		FVector RayStart = GetPawn()->GetActorLocation();
@@ -52,7 +110,7 @@ void AMain_Player_Controller::BuildingPlacementTest()
 		if (GetWorld()->LineTraceSingleByChannel(LandscapeRay, RayStart, RayEnd, ECollisionChannel::ECC_GameTraceChannel2))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Looking at ground location %s"), *LandscapeRay.ImpactPoint.ToString());
-			Cast<AMapController>(MapController[0])->GetTileImLookingAt(LandscapeRay.ImpactPoint);
+			MapController->GetTileImLookingAt(LandscapeRay.ImpactPoint);
 		}
 	}
 }
