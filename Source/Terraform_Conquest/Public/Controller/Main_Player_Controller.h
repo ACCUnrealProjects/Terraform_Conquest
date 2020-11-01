@@ -25,10 +25,14 @@ class TERRAFORM_CONQUEST_API AMain_Player_Controller : public APlayerController
 
 private:
 
+	class ABuildController* BuildingController = nullptr;
+	
+	class AMapController* MapController = nullptr;
+
 	UFUNCTION()
 	void MyPawnHasDied();
 
-	virtual void SetPawn(APawn* InPawn) override;
+	void ExectutionAction();
 
 	void BuildingPlacementTest();
 
@@ -39,10 +43,14 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	virtual void SetupInputComponent() override;
 
 public:
 
 	AMain_Player_Controller();
+
+	virtual void SetPawn(APawn* InPawn) override;
 	
 };

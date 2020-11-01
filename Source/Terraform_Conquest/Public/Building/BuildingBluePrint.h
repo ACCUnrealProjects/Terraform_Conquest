@@ -16,9 +16,9 @@ private:
 
 	FTileIndex CurretBuildTile;
 
-	bool AreTilesAvailable = false;
+	bool bAreTilesAvailable = false;
 
-	TArray<AActor> BlockingMeshes;
+	TArray<AActor*> BlockingMeshes;
 
 protected:
 
@@ -51,7 +51,11 @@ public:
 
 	bool BuildAttempt();
 
-	void SetAreTilesAvailableFalse();
+	void SetAreTilesAvailable(bool bTilesAvailable);
+
+	void GetBuildingTileSize(FTileIndex& PosCenter, FTileIndex& NegativeCenter);
+
+	bool bHasTileImOnChanged(FTileIndex NewCenterTile);
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
