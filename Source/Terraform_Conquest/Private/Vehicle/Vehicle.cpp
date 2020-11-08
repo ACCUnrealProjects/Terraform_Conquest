@@ -8,7 +8,7 @@
 AVehicle::AVehicle()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	//PrimaryActorTick.bCanEverTick = true;
 
 	MyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyMesh"));
 	SetRootComponent(MyMesh);
@@ -47,7 +47,6 @@ void AVehicle::Tick(float DeltaTime)
 
 void AVehicle::Death()
 {
-
 	FTimerHandle DeathTimer;
 	GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AVehicle::DestoryMe, DestroyTime, false);
 }

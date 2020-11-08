@@ -90,3 +90,8 @@ GunType AWeapon::GetGunType() const
 {
 	return myWeaponType;
 }
+
+FName AWeapon::GetWeaponName() const
+{
+	return WeaponName;
+}
