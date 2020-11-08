@@ -7,11 +7,7 @@
 // Sets default values for this component's properties
 UWeapon_Controller_Component::UWeapon_Controller_Component()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-
-	// ...
 }
 
 
@@ -20,13 +16,36 @@ void UWeapon_Controller_Component::BeginPlay()
 {
 	Super::BeginPlay();
 
+	PlayerInputSetUp();
+
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.Instigator = Cast<APawn>(GetOwner());
+
+	MeshToAttachTo = GetOwner()->FindComponentByClass<USceneComponent>();
+	if (AllGuns.Num() > 0)
+	{
+		AllGuns.SetNum(AllowedGunTypes.Num(), false);
+	}
+	for (auto Gun : AllGuns)
+	{
+		if (Gun)
+		{
+			Gun->OnAttach(GetOwner(), MeshToAttachTo);
+		}
+	}
 }
 
-void UWeapon_Controller_Component::SetAttachSkel(USceneComponent* AttachWeaponTo)
+void UWeapon_Controller_Component::PlayerInputSetUp()
 {
-	MeshToAttachTo = AttachWeaponTo;
+	if (Cast<APawn>(GetOwner())->GetController()->IsLocalPlayerController())
+	{
+		UInputComponent* PlayerInputComp = GetOwner()->FindComponentByClass<UInputComponent>();
+		if (PlayerInputComp)
+		{
+			PlayerInputComp->BindAction("LeftClickAction", EInputEvent::IE_Pressed, this, &UWeapon_Controller_Component::FireCurrent);
+			PlayerInputComp->BindAction("RightClickAction", EInputEvent::IE_Released, this, &UWeapon_Controller_Component::SwitchWeapon);
+		}
+	}
 }
 
 void UWeapon_Controller_Component::SetWeaponSlots(TArray<GunType> WeaponsICanHave)
@@ -37,20 +56,20 @@ void UWeapon_Controller_Component::SetWeaponSlots(TArray<GunType> WeaponsICanHav
 
 void UWeapon_Controller_Component::AddAmmoForGuns(float AmmoPercent)
 {
-	for (int32 i = 0; i < AllGuns.Num(); i++)
+	for (auto Gun : AllGuns)
 	{
-		if (AllGuns[i]) 
+		if (Gun)
 		{ 
-			AllGuns[i]->AddAmmo(AmmoPercent);
+			Gun->AddAmmo(AmmoPercent);
 		}
 	}
 }
 
 bool UWeapon_Controller_Component::CanIHaveGunType(GunType NewGunType)
 {
-	for (int32 i = 0; i < AllowedGunTypes.Num(); i++)
+	for (auto AllowedGunType : AllowedGunTypes)
 	{
-		if (AllowedGunTypes[i] == NewGunType)
+		if (AllowedGunType == NewGunType)
 		{
 			return true;
 		}
@@ -61,25 +80,27 @@ bool UWeapon_Controller_Component::CanIHaveGunType(GunType NewGunType)
 
 void UWeapon_Controller_Component::SwitchWeapon()
 {
+	if (AllGuns.Num() <= 0) { return; }
+
 	bool FinishedLooking = false;
-	int SearchGunNum = WeaponIndex + 1;
+	int32 SearchGunNum = AllGuns.IndexOfByKey(ActiveWeapon);
+	int32 CurrentGunIndex = SearchGunNum;
 
 	while (FinishedLooking == false)
 	{
 		SearchGunNum = FMath::Clamp(SearchGunNum, 0, AllGuns.Num());
-		if (SearchGunNum == WeaponIndex)
+		if (SearchGunNum == CurrentGunIndex)
 		{
 			FinishedLooking = true;
 			break;
 		}
-		else if (AllGuns[SearchGunNum])
+		else if (AllGuns.IsValidIndex(SearchGunNum) && AllGuns[SearchGunNum])
 		{
 			FinishedLooking = true;
 			break;
-			AllGuns[WeaponIndex]->ChangeActiveState(false);
-			WeaponIndex = SearchGunNum;
-			AllGuns[WeaponIndex]->ChangeActiveState(true);
-
+			ActiveWeapon->ChangeActiveState(false);
+			ActiveWeapon = AllGuns[SearchGunNum];
+			ActiveWeapon->ChangeActiveState(true);
 		}
 		else
 		{
@@ -91,34 +112,33 @@ void UWeapon_Controller_Component::SwitchWeapon()
 
 void UWeapon_Controller_Component::SwitchWeapon(GunType GunToLookFor)
 {
-	int32 GunSlot = 0;
-	for (int32 i = 0; i < AllowedGunTypes.Num(); i++)
+	if (AllGuns.Num() <= 0) { return; }
+
+	for (auto Gun : AllGuns)
 	{
-		if (AllowedGunTypes[i] == GunToLookFor)
+		if (Gun->GetGunType() == GunToLookFor)
 		{
-			GunSlot = i;
+			if (ActiveWeapon) 
+			{
+				ActiveWeapon->ChangeActiveState(false);
+			}
+			ActiveWeapon = Gun;
+			ActiveWeapon->ChangeActiveState(true);
 			break;
 		}
 	}
 
-	if (WeaponIndex == GunSlot || AllGuns[GunSlot] == nullptr) { return; }
-	AllGuns[WeaponIndex]->ChangeActiveState(false);
-	WeaponIndex = GunSlot;
-	AllGuns[WeaponIndex]->ChangeActiveState(true);
 }
 
-
-void UWeapon_Controller_Component::AddWeapon(TSubclassOf<AWeapon> NewWeapon, FString PointToEquipTo, GunType myWeaponType)
+void UWeapon_Controller_Component::AddWeapon(TSubclassOf<AWeapon> NewWeapon)
 {
 	if (!NewWeapon) { return; }
 	AWeapon* NewGun = GetWorld()->SpawnActor<AWeapon>(NewWeapon, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation(), SpawnParams);
-	if (WeaponIndex < 0) { WeaponIndex = 0; }
-	NewGun->AttachToComponent(MeshToAttachTo, FAttachmentTransformRules::KeepRelativeTransform);
 	NewGun->OnAttach(GetOwner(), MeshToAttachTo);
 	int32 GunSlot = 0;
 	for (int32 i = 0; i < AllowedGunTypes.Num(); i++)
 	{
-		if (AllowedGunTypes[i] == myWeaponType)
+		if (AllowedGunTypes[i] == NewGun->GetGunType())
 		{
 			GunSlot = i;
 			if (AllGuns[i] != nullptr)
@@ -129,25 +149,34 @@ void UWeapon_Controller_Component::AddWeapon(TSubclassOf<AWeapon> NewWeapon, FSt
 		}
 	}
 
-	if (AllGuns[WeaponIndex])
+	if (AllGuns.IsValidIndex(GunSlot) && AllGuns[GunSlot])
 	{
-		AllGuns[WeaponIndex]->ChangeActiveState(false);
+		ActiveWeapon->ChangeActiveState(false);
 	}
-	WeaponIndex = GunSlot;
-	AllGuns[WeaponIndex] = NewGun;
-	AllGuns[WeaponIndex]->ChangeActiveState(true);
+	AllGuns[GunSlot] = NewGun;
+	ActiveWeapon = NewGun;
+	ActiveWeapon->ChangeActiveState(true);
 }
 
 void UWeapon_Controller_Component::FireCurrent()
 {
-	if (AllGuns[WeaponIndex])
+	if (ActiveWeapon)
 	{
-		AllGuns[WeaponIndex]->AttemptToFire();
+		ActiveWeapon->AttemptToFire();
 	}
 }
 
-AWeapon* UWeapon_Controller_Component::GetCurrentGun()
+AWeapon* UWeapon_Controller_Component::GetCurrentGun() const
 {
-	if (WeaponIndex < 0) { return nullptr; }
-	return AllGuns[WeaponIndex];
+	return ActiveWeapon;
+}
+
+FName UWeapon_Controller_Component::GetWeaponWithIndexName(int32 index) const
+{
+	if (AllGuns.IsValidIndex(index) && AllGuns[index])
+	{
+		return AllGuns[index]->GetWeaponName();
+	}
+
+	return FName(TEXT(""));
 }

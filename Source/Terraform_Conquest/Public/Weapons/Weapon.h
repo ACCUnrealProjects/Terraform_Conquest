@@ -40,9 +40,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "FireSocket")
 	TArray<FString> FireSockets;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Ammo")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
 	int32 CurrentTotalAmmo;
-	UPROPERTY(EditDefaultsOnly, Category = "Ammo")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
 	int32 MaxAmmo;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
@@ -93,4 +93,6 @@ public:
 	void AddAmmo(const float AmmoPercent);
 
 	GunType GetGunType() const;
+
+	FName GetWeaponName() const;
 };

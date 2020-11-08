@@ -20,11 +20,7 @@ private:
 	float LastPitch = 0.0f;
 	float IntendedChanges = 0.0f;
 
-	//Hover Control
-	void IncreaseJumpHeight();
-	void DecreaseJumpHeight();
 	void RotationCorrection(float DeltaTime);
-	void HoverPitchControl(float DeltaTime);
 	//Movement
 	void Trusters(float Amount);
 	void Strafe(float Amount);
@@ -57,5 +53,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//Hover Control
+	void IncreaseJumpHeight();
+	void DecreaseJumpHeight();
 
 };

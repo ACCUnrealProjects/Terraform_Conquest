@@ -55,8 +55,6 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	//HoverControl
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &AHover_Vehicles::IncreaseJumpHeight);
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Released, this, &AHover_Vehicles::DecreaseJumpHeight);
-	//Fire
-
 }
 
 
@@ -69,6 +67,7 @@ void AHover_Vehicles::DecreaseJumpHeight()
 {
 	HoverComp->DecreaseHoverHeight();
 }
+
 
 void AHover_Vehicles::Trusters(float Amount)
 {
@@ -83,7 +82,6 @@ void AHover_Vehicles::Trusters(float Amount)
 	{
 		MyMesh->AddForce(GroundForwardVector * (BackWardsThrust * Amount));
 	}
-
 }
 
 void AHover_Vehicles::Strafe(float Amount)

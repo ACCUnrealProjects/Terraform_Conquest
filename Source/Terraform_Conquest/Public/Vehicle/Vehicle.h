@@ -26,14 +26,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* TPSCamera = nullptr;
 
-	bool bAreWeaponsOnline = true;
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
 	virtual void Death();
-
 	UFUNCTION()
 	virtual void imHit();
 
@@ -46,4 +43,5 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
 };

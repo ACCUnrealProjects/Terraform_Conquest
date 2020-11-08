@@ -25,7 +25,7 @@ void AMain_Player_Controller::BeginPlay()
 	AActor* MapControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapController::StaticClass());
 	if (ensure(MapControllerActor))
 	{
-		MapController = Cast<AMapController>(BuildControllerActor);
+		MapController = Cast<AMapController>(MapControllerActor);
 	}
 }
 
@@ -74,8 +74,6 @@ void AMain_Player_Controller::SetPawn(APawn* InPawn)
 void AMain_Player_Controller::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-
-	InputComponent->BindAction("LeftClickAction", EInputEvent::IE_Pressed, this, &AMain_Player_Controller::BuildingPlacementTest);
 
 	//InputComponent->BindAction("ExecuteOrder", EInputEvent::IE_Pressed, this, &AMain_Player_Controller::ExectutionAction);
 }
