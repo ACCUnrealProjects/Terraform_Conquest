@@ -4,6 +4,7 @@
 #include "../../../Public/Vehicle/HoverVehicles/Hover_Vehicles.h"
 #include "../../../Public/Components/Hover_Component.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AHover_Vehicles::AHover_Vehicles()
@@ -16,6 +17,10 @@ AHover_Vehicles::AHover_Vehicles()
 	HoverComp->SetupAttachment(MyMesh);
 
 	MyMesh->SetSimulatePhysics(true);
+
+	BIs1stPersonCamera = true;
+	FPSCamera->SetActive(BIs1stPersonCamera);
+	TPSCamera->SetActive(!BIs1stPersonCamera);
 }
 
 // Called when the game starts or when spawned
@@ -24,7 +29,7 @@ void AHover_Vehicles::BeginPlay()
 	AVehicle::BeginPlay();
 
 	BackWardsThrust = ForwardThrust * 0.3f;
-	StrafeThrust = ForwardThrust * 0.5f;
+	StrafeThrust = ForwardThrust * 0.60f;
 }
 
 // Called every frame
@@ -47,14 +52,14 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
 	//Look
-	PlayerInputComponent->BindAxis("LookUp", this, &AHover_Vehicles::PitchLook);
-	PlayerInputComponent->BindAxis("LookRight", this, &AHover_Vehicles::YawLook);
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AHover_Vehicles::PitchLook);
+	PlayerInputComponent->BindAxis(TEXT("LookRight"), this, &AHover_Vehicles::YawLook);
 	//Movement
-	PlayerInputComponent->BindAxis("Forward", this, &AHover_Vehicles::Trusters);
-	PlayerInputComponent->BindAxis("Right", this, &AHover_Vehicles::Strafe);
+	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &AHover_Vehicles::Trusters);
+	PlayerInputComponent->BindAxis(TEXT("Right"), this, &AHover_Vehicles::Strafe);
 	//HoverControl
-	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &AHover_Vehicles::IncreaseJumpHeight);
-	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Released, this, &AHover_Vehicles::DecreaseJumpHeight);
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::IncreaseJumpHeight);
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AHover_Vehicles::DecreaseJumpHeight);
 }
 
 
@@ -113,16 +118,16 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 		FRotator GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), HoverComp->GetGroundNormal());
 		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
 		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), HoverComp->GetGroundNormal());
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch + RotationChange.Y, DeltaTime, 1.5f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 2.0f);
+		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch + RotationChange.Y, DeltaTime, 1.0f);
+		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 1.0f);
 		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
 	else
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 1.5f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.5f);
+		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
+		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 0.75f);
 		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}

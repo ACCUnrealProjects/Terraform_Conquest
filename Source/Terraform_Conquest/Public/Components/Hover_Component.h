@@ -14,18 +14,20 @@ class TERRAFORM_CONQUEST_API UHover_Component : public USceneComponent
 
 private:
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ForceObject", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "ForceObject", meta = (AllowPrivateAccess = "true"))
 	UPrimitiveComponent* MyPrimComponent = nullptr;
 	
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float HoverLenght = 150.0f;
+	float HoverLenght = 100.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float IncreaseHoverMultiplier = 2.0f;
 	float OGHoverLenght = HoverLenght;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float HoverMaxForce = 500000.0f;
+	float HoverMaxForce = 1500000.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float LinearDamp = 1.5f;
+	float LinearDamp = 2.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float AngularDamp = 1.5f;
+	float AngularDamp = 2.0f;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	bool HoverEnabled = true;

@@ -35,10 +35,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
 	float ForwardThrust = 500000.0f;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
 	float BackWardsThrust = ForwardThrust * 0.3f;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float StrafeThrust = ForwardThrust * 0.5f;
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
+	float StrafeThrust = ForwardThrust * 0.65f;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

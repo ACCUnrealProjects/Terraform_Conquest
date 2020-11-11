@@ -58,7 +58,7 @@ void UHover_Component::ChangeHoverState(bool HoverState)
 
 void UHover_Component::IncreaseHoverHeight()
 {
-	HoverLenght = HoverLenght * 1.5;
+	HoverLenght = HoverLenght * IncreaseHoverMultiplier;
 }
 
 void UHover_Component::DecreaseHoverHeight()
