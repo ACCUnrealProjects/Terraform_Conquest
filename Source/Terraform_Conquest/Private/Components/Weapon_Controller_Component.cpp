@@ -19,13 +19,14 @@ void UWeapon_Controller_Component::BeginPlay()
 	PlayerInputSetUp();
 
 	SpawnParams.Owner = GetOwner();
-	SpawnParams.Instigator = Cast<APawn>(GetOwner());
+	SpawnParams.Instigator = Cast<APawn>(SpawnParams.Owner);
 
-	MeshToAttachTo = GetOwner()->FindComponentByClass<USceneComponent>();
 	if (AllGuns.Num() > 0)
 	{
 		AllGuns.SetNum(AllowedGunTypes.Num(), false);
 	}
+
+	MeshToAttachTo = GetOwner()->FindComponentByClass<USceneComponent>();
 	for (auto Gun : AllGuns)
 	{
 		if (Gun)
@@ -42,8 +43,8 @@ void UWeapon_Controller_Component::PlayerInputSetUp()
 		UInputComponent* PlayerInputComp = GetOwner()->FindComponentByClass<UInputComponent>();
 		if (PlayerInputComp)
 		{
-			PlayerInputComp->BindAction("LeftClickAction", EInputEvent::IE_Pressed, this, &UWeapon_Controller_Component::FireCurrent);
-			PlayerInputComp->BindAction("RightClickAction", EInputEvent::IE_Released, this, &UWeapon_Controller_Component::SwitchWeapon);
+			PlayerInputComp->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Pressed, this, &UWeapon_Controller_Component::FireCurrent);
+			PlayerInputComp->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Released, this, &UWeapon_Controller_Component::SwitchWeapon);
 		}
 	}
 }

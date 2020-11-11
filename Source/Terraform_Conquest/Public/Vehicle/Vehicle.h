@@ -13,6 +13,8 @@ class TERRAFORM_CONQUEST_API AVehicle : public APawn
 
 private:
 
+	void CameraChange();
+
 	void DestoryMe();
 
 protected:
@@ -25,6 +27,10 @@ protected:
 	class UCameraComponent* FPSCamera = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	class UCameraComponent* TPSCamera = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	class USpringArmComponent* TPSCameraSpring = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	bool BIs1stPersonCamera = true;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -43,5 +49,8 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };

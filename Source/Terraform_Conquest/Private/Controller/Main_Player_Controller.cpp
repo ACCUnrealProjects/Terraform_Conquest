@@ -74,8 +74,10 @@ void AMain_Player_Controller::SetPawn(APawn* InPawn)
 void AMain_Player_Controller::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+	check(InputComponent);
+	EnableInput(this);
 
-	//InputComponent->BindAction("ExecuteOrder", EInputEvent::IE_Pressed, this, &AMain_Player_Controller::ExectutionAction);
+	InputComponent->BindAction(TEXT("ExecuteOrder"), EInputEvent::IE_Released, this, &AMain_Player_Controller::ExectutionAction).bConsumeInput = false;
 }
 
 
@@ -91,7 +93,6 @@ void AMain_Player_Controller::ExectutionAction()
 		break;
 
 	case ControlMode::Selection:
-
 		break;
 	}
 }
