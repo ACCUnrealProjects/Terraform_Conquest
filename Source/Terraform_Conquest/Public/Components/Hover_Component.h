@@ -18,19 +18,18 @@ private:
 	UPrimitiveComponent* MyPrimComponent = nullptr;
 	
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float HoverLenght = 100.0f;
+	float HoverLenght = 40.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float IncreaseHoverMultiplier = 2.0f;
 	float OGHoverLenght = HoverLenght;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float HoverMaxForce = 1500000.0f;
+	float HoverMaxForce = 500000.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float LinearDamp = 2.0f;
+	float LinearDamp = 1.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float AngularDamp = 2.0f;
-
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	bool HoverEnabled = true;
+	bool bIsHoverEnabled = true;
 
 	bool HoverGrounded = false;
 	FVector GroundNormal = FVector(0.0f);
@@ -50,6 +49,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void ChangeHoverState(bool HoverState);
+	bool GetbIsHoverEnabled() { return bIsHoverEnabled; }
 
 	void IncreaseHoverHeight();
 	void DecreaseHoverHeight();

@@ -14,7 +14,7 @@ class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float MaxMinPitchLook = 30.0f;
+	float MaxMinPitchLook = 20.0f;
 
 	FVector RotationChange = FVector(0.0f);
 	float LastPitch = 0.0f;
@@ -31,14 +31,16 @@ private:
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
-	class UHover_Component* HoverComp;
+	class UHover_Component* MainHoverComp;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
+	TArray<class UHover_Component*> AdditionalHoverComp;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
 	float ForwardThrust = 500000.0f;
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
 	float BackWardsThrust = ForwardThrust * 0.3f;
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
-	float StrafeThrust = ForwardThrust * 0.65f;
+	float StrafeThrust = ForwardThrust * 0.50f;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -57,5 +59,7 @@ public:
 	//Hover Control
 	void IncreaseJumpHeight();
 	void DecreaseJumpHeight();
+
+	void ChangeHoverSystem(bool bShouldIHover);
 
 };
