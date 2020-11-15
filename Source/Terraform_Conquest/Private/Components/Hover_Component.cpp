@@ -28,7 +28,7 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!HoverEnabled) { return; }
+	if (!bIsHoverEnabled) { return; }
 
 	FVector MyPos = GetComponentLocation();
 	FVector RayEnd = MyPos + (-GetOwner()->GetActorUpVector() * HoverLenght);
@@ -42,9 +42,11 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 		float DistanceToFoor = FVector::Dist(DownRayCast.Location, MyPos);
 		float DistanceNormal = DistanceToFoor / HoverLenght;
 		float ForceNeeded = FMath::Lerp(HoverMaxForce, 0.0f, DistanceNormal);
-
 		GroundNormal = DownRayCast.ImpactNormal;
-		FVector ForceVector = GroundNormal * ForceNeeded;
+		FVector UpSpeedVector = MyPrimComponent->GetPhysicsLinearVelocity() * GetOwner()->GetActorUpVector();
+		float Stablize = FMath::Sqrt(ForceNeeded) * 2 * FMath::Max3(UpSpeedVector.X, UpSpeedVector.Y, UpSpeedVector.Z);
+		float ForcetoApply = (ForceNeeded - Stablize);
+		FVector ForceVector = GroundNormal * (ForcetoApply);
 		MyPrimComponent->AddForce(ForceVector);
 		//MyPrimComponent->AddForceAtLocation(ForceVector, GetComponentLocation());
 	}
@@ -53,7 +55,7 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UHover_Component::ChangeHoverState(bool HoverState)
 {
-	HoverEnabled = HoverState;
+	bIsHoverEnabled = HoverState;
 }
 
 void UHover_Component::IncreaseHoverHeight()
@@ -65,7 +67,6 @@ void UHover_Component::DecreaseHoverHeight()
 {
 	HoverLenght = OGHoverLenght;
 }
-
 
 bool UHover_Component::AmIHovering() const
 {

@@ -12,9 +12,9 @@ AHover_Vehicles::AHover_Vehicles()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	HoverComp = CreateDefaultSubobject<UHover_Component>(TEXT("MyHoverComp"));
-	HoverComp->bEditableWhenInherited = true;
-	HoverComp->SetupAttachment(MyMesh);
+	MainHoverComp = CreateDefaultSubobject<UHover_Component>(TEXT("MyHoverComp"));
+	MainHoverComp->bEditableWhenInherited = true;
+	MainHoverComp->SetupAttachment(MyMesh);
 
 	MyMesh->SetSimulatePhysics(true);
 
@@ -65,20 +65,28 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 void AHover_Vehicles::IncreaseJumpHeight()
 {
-	HoverComp->IncreaseHoverHeight();
+	MainHoverComp->IncreaseHoverHeight();
 }
 
 void AHover_Vehicles::DecreaseJumpHeight()
 {
-	HoverComp->DecreaseHoverHeight();
+	MainHoverComp->DecreaseHoverHeight();
 }
 
+void AHover_Vehicles::ChangeHoverSystem(bool bShouldIHover)
+{
+	MainHoverComp->ChangeHoverState(bShouldIHover);
+	for (auto HoverComp : AdditionalHoverComp)
+	{
+		HoverComp->ChangeHoverState(bShouldIHover);
+	}
+}
 
 void AHover_Vehicles::Trusters(float Amount)
 {
+	if (!MainHoverComp->GetbIsHoverEnabled()) { return; }
+
 	FVector GroundForwardVector = MyMesh->GetForwardVector();
-	GroundForwardVector.Z = 0;
-	GroundForwardVector = GroundForwardVector.GetSafeNormal();
 	if (Amount > 0.1)
 	{
 		MyMesh->AddForce(GroundForwardVector * (ForwardThrust * Amount));
@@ -91,6 +99,8 @@ void AHover_Vehicles::Trusters(float Amount)
 
 void AHover_Vehicles::Strafe(float Amount)
 {
+	if (!MainHoverComp->GetbIsHoverEnabled()) { return; }
+
 	if (Amount > 0.1 || Amount < -0.1)
 	{
 		MyMesh->AddForce(FRotationMatrix(MyMesh->GetComponentRotation()).GetScaledAxis(EAxis::Y) * (StrafeThrust * Amount));
@@ -111,14 +121,14 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 {
 	FRotator MyRotation = MyMesh->GetComponentRotation();
 	// start to correct roll of ship when we are hovering
-	if (HoverComp->AmIHovering())
+	if (MainHoverComp->AmIHovering())
 	{
 		// Lerp Towards Pitch and Roll
 		// Create wanted pitch using the right and normal or the surface (think cross product for our forward vector)
-		FRotator GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), HoverComp->GetGroundNormal());
+		FRotator GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
 		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
-		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), HoverComp->GetGroundNormal());
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch + RotationChange.Y, DeltaTime, 1.0f);
+		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
+		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch + RotationChange.Y, DeltaTime, 1.5f);
 		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 1.0f);
 		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
@@ -127,7 +137,7 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
 		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 0.75f);
+		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.5f);
 		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}

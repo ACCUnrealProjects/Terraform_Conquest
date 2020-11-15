@@ -2,7 +2,6 @@
 
 #include "../../Public/Map/MapController.h"
 #include "../../Public/Map/MapTile.h"
-#include "../../Public/Map/BuildController.h"
 #include "Landscape.h"
 
 // Sets default values
@@ -126,12 +125,4 @@ FTileIndex AMapController::GetTileIndexFromPos(FVector GroundPosition)
 	}
 
 	return TilesIndex;
-}
-
-ABuildController* AMapController::GetBuildController()
-{
-	if (!BuildController) { return nullptr; }
-
-	return BuildController;
-	
 }
