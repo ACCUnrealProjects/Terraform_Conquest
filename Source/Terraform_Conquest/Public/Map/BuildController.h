@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Actor.h"
 #include "../Map/TileIndex.h"
 #include "BuildController.generated.h"
@@ -14,10 +15,14 @@ class TERRAFORM_CONQUEST_API ABuildController : public AActor
 	
 private:	
 
+	FGenericTeamId TeamId;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapController", meta = (AllowPrivateAccess = "true"))
 	class AMapController* MapController = nullptr;
 
 	class ABuildingBluePrint* BuildingToBuild = nullptr;
+
+	TArray<class AMapTile*> TilesBuildingWillBeOn;
 
 protected:
 	// Called when the game starts or when spawned
@@ -37,4 +42,8 @@ public:
 	bool AttemptedToBuild(FString &FailedMessage);
 
 	void CancelBuild();
+
+	void SetTeamID(FGenericTeamId TeamID);
+
+	FGenericTeamId GetTeamId() const;
 };

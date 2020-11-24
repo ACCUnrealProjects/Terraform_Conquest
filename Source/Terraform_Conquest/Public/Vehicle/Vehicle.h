@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "GenericTeamAgentInterface.h"
 #include "Vehicle.generated.h"
 
 UCLASS()
@@ -12,6 +13,8 @@ class TERRAFORM_CONQUEST_API AVehicle : public APawn
 	GENERATED_BODY()
 
 private:
+
+	FGenericTeamId TeamId;
 
 	void CameraChange();
 
@@ -52,5 +55,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void SetTeamID(FGenericTeamId TeamID);
+
+	FGenericTeamId GetTeamId() const;
 
 };

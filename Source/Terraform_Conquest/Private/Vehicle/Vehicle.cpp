@@ -57,6 +57,16 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void AVehicle::SetTeamID(FGenericTeamId TeamID)
+{
+	TeamId = TeamID;
+}
+
+FGenericTeamId AVehicle::GetTeamId() const
+{
+	return TeamId;
+}
+
 void AVehicle::CameraChange()
 {
 	BIs1stPersonCamera = !BIs1stPersonCamera;

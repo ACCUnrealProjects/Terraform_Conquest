@@ -14,7 +14,7 @@ class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float MaxMinPitchLook = 20.0f;
+	float MaxMinPitchLook = 15.0f;
 
 	FVector RotationChange = FVector(0.0f);
 	float LastPitch = 0.0f;
@@ -31,7 +31,7 @@ private:
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
-	class UHover_Component* MainHoverComp;
+	class UMaster_Hover_Component* MainHoverComp;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
 	TArray<class UHover_Component*> AdditionalHoverComp;
 

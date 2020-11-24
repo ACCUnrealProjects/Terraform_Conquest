@@ -27,15 +27,16 @@ bool AMapTile::BuildAvailabilityCheck()
 {
 	FHitResult LandscapeRay;
 	FVector RayStart = GetActorLocation();
-	FVector RayEnd = RayStart + (FVector::DownVector * 1000);
+	FVector RayEnd = RayStart + (FVector::DownVector * 2000);
 	if (GetWorld()->LineTraceSingleByChannel(LandscapeRay, RayStart, RayEnd, ECollisionChannel::ECC_GameTraceChannel2))
 	{
 		SetActorLocation(LandscapeRay.ImpactPoint);
-		if (LandscapeRay.ImpactNormal.Equals(FVector::UpVector, 0.1f))
+		if (LandscapeRay.ImpactNormal.Equals(FVector::UpVector, 0.1f) 
+			&& LandscapeRay.ImpactPoint.Z < LandscapeRay.Actor.Get()->GetActorLocation().Z + 300
+			&& LandscapeRay.ImpactPoint.Z > LandscapeRay.Actor.Get()->GetActorLocation().Z - 300)
 		{
 			return true;
 		}
-		return false;
 	}
 	return false;
 }
