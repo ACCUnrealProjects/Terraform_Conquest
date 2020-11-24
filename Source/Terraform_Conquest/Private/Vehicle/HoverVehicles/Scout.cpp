@@ -7,13 +7,9 @@
 
 AScout::AScout()
 {
-	ForwardThrust = 175000.0f;
+	ForwardThrust = 125000.0f;
 
 	WeaponController = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("MyWeaponSystem"));
 	WeaponController->bEditableWhenInherited = true;
 
-	UHover_Component* AddedHoverComp = CreateDefaultSubobject<UHover_Component>(TEXT("SupportBooster1"));
-	AddedHoverComp->bEditableWhenInherited = true;
-	AddedHoverComp->SetupAttachment(MyMesh);
-	AdditionalHoverComp.Add(AddedHoverComp);
 }

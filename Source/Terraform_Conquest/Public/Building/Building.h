@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Pawn.h"
 #include "Building.generated.h"
 
@@ -13,13 +14,16 @@ class TERRAFORM_CONQUEST_API ABuilding : public APawn
 	
 private:	
 
-	TArray<TSharedPtr<class Tile>> TilesImOn;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TilesImOn", meta = (AllowPrivateAccess = "true"))
+	TArray<class AMapTile*> TilesImOn;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* BuildingMesh = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "OverlapSpace", meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* BuildOverlapSpace = nullptr;
+
+	FGenericTeamId TeamId;
 
 protected:
 
@@ -37,7 +41,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void SetTilesImOn(TArray<TSharedPtr<Tile>> BuiltTiles);
+	void SetTilesImOn(TArray<AMapTile*> BuiltTiles);
+
+	void SetTeamID(FGenericTeamId TeamID);
+
+	FGenericTeamId GetTeamId() const;
+
+	virtual void StartDestroy();
 
 	void DestroyCleanUp();
 

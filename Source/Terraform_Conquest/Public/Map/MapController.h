@@ -43,7 +43,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	bool CanBuildCheck(FTileIndex PosTilesFromCenter, FTileIndex NegTilesFromCenter, FVector CenterPos);
+	bool CanBuildCheck(FTileIndex PosTilesFromCenter, FTileIndex NegTilesFromCenter, FVector CenterPos, TArray<AMapTile*>& TilesCheck);
+
+	FVector GetTilePosFromIndex(FTileIndex TileIndex);
 
 	FTileIndex GetTileImLookingAt(FVector GroundPosition);
 

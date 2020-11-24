@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "../Map/TileIndex.h"
+#include "GenericTeamAgentInterface.h"
+#include "../../Map/TileIndex.h"
 #include "BuildingBluePrint.generated.h"
 
 UCLASS()
@@ -49,7 +50,7 @@ public:
 
 	void NewPlacement(FVector Pos, FTileIndex CurrentTile);
 
-	bool BuildAttempt();
+	bool BuildAttempt(FGenericTeamId TeamID, TArray<class AMapTile*> Tiles);
 
 	void SetAreTilesAvailable(bool bTilesAvailable);
 

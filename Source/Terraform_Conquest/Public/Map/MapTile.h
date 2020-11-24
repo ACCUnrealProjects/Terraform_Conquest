@@ -22,6 +22,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileInfo", meta = (AllowPrivateAccess = "true"))
 	bool Available = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileInfo", meta = (AllowPrivateAccess = "true"))
 	FTileIndex MyIndex;
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))

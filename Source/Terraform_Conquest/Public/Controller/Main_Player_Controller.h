@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "Main_Player_Controller.generated.h"
 
@@ -29,14 +30,23 @@ private:
 	
 	class AMapController* MapController = nullptr;
 
-	UFUNCTION()
-	void MyPawnHasDied();
+	FGenericTeamId TeamId;
 
 	void ExectutionAction();
 
-	void BuildingPlacementTest();
+	void CancelAction();
+
+	void BuildingPlacement();
+
+	void StartPowerSpawn();
+
+	UFUNCTION()
+	void MyPawnHasDied();
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "BuildingBlueprintSpawnTest")
+	TSubclassOf<class ABuildingBluePrint> BuildingControllerSubClass;
 
 	UPROPERTY(BlueprintReadOnly, Category = "ControlMode")
 	ControlMode CurrentMode;
@@ -52,5 +62,9 @@ public:
 	AMain_Player_Controller();
 
 	virtual void SetPawn(APawn* InPawn) override;
+
+	void SetTeamID(FGenericTeamId TeamID);
+
+	FGenericTeamId GetTeamId() const;
 	
 };

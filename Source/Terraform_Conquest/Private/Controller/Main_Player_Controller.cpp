@@ -9,6 +9,7 @@
 AMain_Player_Controller::AMain_Player_Controller()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	SetTeamID(FGenericTeamId(1));
 }
 
 void AMain_Player_Controller::BeginPlay()
@@ -16,11 +17,8 @@ void AMain_Player_Controller::BeginPlay()
 	Super::BeginPlay();
 	CurrentMode = ControlMode::FreeDrive;
 
-	AActor* BuildControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), ABuildController::StaticClass());
-	if (ensure(BuildControllerActor))
-	{
-		BuildingController = Cast<ABuildController>(BuildControllerActor);
-	}
+	BuildingController = GetWorld()->SpawnActor<ABuildController>(ABuildController::StaticClass());
+	BuildingController->SetTeamID(TeamId);
 
 	AActor* MapControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapController::StaticClass());
 	if (ensure(MapControllerActor))
@@ -78,6 +76,9 @@ void AMain_Player_Controller::SetupInputComponent()
 	EnableInput(this);
 
 	InputComponent->BindAction(TEXT("ExecuteOrder"), EInputEvent::IE_Released, this, &AMain_Player_Controller::ExectutionAction).bConsumeInput = false;
+	InputComponent->BindAction(TEXT("Escape"), EInputEvent::IE_Released, this, &AMain_Player_Controller::CancelAction);
+
+	InputComponent->BindAction(TEXT("Key1"), EInputEvent::IE_Released, this, &AMain_Player_Controller::StartPowerSpawn);
 }
 
 
@@ -86,32 +87,69 @@ void AMain_Player_Controller::ExectutionAction()
 	switch (CurrentMode)
 	{
 	case ControlMode::BuildingPlacement:
-		BuildingPlacementTest();
+	{
+		BuildingPlacement();
 		break;
-
+	}
 	case ControlMode::UnitSelected:
+	{
 		break;
-
+	}
 	case ControlMode::Selection:
+	{
 		break;
+	}
 	}
 }
 
-void AMain_Player_Controller::BuildingPlacementTest()
+void AMain_Player_Controller::CancelAction()
 {
-	FVector GroundLocation;
-
-	if (MapController != NULL)
+	switch (CurrentMode)
 	{
-		FHitResult LandscapeRay;
-		FVector RayStart = GetPawn()->GetActorLocation();
-		FVector RayEnd = RayStart + (GetPawn()->GetActorForwardVector() * 100000);
-		if (GetWorld()->LineTraceSingleByChannel(LandscapeRay, RayStart, RayEnd, ECollisionChannel::ECC_GameTraceChannel2))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Looking at ground location %s"), *LandscapeRay.ImpactPoint.ToString());
-			MapController->GetTileImLookingAt(LandscapeRay.ImpactPoint);
-		}
+	case ControlMode::BuildingPlacement:
+	{
+		BuildingController->CancelBuild();
+		CurrentMode = ControlMode::FreeDrive;
+		break;
 	}
+	case ControlMode::UnitSelected:
+	{
+		break;
+	}
+	case ControlMode::Selection:
+	{
+		break;
+	}
+	}
+}
+
+void AMain_Player_Controller::BuildingPlacement()
+{
+	FString BuildMessage;
+	if (BuildingController->AttemptedToBuild(BuildMessage))
+	{
+		CurrentMode = ControlMode::FreeDrive;
+	}
+	else
+	{
+
+	}
+}
+
+void AMain_Player_Controller::StartPowerSpawn()
+{
+	CurrentMode = ControlMode::BuildingPlacement;
+	BuildingController->CreateBuildingBlueprint(BuildingControllerSubClass);
+}
+
+void AMain_Player_Controller::SetTeamID(FGenericTeamId TeamID)
+{
+	TeamId = TeamID;
+}
+
+FGenericTeamId AMain_Player_Controller::GetTeamId() const
+{
+	return TeamId;
 }
 
 void AMain_Player_Controller::MyPawnHasDied()

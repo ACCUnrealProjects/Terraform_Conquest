@@ -3,6 +3,7 @@
 
 #include "../../../Public/Vehicle/HoverVehicles/Hover_Vehicles.h"
 #include "../../../Public/Components/Hover_Component.h"
+#include "../../../Public/Components/Master_Hover_Component.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
 
@@ -12,7 +13,7 @@ AHover_Vehicles::AHover_Vehicles()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	MainHoverComp = CreateDefaultSubobject<UHover_Component>(TEXT("MyHoverComp"));
+	MainHoverComp = CreateDefaultSubobject<UMaster_Hover_Component>(TEXT("MainHoverComp"));
 	MainHoverComp->bEditableWhenInherited = true;
 	MainHoverComp->SetupAttachment(MyMesh);
 
@@ -137,7 +138,7 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
 		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.5f);
+		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.2f);
 		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}

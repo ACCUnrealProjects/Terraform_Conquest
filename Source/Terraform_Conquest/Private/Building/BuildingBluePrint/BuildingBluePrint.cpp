@@ -1,7 +1,8 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Building/BuildingBluePrint.h"
-#include "../../Public/Map/MapTile.h"
+#include "../../../Public/Building/BuildingBluePrint/BuildingBluePrint.h"
+#include "../../../Public/Building/Building.h"
+#include "../../../Public/Map/MapTile.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
@@ -11,8 +12,12 @@ ABuildingBluePrint::ABuildingBluePrint()
 	PrimaryActorTick.bCanEverTick = true;
 
 	BuildingProtoTypeMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName(TEXT("Prototype Mesh")));
+	BuildingProtoTypeMesh->bEditableWhenInherited = true;
+	BuildingProtoTypeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	OverlapSpace = CreateDefaultSubobject<UBoxComponent>(FName(TEXT("Bounding Box")));
+	OverlapSpace->SetupAttachment(BuildingProtoTypeMesh);
+	OverlapSpace->bEditableWhenInherited = true;
 }
 
 // Called when the game starts or when spawned
@@ -42,13 +47,16 @@ void ABuildingBluePrint::SetAreTilesAvailable(bool bTilesAvailable)
 	bAreTilesAvailable = bTilesAvailable;
 }
 
-bool ABuildingBluePrint::BuildAttempt()
+bool ABuildingBluePrint::BuildAttempt(FGenericTeamId TeamID, TArray<AMapTile*> Tiles)
 {
 	if (!bAreTilesAvailable || BlockingMeshes.Num() > 0)
 	{ 
 		return false;
 	}
 
+	ABuilding* NewBuilding = GetWorld()->SpawnActor<ABuilding>(BuildingToBuild, GetActorLocation(), FRotator(0));
+	NewBuilding->SetTeamID(TeamID);
+	NewBuilding->SetTilesImOn(Tiles);
 	return true;
 }
 
