@@ -77,8 +77,6 @@ void AMain_Player_Controller::SetupInputComponent()
 
 	InputComponent->BindAction(TEXT("ExecuteOrder"), EInputEvent::IE_Released, this, &AMain_Player_Controller::ExectutionAction).bConsumeInput = false;
 	InputComponent->BindAction(TEXT("Escape"), EInputEvent::IE_Released, this, &AMain_Player_Controller::CancelAction);
-
-	InputComponent->BindAction(TEXT("Key1"), EInputEvent::IE_Released, this, &AMain_Player_Controller::StartPowerSpawn);
 }
 
 
@@ -138,8 +136,11 @@ void AMain_Player_Controller::BuildingPlacement()
 
 void AMain_Player_Controller::StartPowerSpawn()
 {
-	CurrentMode = ControlMode::BuildingPlacement;
-	BuildingController->CreateBuildingBlueprint(BuildingControllerSubClass);
+	if (CurrentMode != ControlMode::BuildingPlacement)
+	{
+		//CurrentMode = ControlMode::BuildingPlacement;
+		//BuildingController->CreateBuildingBlueprint(BuildingControllerSubClass);
+	}
 }
 
 void AMain_Player_Controller::SetTeamID(FGenericTeamId TeamID)

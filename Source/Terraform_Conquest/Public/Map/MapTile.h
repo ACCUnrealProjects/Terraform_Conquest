@@ -25,8 +25,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileInfo", meta = (AllowPrivateAccess = "true"))
 	FTileIndex MyIndex;
 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
-	//class UStaticMeshComponent* TileMesh = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Landscape", meta = (AllowPrivateAccess = "true"))
+	class UStaticMeshComponent* TileMesh = nullptr;
 
 	bool BuildAvailabilityCheck();
 
