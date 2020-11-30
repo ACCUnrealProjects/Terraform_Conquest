@@ -53,54 +53,17 @@ void AMapController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-bool AMapController::CanBuildCheck(FTileIndex PosTilesFromCenter, FTileIndex NegTilesFromCenter, FVector CenterPos, TArray<AMapTile*> &TilesCheck)
+bool AMapController::CanBuildCheck(FVector Pos, TArray<AMapTile*> &TilesCheck)
 {
-	FTileIndex CenterTile = GetTileIndexFromPos(CenterPos);
+	FTileIndex CenterTile = GetTileIndexFromPos(Pos);
 
-	if (Tiles[CenterTile.XIndex][CenterTile.YIndex]->AmIAvailable() && 
+	if (Tiles[CenterTile.XIndex][CenterTile.YIndex]->AmIAvailable() &&
 		CenterTile.XIndex != -1 && CenterTile.YIndex != -1)
 	{
-		TilesCheck.Add(Tiles[CenterTile.XIndex][CenterTile.YIndex]);
-
-		for (int x = 0; x <= PosTilesFromCenter.XIndex; x++)
-		{
-			if (!Tiles.IsValidIndex(CenterTile.XIndex + x)) { return false; }
-
-			for (int y = 1; y <= PosTilesFromCenter.YIndex; y++)
-			{
-				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y) || 
-					!Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]->AmIAvailable()) { return false; }
-				TilesCheck.Add(Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]);
-			}
-			for (int y = 1; y <= NegTilesFromCenter.YIndex; y++)
-			{
-				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y) ||
-					!Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]->AmIAvailable()) { return false; }
-				TilesCheck.Add(Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]);
-			}
-		}
-
-		for (int x = 0; x <= NegTilesFromCenter.XIndex; x++)
-		{
-			if (!Tiles.IsValidIndex(CenterTile.XIndex + x)) { return false; }
-
-			for (int y = 1; y <= PosTilesFromCenter.YIndex; y++)
-			{
-				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y) ||
-					!Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]->AmIAvailable()) { return false; }
-				TilesCheck.Add(Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]);
-			}
-			for (int y = 1; y <= NegTilesFromCenter.YIndex; y++)
-			{
-				if (!Tiles[CenterTile.XIndex + x].IsValidIndex(CenterTile.YIndex + y) ||
-					!Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]->AmIAvailable()) { return false; }
-				TilesCheck.Add(Tiles[CenterTile.XIndex + x][CenterTile.YIndex + y]);
-			}
-		}
+		return true;
 	}
-	else { return false; }
 
-	return true;
+	return false;
 }
 
 FVector AMapController::GetTilePosFromIndex(FTileIndex TileIndex)

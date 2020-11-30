@@ -63,6 +63,7 @@ bool ABuildController::AttemptedToBuild(FString &FailedMessage)
 		//take away resources
 		BuildingToBuild->Destroy();
 		BuildingToBuild = nullptr;
+		TilesBuildingWillBeOn.Empty();
 		return true;
 	}
 	else
