@@ -48,7 +48,7 @@ void ABuildController::SetBluePrintLocation(FVector Pos, FTileIndex CurrentTile)
 		FTileIndex PSize, NSize;
 		BuildingToBuild->GetBuildingTileSize(PSize, NSize);
 		TilesBuildingWillBeOn.Empty();
-		BuildingToBuild->SetAreTilesAvailable(MapController->CanBuildCheck(PSize, NSize, Pos, TilesBuildingWillBeOn));
+		BuildingToBuild->SetAreTilesAvailable(MapController->CanBuildCheck(Pos, TilesBuildingWillBeOn));
 	}
 }
 

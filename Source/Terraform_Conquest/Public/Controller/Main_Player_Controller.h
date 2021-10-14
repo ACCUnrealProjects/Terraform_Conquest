@@ -7,15 +7,6 @@
 #include "GameFramework/PlayerController.h"
 #include "Main_Player_Controller.generated.h"
 
-UENUM(BlueprintType)
-enum class ControlMode : uint8
-{
-	UnitSelected        UMETA(DisplayName = "UnitSelected"),
-	BuildingPlacement	UMETA(DisplayName = "BuildingPlacement"),
-	Selection			UMETA(DisplayName = "Selection"),
-	FreeDrive		    UMETA(DisplayName = "FreeDrive"),
-};
-
 /**
  * 
  */
@@ -26,30 +17,14 @@ class TERRAFORM_CONQUEST_API AMain_Player_Controller : public APlayerController
 
 private:
 
-	class ABuildController* BuildingController = nullptr;
-	
-	class AMapController* MapController = nullptr;
+	class AMapControllerV2* MapController = nullptr;
 
 	FGenericTeamId TeamId;
-
-	void ExectutionAction();
-
-	void CancelAction();
-
-	void BuildingPlacement();
-
-	void StartPowerSpawn();
 
 	UFUNCTION()
 	void MyPawnHasDied();
 
 protected:
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "BuildingBlueprintSpawnTest")
-	TSubclassOf<class ABuildingBluePrint> BuildingControllerSubClass;
-
-	UPROPERTY(BlueprintReadOnly, Category = "ControlMode")
-	ControlMode CurrentMode;
 
 	virtual void BeginPlay() override;
 
