@@ -35,8 +35,8 @@ protected:
 	FCollisionQueryParams HoverCollParams;
 
 	// Called when the game starts
-	virtual void BeginPlay() override;
-
+	virtual void BeginPlay() override; 
+	 
 public:	
 
 	// Sets default values for this component's properties
