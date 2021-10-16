@@ -6,6 +6,13 @@
 #include "Vehicle/Vehicle.h"
 #include "Hover_Vehicles.generated.h"
 
+UENUM(BlueprintType)
+enum class MovementState : uint8
+{
+	Flying,
+	Hovering
+};
+
 UCLASS()
 class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 {
@@ -15,6 +22,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
 	float MaxMinPitchLook = 15.0f;
+
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	MovementState CurrentMoveState = MovementState::Hovering;
 
 	FVector RotationChange = FVector(0.0f);
 	float LastPitch = 0.0f;
@@ -42,6 +52,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
 	float StrafeThrust = ForwardThrust * 0.50f;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
+	float MaxHoverSpeed = 500000.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
+	float MaxFlySpeed = 500000.0f;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -61,5 +76,7 @@ public:
 	void DecreaseJumpHeight();
 
 	void ChangeHoverSystem(bool bShouldIHover);
+
+	void SwitchMovementMode();
 
 };
