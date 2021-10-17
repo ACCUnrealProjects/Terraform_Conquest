@@ -11,5 +11,4 @@ AScout::AScout()
 
 	WeaponController = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("MyWeaponSystem"));
 	WeaponController->bEditableWhenInherited = true;
-
 }

@@ -31,6 +31,7 @@ void AHover_Vehicles::BeginPlay()
 
 	BackWardsThrust = ForwardThrust * 0.3f;
 	StrafeThrust = ForwardThrust * 0.60f;
+	RestrictedPitch = 0.0f;
 }
 
 // Called every frame
@@ -38,15 +39,62 @@ void AHover_Vehicles::Tick(float DeltaTime)
 {
 	AVehicle::Tick(DeltaTime);
 
-	RotationCorrection(DeltaTime);
-	float OldRoll = MyMesh->GetComponentRotation().Roll;
-	FQuat PitchRotation(MyMesh->GetRightVector(), FMath::DegreesToRadians(LastPitch - RotationChange.Y));
-	FQuat YawRotation(MyMesh->GetUpVector(), FMath::DegreesToRadians(RotationChange.Z));
-	MyMesh->SetWorldRotation((YawRotation * PitchRotation * MyMesh->GetComponentQuat()));
-	MyMesh->SetWorldRotation(FRotator(MyMesh->GetComponentRotation().Pitch, MyMesh->GetComponentRotation().Yaw, OldRoll));
-	LastPitch = RotationChange.Y;
-	RotationChange.Z = 0.0f;
+	switch (CurrentMoveState)
+	{
+	case MovementState::Hovering:
+		RotationCorrection(DeltaTime);
+		break;
+	case MovementState::Flying:
+
+		break;
+	}
+	RotateMe();
 }
+
+void AHover_Vehicles::RotateMe()
+{
+	float OldRoll = MyMesh->GetComponentRotation().Roll;
+	MyMesh->AddTorqueInDegrees(RotationChange.Y * GetActorRightVector(), NAME_None, true); //Pitch
+	MyMesh->AddTorqueInDegrees(RotationChange.Z * GetActorUpVector(), NAME_None, true); //Yaw
+	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
+	FRotator GroundPitch = FRotator::ZeroRotator;
+	if (CurrentMoveState == MovementState::Hovering && MainHoverComp->AmIHovering())
+	{
+		// Create wanted pitch using the right and normal or the surface (think cross product for our forward vector)
+		GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
+		// Maybe the best thing to do here is just reverse the AddTorqueInDegrees if the Current Pitch 
+		// of the ship is over/under the angle ammount
+		MyMesh->SetWorldRotation(FRotator(MyMesh->GetComponentRotation().Pitch, MyMesh->GetComponentRotation().Yaw, OldRoll));
+	}
+	RestrictedPitch = FMath::Clamp(MyMesh->GetComponentRotation().Pitch, GroundPitch.Pitch - HoverMaxMinPitchLook, GroundPitch.Pitch + HoverMaxMinPitchLook);
+	RotationChange = FVector::ZeroVector;
+}
+
+void AHover_Vehicles::RotationCorrection(float DeltaTime)
+{
+	FRotator MyRotation = MyMesh->GetComponentRotation();
+	// start to correct roll of ship when we are hovering
+	if (MainHoverComp->AmIHovering())
+	{
+		// Lerp Towards Pitch and Roll
+		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
+		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
+		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, RestrictedPitch, DeltaTime, 1.0f);
+		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 1.0f);
+		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
+		MyMesh->SetWorldRotation(NewRotation);
+	}
+	else
+	{
+		//If we free falling, tilt the roll of the ship to 0 and reset the roll
+		//float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
+		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.25f);
+		FRotator NewRotation = FRotator(MyRotation.Pitch, MyRotation.Yaw, WantedGroundRoll);
+		MyMesh->SetWorldRotation(NewRotation);
+	}
+
+}
+
 
 void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -61,6 +109,8 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	//HoverControl
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::IncreaseJumpHeight);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AHover_Vehicles::DecreaseJumpHeight);
+	//Switch Movement Mode
+	PlayerInputComponent->BindAction(TEXT("SwitchMode"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::SwitchMovementMode);
 }
 
 
@@ -80,6 +130,23 @@ void AHover_Vehicles::ChangeHoverSystem(bool bShouldIHover)
 	for (auto HoverComp : AdditionalHoverComp)
 	{
 		HoverComp->ChangeHoverState(bShouldIHover);
+	}
+}
+
+void AHover_Vehicles::SwitchMovementMode()
+{
+	switch (CurrentMoveState)
+	{
+	case MovementState::Hovering:
+		CurrentMoveState = MovementState::Flying;
+		MainHoverComp->ChangeHoverState(false);
+		ForwardThrust *= ForwardThrustMulti;
+		break;
+	case MovementState::Flying:
+		CurrentMoveState = MovementState::Hovering;
+		ForwardThrust /= ForwardThrustMulti;
+		MyMesh->SetEnableGravity(true);
+		break;
 	}
 }
 
@@ -104,43 +171,24 @@ void AHover_Vehicles::Strafe(float Amount)
 
 	if (Amount > 0.1 || Amount < -0.1)
 	{
-		MyMesh->AddForce(FRotationMatrix(MyMesh->GetComponentRotation()).GetScaledAxis(EAxis::Y) * (StrafeThrust * Amount));
+		MyMesh->AddForce(MyMesh->GetRightVector() * (StrafeThrust * Amount));
 	}
 }
 
 void AHover_Vehicles::YawLook(float Amount)
 {
-	RotationChange.Z += Amount;
+	RotationChange.Z += Amount * RotateSens;
 }
 
 void AHover_Vehicles::PitchLook(float Amount)
 {
-	RotationChange.Y = FMath::Clamp(RotationChange.Y += Amount, -MaxMinPitchLook, MaxMinPitchLook);
+	RotationChange.Y += (Amount * RotateSens) * -1.0f;
 }
 
-void AHover_Vehicles::RotationCorrection(float DeltaTime)
+void AHover_Vehicles::RollLook(float Amount)
 {
-	FRotator MyRotation = MyMesh->GetComponentRotation();
-	// start to correct roll of ship when we are hovering
-	if (MainHoverComp->AmIHovering())
+	if(CurrentMoveState == MovementState::Flying)
 	{
-		// Lerp Towards Pitch and Roll
-		// Create wanted pitch using the right and normal or the surface (think cross product for our forward vector)
-		FRotator GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
-		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
-		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch + RotationChange.Y, DeltaTime, 1.5f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 1.25f);
-		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
-		MyMesh->SetWorldRotation(NewRotation);
+		RotationChange.X += Amount * RotateSens;
 	}
-	else
-	{
-		//If we free falling, tilt the roll of the ship to 0 and reset the roll
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.25f);
-		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
-		MyMesh->SetWorldRotation(NewRotation);
-	}
-
 }

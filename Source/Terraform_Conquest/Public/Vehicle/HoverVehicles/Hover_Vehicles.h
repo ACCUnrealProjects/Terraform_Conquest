@@ -21,15 +21,17 @@ class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float MaxMinPitchLook = 15.0f;
+	float HoverMaxMinPitchLook = 10.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
+	float RotateSens = 75.0f;
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	MovementState CurrentMoveState = MovementState::Hovering;
 
 	FVector RotationChange = FVector(0.0f);
-	float LastPitch = 0.0f;
-	float IntendedChanges = 0.0f;
+	float RestrictedPitch = 0.0f;
 
+	void RotateMe();
 	void RotationCorrection(float DeltaTime);
 	//Movement
 	void Trusters(float Amount);
@@ -37,6 +39,7 @@ private:
 	//Rotation
 	void YawLook(float Amount);
 	void PitchLook(float Amount);
+	void RollLook(float Amount);
 
 protected:
 
@@ -53,9 +56,12 @@ protected:
 	float StrafeThrust = ForwardThrust * 0.50f;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
+	float ForwardThrustMulti = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
 	float MaxHoverSpeed = 500000.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float MaxFlySpeed = 500000.0f;
+	float MaxFlySpeed = 1000000.0f;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
