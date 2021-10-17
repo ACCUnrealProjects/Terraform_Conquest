@@ -18,6 +18,14 @@ private:
 	bool bIsHoverEnabled = true;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float StablizationMulti = 1.0f; // best set between 0.0f and 2.0f
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float HoverBoostThreshold = 0.7f; // if below, decrease the stabilizer's strenght
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float DefaultStabSubForce = 2.0f; // Default strengh of the stabilizer force
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float StabSubForceLowerLerp = 0.1f; 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float StabSubForceUpperLerp = 1.5f;
 
 	bool HoverGrounded = false;
 	FVector GroundNormal = FVector(0,0,1);

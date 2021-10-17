@@ -54,10 +54,11 @@ void UHover_Component::HoverCalc()
 		float DistanceNormal = DistanceToFoor / HoverLenght;
 		float ForceNeeded = FMath::Lerp(HoverMaxForce, 0.0f, DistanceNormal);
 		FVector UpSpeedVector = MyPrimComponent->GetPhysicsLinearVelocity() * GetOwner()->GetActorUpVector();
-		float StabSubForce = 2.0f;
-		if (DistanceNormal < .7f) 
-		{ 
-			StabSubForce = FMath::Lerp(0.1f, 1.5f, DistanceNormal / 0.7f);
+		float StabSubForce = DefaultStabSubForce;
+		if (DistanceNormal < HoverBoostThreshold)
+		{
+			StabSubForce = FMath::Lerp(StabSubForceLowerLerp, StabSubForceUpperLerp, 
+				DistanceNormal / HoverBoostThreshold);
 		}
 
 		float Stablize = FMath::Sqrt(ForceNeeded) * (StabSubForce * StablizationMulti) * FMath::Max3(UpSpeedVector.X, UpSpeedVector.Y, UpSpeedVector.Z);
