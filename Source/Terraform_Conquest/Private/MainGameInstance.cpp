@@ -5,10 +5,10 @@
 
 void UMainGameInstance::Init()
 {
-
+	UGameInstance::Init();
 }
 
 void UMainGameInstance::Shutdown()
 {
-
+	UGameInstance::Shutdown();
 }

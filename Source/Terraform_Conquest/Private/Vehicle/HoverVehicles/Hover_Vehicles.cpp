@@ -45,7 +45,7 @@ void AHover_Vehicles::Tick(float DeltaTime)
 		RotationCorrection(DeltaTime);
 		break;
 	case MovementState::Flying:
-
+		FlightMovement();
 		break;
 	}
 	RotateMe();
@@ -53,7 +53,6 @@ void AHover_Vehicles::Tick(float DeltaTime)
 
 void AHover_Vehicles::RotateMe()
 {
-	float OldRoll = MyMesh->GetComponentRotation().Roll;
 	MyMesh->AddTorqueInDegrees(RotationChange.Y * GetActorRightVector(), NAME_None, true); //Pitch
 	MyMesh->AddTorqueInDegrees(RotationChange.Z * GetActorUpVector(), NAME_None, true); //Yaw
 	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
@@ -62,11 +61,9 @@ void AHover_Vehicles::RotateMe()
 	{
 		// Create wanted pitch using the right and normal or the surface (think cross product for our forward vector)
 		GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
-		// Maybe the best thing to do here is just reverse the AddTorqueInDegrees if the Current Pitch 
-		// of the ship is over/under the angle ammount
-		MyMesh->SetWorldRotation(FRotator(MyMesh->GetComponentRotation().Pitch, MyMesh->GetComponentRotation().Yaw, OldRoll));
+		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
 	}
-	RestrictedPitch = FMath::Clamp(MyMesh->GetComponentRotation().Pitch, GroundPitch.Pitch - HoverMaxMinPitchLook, GroundPitch.Pitch + HoverMaxMinPitchLook);
+	//RestrictedPitch = FMath::Clamp(MyMesh->GetComponentRotation().Pitch, GroundPitch.Pitch - HoverMaxMinPitchLook, GroundPitch.Pitch + HoverMaxMinPitchLook);
 	RotationChange = FVector::ZeroVector;
 }
 
@@ -76,10 +73,11 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 	// start to correct roll of ship when we are hovering
 	if (MainHoverComp->AmIHovering())
 	{
+		FRotator GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
 		// Lerp Towards Pitch and Roll
 		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
 		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, RestrictedPitch, DeltaTime, 1.0f);
+		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch, DeltaTime, 1.0f);
 		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 1.0f);
 		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
@@ -87,14 +85,26 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 	else
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
-		//float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
+		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
 		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.25f);
 		FRotator NewRotation = FRotator(MyRotation.Pitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
 
-}
+}void AHover_Vehicles::FlightMovement()
+{
+	//Check is speed is below certain ammount
+	//If so, re-enable gravity on ship so it starts to drop
+	if (GetVelocity().Size() >= GravitySpeedCutoff)
+	{
+		MyMesh->SetEnableGravity(false);
+	}
+	else
+	{
+		MyMesh->SetEnableGravity(true);
+	}
 
+}
 
 void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -103,6 +113,7 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	//Look
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AHover_Vehicles::PitchLook);
 	PlayerInputComponent->BindAxis(TEXT("LookRight"), this, &AHover_Vehicles::YawLook);
+	PlayerInputComponent->BindAxis(TEXT("Roll"), this, &AHover_Vehicles::RollLook);
 	//Movement
 	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &AHover_Vehicles::Trusters);
 	PlayerInputComponent->BindAxis(TEXT("Right"), this, &AHover_Vehicles::Strafe);
@@ -113,23 +124,27 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction(TEXT("SwitchMode"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::SwitchMovementMode);
 }
 
-
-void AHover_Vehicles::IncreaseJumpHeight()
+void AHover_Vehicles::ActivateHoverSystem()
 {
-	MainHoverComp->IncreaseHoverHeight();
-}
-
-void AHover_Vehicles::DecreaseJumpHeight()
-{
-	MainHoverComp->DecreaseHoverHeight();
-}
-
-void AHover_Vehicles::ChangeHoverSystem(bool bShouldIHover)
-{
-	MainHoverComp->ChangeHoverState(bShouldIHover);
+	MainHoverComp->ChangeHoverState(true);
 	for (auto HoverComp : AdditionalHoverComp)
 	{
-		HoverComp->ChangeHoverState(bShouldIHover);
+		if (HoverComp)
+		{
+			HoverComp->ChangeHoverState(false);
+		}
+	}
+}
+
+void AHover_Vehicles::DeactivateHoverSystem()
+{
+	MainHoverComp->ChangeHoverState(false);
+	for (auto HoverComp : AdditionalHoverComp)
+	{
+		if (HoverComp)
+		{
+			HoverComp->ChangeHoverState(false);
+		}
 	}
 }
 
@@ -139,12 +154,14 @@ void AHover_Vehicles::SwitchMovementMode()
 	{
 	case MovementState::Hovering:
 		CurrentMoveState = MovementState::Flying;
-		MainHoverComp->ChangeHoverState(false);
+		GetWorld()->GetTimerManager().SetTimer(HoverSwitchHandle, this, 
+			&AHover_Vehicles::ActivateHoverSystem, HoverDisengageTime, false);
 		ForwardThrust *= ForwardThrustMulti;
 		break;
 	case MovementState::Flying:
 		CurrentMoveState = MovementState::Hovering;
 		ForwardThrust /= ForwardThrustMulti;
+		MainHoverComp->ChangeHoverState(true);
 		MyMesh->SetEnableGravity(true);
 		break;
 	}
@@ -159,7 +176,7 @@ void AHover_Vehicles::Trusters(float Amount)
 	{
 		MyMesh->AddForce(GroundForwardVector * (ForwardThrust * Amount));
 	}
-	if (Amount < -0.1)
+	if (Amount < -0.1 && CurrentMoveState != MovementState::Hovering)
 	{
 		MyMesh->AddForce(GroundForwardVector * (BackWardsThrust * Amount));
 	}
@@ -191,4 +208,14 @@ void AHover_Vehicles::RollLook(float Amount)
 	{
 		RotationChange.X += Amount * RotateSens;
 	}
+}
+
+void AHover_Vehicles::IncreaseJumpHeight()
+{
+	MainHoverComp->IncreaseHoverHeight();
+}
+
+void AHover_Vehicles::DecreaseJumpHeight()
+{
+	MainHoverComp->DecreaseHoverHeight();
 }

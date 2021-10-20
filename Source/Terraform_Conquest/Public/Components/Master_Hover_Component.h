@@ -15,7 +15,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float LinearDamp = 1.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float AngularDamp = 2.0f;
+	float AngularDamp = 1.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float IncreaseHoverMultiplier = 2.0f;
 	
