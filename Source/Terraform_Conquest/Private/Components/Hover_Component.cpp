@@ -42,7 +42,7 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UHover_Component::HoverCalc()
 {
 	FVector MyPos = GetComponentLocation();
-	FVector RayEnd = MyPos + (-GetOwner()->GetActorUpVector() * HoverLenght);
+	FVector RayEnd = MyPos + (-GetUpVector() * HoverLenght);
 
 	FHitResult DownRayCast;
 
@@ -53,7 +53,7 @@ void UHover_Component::HoverCalc()
 		float DistanceToFoor = FVector::Dist(DownRayCast.Location, MyPos);
 		float DistanceNormal = DistanceToFoor / HoverLenght;
 		float ForceNeeded = FMath::Lerp(HoverMaxForce, 0.0f, DistanceNormal);
-		FVector UpSpeedVector = MyPrimComponent->GetPhysicsLinearVelocity() * GetOwner()->GetActorUpVector();
+		FVector UpSpeedVector = MyPrimComponent->GetPhysicsLinearVelocity() * GetUpVector();
 		float StabSubForce = DefaultStabSubForce;
 		if (DistanceNormal < HoverBoostThreshold)
 		{
