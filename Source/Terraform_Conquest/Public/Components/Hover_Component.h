@@ -27,6 +27,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float StabSubForceUpperLerp = 1.5f;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float IncreaseHoverMultiplier = 2.0f;
+
 	bool HoverGrounded = false;
 	FVector GroundNormal = FVector(0,0,1);
 
@@ -58,8 +61,10 @@ public:
 	void HoverCalc();
 
 	void ChangeHoverState(bool HoverState);
-	bool GetbIsHoverEnabled() { return bIsHoverEnabled; }
+	void IncreaseHoverHeight();
+	void DecreaseHoverHeight();
 
+	bool GetbIsHoverEnabled() const { return bIsHoverEnabled; }
 	bool AmIHovering() const;
 	FVector GetGroundNormal() const;
 		

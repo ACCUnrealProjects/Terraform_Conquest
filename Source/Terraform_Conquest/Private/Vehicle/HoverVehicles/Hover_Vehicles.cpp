@@ -3,7 +3,6 @@
 
 #include "../../../Public/Vehicle/HoverVehicles/Hover_Vehicles.h"
 #include "../../../Public/Components/Hover_Component.h"
-#include "../../../Public/Components/Master_Hover_Component.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
 
@@ -13,7 +12,7 @@ AHover_Vehicles::AHover_Vehicles()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	MainHoverComp = CreateDefaultSubobject<UMaster_Hover_Component>(TEXT("MainHoverComp"));
+	MainHoverComp = CreateDefaultSubobject<UHover_Component>(TEXT("MainHoverComp"));
 	MainHoverComp->bEditableWhenInherited = true;
 	MainHoverComp->SetupAttachment(MyMesh);
 
