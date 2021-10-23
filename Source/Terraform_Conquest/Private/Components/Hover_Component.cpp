@@ -75,6 +75,16 @@ void UHover_Component::ChangeHoverState(bool HoverState)
 	bIsHoverEnabled = HoverState;
 }
 
+void UHover_Component::IncreaseHoverHeight()
+{
+	HoverLenght *= IncreaseHoverMultiplier;
+}
+
+void UHover_Component::DecreaseHoverHeight()
+{
+	HoverLenght = OGHoverLenght;
+}
+
 bool UHover_Component::AmIHovering() const
 {
 	return HoverGrounded;

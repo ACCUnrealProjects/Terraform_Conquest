@@ -56,7 +56,7 @@ private:
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
-	class UMaster_Hover_Component* MainHoverComp;
+	class UHover_Component* MainHoverComp;
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
 	TArray<class UHover_Component*> AdditionalHoverComp{};
 
