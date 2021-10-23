@@ -21,29 +21,44 @@ class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float MaxMinPitchLook = 15.0f;
+	float HoverMaxMinPitchLook = 10.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
+	float RotateSens = 75.0f;
+
+	//Time handler for Hover booster to turn off
+	FTimerHandle HoverSwitchHandle;
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	MovementState CurrentMoveState = MovementState::Hovering;
 
 	FVector RotationChange = FVector(0.0f);
-	float LastPitch = 0.0f;
-	float IntendedChanges = 0.0f;
+	float RestrictedPitch = 0.0f;
 
-	void RotationCorrection(float DeltaTime);
+	//Movement and flight
+	void RotateMe();
+	void FlightMovement();
 	//Movement
 	void Trusters(float Amount);
 	void Strafe(float Amount);
 	//Rotation
 	void YawLook(float Amount);
 	void PitchLook(float Amount);
+	void RollLook(float Amount);
+
+	// Rotation correction for hover mode
+	void RotationCorrection(float DeltaTime);
+
+	//Activate/Deactivate Hover
+	UFUNCTION()
+	void ActivateHoverSystem();
+	void DeactivateHoverSystem();
 
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
 	class UMaster_Hover_Component* MainHoverComp;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
-	TArray<class UHover_Component*> AdditionalHoverComp;
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
+	TArray<class UHover_Component*> AdditionalHoverComp{};
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
 	float ForwardThrust = 500000.0f;
@@ -53,9 +68,12 @@ protected:
 	float StrafeThrust = ForwardThrust * 0.50f;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float MaxHoverSpeed = 500000.0f;
+	float ForwardThrustMulti = 2.5f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float MaxFlySpeed = 500000.0f;
+	float HoverDisengageTime = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
+	float GravitySpeedCutoff = 1000.0f;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -74,8 +92,6 @@ public:
 	//Hover Control
 	void IncreaseJumpHeight();
 	void DecreaseJumpHeight();
-
-	void ChangeHoverSystem(bool bShouldIHover);
 
 	void SwitchMovementMode();
 
