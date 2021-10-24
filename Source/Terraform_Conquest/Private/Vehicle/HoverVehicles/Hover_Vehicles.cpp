@@ -56,7 +56,8 @@ void AHover_Vehicles::RotateMe()
 	MyMesh->AddTorqueInDegrees(RotationChange.Z * GetActorUpVector(), NAME_None, true); //Yaw
 	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
 	FRotator GroundPitch = FRotator::ZeroRotator;
-	if (CurrentMoveState == MovementState::Hovering && MainHoverComp->AmIHovering())
+	if (CurrentMoveState == MovementState::Hovering && 
+		MainHoverComp && MainHoverComp->AmIHovering())
 	{
 		// Create wanted pitch using the right and normal or the surface (think cross product for our forward vector)
 		GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
@@ -70,7 +71,7 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 {
 	FRotator MyRotation = MyMesh->GetComponentRotation();
 	// start to correct roll of ship when we are hovering
-	if (MainHoverComp->AmIHovering())
+	if (MainHoverComp && MainHoverComp->AmIHovering())
 	{
 		FRotator GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
 		// Lerp Towards Pitch and Roll
@@ -125,6 +126,7 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 void AHover_Vehicles::ActivateHoverSystem()
 {
+	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(true);
 	for (auto HoverComp : AdditionalHoverComp)
 	{
@@ -137,6 +139,7 @@ void AHover_Vehicles::ActivateHoverSystem()
 
 void AHover_Vehicles::DeactivateHoverSystem()
 {
+	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(false);
 	for (auto HoverComp : AdditionalHoverComp)
 	{
@@ -168,8 +171,6 @@ void AHover_Vehicles::SwitchMovementMode()
 
 void AHover_Vehicles::Trusters(float Amount)
 {
-	if (!MainHoverComp->GetbIsHoverEnabled()) { return; }
-
 	FVector GroundForwardVector = MyMesh->GetForwardVector();
 	if (Amount > 0.1)
 	{
@@ -183,7 +184,7 @@ void AHover_Vehicles::Trusters(float Amount)
 
 void AHover_Vehicles::Strafe(float Amount)
 {
-	if (!MainHoverComp->GetbIsHoverEnabled()) { return; }
+	if (!MainHoverComp || !MainHoverComp->GetbIsHoverEnabled()) { return; }
 
 	if (Amount > 0.1 || Amount < -0.1)
 	{
@@ -211,10 +212,12 @@ void AHover_Vehicles::RollLook(float Amount)
 
 void AHover_Vehicles::IncreaseJumpHeight()
 {
+	if (!MainHoverComp) { return; }
 	MainHoverComp->IncreaseHoverHeight();
 }
 
 void AHover_Vehicles::DecreaseJumpHeight()
 {
+	if (!MainHoverComp) { return; }
 	MainHoverComp->DecreaseHoverHeight();
 }

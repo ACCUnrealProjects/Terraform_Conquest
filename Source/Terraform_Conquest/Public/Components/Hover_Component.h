@@ -17,33 +17,23 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	bool bIsHoverEnabled = true;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float StablizationMulti = 1.0f; // best set between 0.0f and 2.0f
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float HoverBoostThreshold = 0.7f; // if below, decrease the stabilizer's strenght
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float DefaultStabSubForce = 2.0f; // Default strengh of the stabilizer force
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float StabSubForceLowerLerp = 0.1f; 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float StabSubForceUpperLerp = 1.5f;
+	float SupressionStiffness = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float HoverLenght = 40.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float IncreaseHoverMultiplier = 2.0f;
+
+	float OGHoverLenght = HoverLenght;
+
+	UPrimitiveComponent* MyPrimComponent = nullptr;
+	FCollisionQueryParams HoverCollParams;
 
 	bool HoverGrounded = false;
 	FVector GroundNormal = FVector(0,0,1);
 
 
 protected:
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings")
-	float HoverMaxForce = 500000.0f;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings")
-	float HoverLenght = 40.0f;
-	float OGHoverLenght = HoverLenght;
-
-	UPrimitiveComponent* MyPrimComponent = nullptr;
-	FCollisionQueryParams HoverCollParams;
 
 	// Called when the game starts
 	virtual void BeginPlay() override; 
@@ -53,7 +43,7 @@ public:
 	// Sets default values for this component's properties
 	UHover_Component();
 
-	void SetUp(float HoverHeight, float MaxForce);
+	void SetUp(float HoverHeight);
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -67,5 +57,4 @@ public:
 	bool GetbIsHoverEnabled() const { return bIsHoverEnabled; }
 	bool AmIHovering() const;
 	FVector GetGroundNormal() const;
-		
 };
