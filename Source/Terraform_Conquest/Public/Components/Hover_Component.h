@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "Utility/PID_Controller.h"
 #include "Hover_Component.generated.h"
 
 
@@ -17,7 +18,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	bool bIsHoverEnabled = true;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
-	float SupressionStiffness = 1.0f;
+	float SupressionStiffness = 1280.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
+	float Dampening = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSettings", meta = (AllowPrivateAccess = "true"))
 	float HoverLenght = 40.0f;
@@ -30,7 +33,10 @@ private:
 	FCollisionQueryParams HoverCollParams;
 
 	bool HoverGrounded = false;
+	bool IncreasingHover = false;
 	FVector GroundNormal = FVector(0,0,1);
+
+	PID_Controller HoverPid;
 
 
 protected:
@@ -49,6 +55,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void HoverCalc();
+	void HoverCalcPid(float DT);
 
 	void ChangeHoverState(bool HoverState);
 	void IncreaseHoverHeight();
