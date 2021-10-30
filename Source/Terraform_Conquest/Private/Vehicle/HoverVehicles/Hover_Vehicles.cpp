@@ -5,6 +5,7 @@
 #include "../../../Public/Components/Hover_Component.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
 AHover_Vehicles::AHover_Vehicles()
@@ -17,6 +18,8 @@ AHover_Vehicles::AHover_Vehicles()
 	MainHoverComp->SetupAttachment(MyMesh);
 
 	MyMesh->SetSimulatePhysics(true);
+	MyMesh->SetLinearDamping(1.0f);
+	MyMesh->SetAngularDamping(1.0f);
 
 	BIs1stPersonCamera = true;
 	FPSCamera->SetActive(BIs1stPersonCamera);
@@ -44,27 +47,34 @@ void AHover_Vehicles::Tick(float DeltaTime)
 		RotationCorrection(DeltaTime);
 		break;
 	case MovementState::Flying:
-		FlightMovement();
+		FlightMovement(DeltaTime);
 		break;
 	}
-	RotateMe();
+
+	RotateMe(DeltaTime);
 }
 
-void AHover_Vehicles::RotateMe()
+void AHover_Vehicles::RotateMe(float dt)
 {
-	MyMesh->AddTorqueInDegrees(RotationChange.Y * GetActorRightVector(), NAME_None, true); //Pitch
+	if (CurrentMoveState == MovementState::Hovering)
+	{
+		RestrictedPitch += -RotationChange.Y * dt;
+		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
+		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
+		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
+		CameraRotation.Pitch = RestrictedPitch;
+		FPSCamera->SetRelativeRotation(CameraRotation);
+		CameraRotation.Pitch = RestrictedPitch + -TPSCameraSpring->GetRelativeRotation().Pitch;
+		TPSCamera->SetRelativeRotation(CameraRotation);
+	}
+	else if (CurrentMoveState == MovementState::Flying)
+	{
+		MyMesh->AddTorqueInDegrees(RotationChange.Y * GetActorRightVector(), NAME_None, true); //Pitch
+	}
 	MyMesh->AddTorqueInDegrees(RotationChange.Z * GetActorUpVector(), NAME_None, true); //Yaw
 	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
-	FRotator GroundPitch = FRotator::ZeroRotator;
-	if (CurrentMoveState == MovementState::Hovering && 
-		MainHoverComp && MainHoverComp->AmIHovering())
-	{
-		// Create wanted pitch using the right and normal or the surface (think cross product for our forward vector)
-		GroundPitch = UKismetMathLibrary::MakeRotFromYZ(MyMesh->GetRightVector(), MainHoverComp->GetGroundNormal());
-		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
-	}
-	//RestrictedPitch = FMath::Clamp(MyMesh->GetComponentRotation().Pitch, GroundPitch.Pitch - HoverMaxMinPitchLook, GroundPitch.Pitch + HoverMaxMinPitchLook);
 	RotationChange = FVector::ZeroVector;
+
 }
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)
@@ -78,20 +88,20 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
 		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
 		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch, DeltaTime, 1.0f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 1.0f);
+		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 2.0f);
 		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
 	else
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0 + RotationChange.Y, DeltaTime, 0.75f);
+		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0, DeltaTime, 0.75f);
 		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.25f);
-		FRotator NewRotation = FRotator(MyRotation.Pitch, MyRotation.Yaw, WantedGroundRoll);
+		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
 
-}void AHover_Vehicles::FlightMovement()
+}void AHover_Vehicles::FlightMovement(float dt)
 {
 	//Check is speed is below certain ammount
 	//If so, re-enable gravity on ship so it starts to drop
@@ -104,6 +114,13 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 		MyMesh->SetEnableGravity(true);
 	}
 
+	FRotator CameraRotation = FPSCamera->GetRelativeRotation();
+	float PitchBase = CameraRotation.Pitch;
+	CameraRotation.Pitch = FMath::FInterpTo(PitchBase, 0.0f, dt, 2.0f);
+	FPSCamera->SetRelativeRotation(CameraRotation);
+	CameraRotation.Pitch = FMath::FInterpTo(PitchBase + 
+		-TPSCameraSpring->GetRelativeRotation().Pitch, 0.0f, dt, 2.0f);
+	TPSCamera->SetRelativeRotation(CameraRotation);
 }
 
 void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -128,26 +145,12 @@ void AHover_Vehicles::ActivateHoverSystem()
 {
 	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(true);
-	for (auto HoverComp : AdditionalHoverComp)
-	{
-		if (HoverComp)
-		{
-			HoverComp->ChangeHoverState(false);
-		}
-	}
 }
 
 void AHover_Vehicles::DeactivateHoverSystem()
 {
 	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(false);
-	for (auto HoverComp : AdditionalHoverComp)
-	{
-		if (HoverComp)
-		{
-			HoverComp->ChangeHoverState(false);
-		}
-	}
 }
 
 void AHover_Vehicles::SwitchMovementMode()
@@ -157,13 +160,13 @@ void AHover_Vehicles::SwitchMovementMode()
 	case MovementState::Hovering:
 		CurrentMoveState = MovementState::Flying;
 		GetWorld()->GetTimerManager().SetTimer(HoverSwitchHandle, this, 
-			&AHover_Vehicles::ActivateHoverSystem, HoverDisengageTime, false);
+			&AHover_Vehicles::DeactivateHoverSystem, HoverDisengageTime, false);
 		ForwardThrust *= ForwardThrustMulti;
 		break;
 	case MovementState::Flying:
 		CurrentMoveState = MovementState::Hovering;
 		ForwardThrust /= ForwardThrustMulti;
-		MainHoverComp->ChangeHoverState(true);
+		ActivateHoverSystem();
 		MyMesh->SetEnableGravity(true);
 		break;
 	}

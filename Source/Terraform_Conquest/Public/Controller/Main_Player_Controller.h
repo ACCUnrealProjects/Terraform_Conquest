@@ -28,13 +28,13 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupInputComponent() override;
 
 public:
 
 	AMain_Player_Controller();
+
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetPawn(APawn* InPawn) override;
 

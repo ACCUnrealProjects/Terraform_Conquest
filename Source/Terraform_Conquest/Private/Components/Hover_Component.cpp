@@ -19,6 +19,10 @@ void UHover_Component::BeginPlay()
 	OGHoverLenght = HoverLenght;
 	MyPrimComponent = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
 	HoverCollParams.AddIgnoredActor(GetOwner());
+
+	HoverPid.SetMinMax(-1.0f, 1.0f);
+	HoverPid.SetGains(0.8f, 0.0002f, 0.2f);
+
 }
 
 void UHover_Component::SetUp(float HoverHeight)
@@ -35,6 +39,16 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (!bIsHoverEnabled) { return; }
 
 	HoverCalc();
+
+	if (IncreasingHover)
+	{
+		HoverLenght = FMath::FInterpTo(HoverLenght, OGHoverLenght * IncreaseHoverMultiplier,
+			DeltaTime, 2.0f);
+	}
+	else
+	{
+		HoverLenght = FMath::FInterpTo(HoverLenght, OGHoverLenght, DeltaTime, 2.0f);
+	}
 }
 
 void UHover_Component::HoverCalc()
@@ -48,14 +62,40 @@ void UHover_Component::HoverCalc()
 	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Visibility, HoverCollParams))
 	{
 		HoverGrounded = true;
+		// Get current velocity at point
 		FVector CV = MyPrimComponent->GetPhysicsLinearVelocityAtPoint(MyPos);
-		FVector CF = CV.ProjectOnToNormal(GetUpVector());
+		// project onto the up vector for the hover comp
+		FVector CF = CV.ProjectOnToNormal(GetUpVector()) * Dampening;
+		// see how far we are off the ground
 		float DistanceNormal = 1.0f - (DownRayCast.Distance / HoverLenght);
+		UE_LOG(LogTemp, Warning, TEXT("DistanceNormal = %f"), DistanceNormal);
+		// Get a counter-acting up force
 		FVector NF = GetUpVector() * DistanceNormal * SupressionStiffness;
-		FVector DF = NF - CF;
+		// get what we want the new vel to be for the point
+		FVector DF = (NF - CF) * MyPrimComponent->GetMass();
 
-		MyPrimComponent->AddForceAtLocation(DF, MyPos);
+		// Apply the force
+		MyPrimComponent->AddForce(DF);
 
+		GroundNormal = DownRayCast.ImpactNormal;
+	}
+}
+
+void UHover_Component::HoverCalcPid(float DT)
+{
+	FVector MyPos = GetComponentLocation();
+	FVector RayEnd = MyPos + (-GetUpVector() * HoverLenght);
+
+	FHitResult DownRayCast;
+
+	HoverGrounded = false;
+	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Visibility, HoverCollParams))
+	{
+		HoverGrounded = true;
+		//Get percentage of force to add
+		float ForcePercentage = HoverPid.Calculate(HoverLenght, DownRayCast.Distance,DT);
+		// Apply the force
+		MyPrimComponent->AddForce((SupressionStiffness * ForcePercentage) * GetUpVector());
 		GroundNormal = DownRayCast.ImpactNormal;
 	}
 }
@@ -67,12 +107,12 @@ void UHover_Component::ChangeHoverState(bool HoverState)
 
 void UHover_Component::IncreaseHoverHeight()
 {
-	HoverLenght *= IncreaseHoverMultiplier;
+	IncreasingHover = true;
 }
 
 void UHover_Component::DecreaseHoverHeight()
 {
-	HoverLenght = OGHoverLenght;
+	IncreasingHover = false;
 }
 
 bool UHover_Component::AmIHovering() const
