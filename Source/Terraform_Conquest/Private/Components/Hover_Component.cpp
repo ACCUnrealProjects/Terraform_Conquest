@@ -19,14 +19,16 @@ void UHover_Component::BeginPlay()
 	OGHoverLenght = HoverLenght;
 	MyPrimComponent = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
 	HoverCollParams.AddIgnoredActor(GetOwner());
+
+	HoverPid.SetMinMax(-1.0f, 1.0f);
+	HoverPid.SetGains(0.8f, 0.0002f, 0.2f);
+
 }
 
-void UHover_Component::SetUp(float HoverHeight, float MaxForce)
+void UHover_Component::SetUp(float HoverHeight)
 {
 	HoverLenght = HoverHeight;
 	OGHoverLenght = HoverLenght;
-
-	HoverMaxForce = MaxForce;
 }
 
 // Called every frame
@@ -37,6 +39,16 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	if (!bIsHoverEnabled) { return; }
 
 	HoverCalc();
+
+	if (IncreasingHover)
+	{
+		HoverLenght = FMath::FInterpTo(HoverLenght, OGHoverLenght * IncreaseHoverMultiplier,
+			DeltaTime, 2.0f);
+	}
+	else
+	{
+		HoverLenght = FMath::FInterpTo(HoverLenght, OGHoverLenght, DeltaTime, 2.0f);
+	}
 }
 
 void UHover_Component::HoverCalc()
@@ -50,22 +62,40 @@ void UHover_Component::HoverCalc()
 	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Visibility, HoverCollParams))
 	{
 		HoverGrounded = true;
-		float DistanceToFoor = FVector::Dist(DownRayCast.Location, MyPos);
-		float DistanceNormal = DistanceToFoor / HoverLenght;
-		float ForceNeeded = FMath::Lerp(HoverMaxForce, 0.0f, DistanceNormal);
-		FVector UpSpeedVector = MyPrimComponent->GetPhysicsLinearVelocity() * GetUpVector();
-		float StabSubForce = DefaultStabSubForce;
-		if (DistanceNormal < HoverBoostThreshold)
-		{
-			StabSubForce = FMath::Lerp(StabSubForceLowerLerp, StabSubForceUpperLerp, 
-				DistanceNormal / HoverBoostThreshold);
-		}
+		// Get current velocity at point
+		FVector CV = MyPrimComponent->GetPhysicsLinearVelocityAtPoint(MyPos);
+		// project onto the up vector for the hover comp
+		FVector CF = CV.ProjectOnToNormal(GetUpVector()) * Dampening;
+		// see how far we are off the ground
+		float DistanceNormal = 1.0f - (DownRayCast.Distance / HoverLenght);
+		UE_LOG(LogTemp, Warning, TEXT("DistanceNormal = %f"), DistanceNormal);
+		// Get a counter-acting up force
+		FVector NF = GetUpVector() * DistanceNormal * SupressionStiffness;
+		// get what we want the new vel to be for the point
+		FVector DF = (NF - CF) * MyPrimComponent->GetMass();
 
-		float Stablize = FMath::Sqrt(ForceNeeded) * (StabSubForce * StablizationMulti) * FMath::Max3(UpSpeedVector.X, UpSpeedVector.Y, UpSpeedVector.Z);
-		float ForcetoApply = (ForceNeeded - Stablize);
-		FVector ForceVector = GroundNormal * (ForcetoApply);
-		MyPrimComponent->AddForce(ForceVector);
+		// Apply the force
+		MyPrimComponent->AddForce(DF);
 
+		GroundNormal = DownRayCast.ImpactNormal;
+	}
+}
+
+void UHover_Component::HoverCalcPid(float DT)
+{
+	FVector MyPos = GetComponentLocation();
+	FVector RayEnd = MyPos + (-GetUpVector() * HoverLenght);
+
+	FHitResult DownRayCast;
+
+	HoverGrounded = false;
+	if (GetWorld()->LineTraceSingleByChannel(DownRayCast, MyPos, RayEnd, ECollisionChannel::ECC_Visibility, HoverCollParams))
+	{
+		HoverGrounded = true;
+		//Get percentage of force to add
+		float ForcePercentage = HoverPid.Calculate(HoverLenght, DownRayCast.Distance,DT);
+		// Apply the force
+		MyPrimComponent->AddForce((SupressionStiffness * ForcePercentage) * GetUpVector());
 		GroundNormal = DownRayCast.ImpactNormal;
 	}
 }
@@ -73,6 +103,16 @@ void UHover_Component::HoverCalc()
 void UHover_Component::ChangeHoverState(bool HoverState)
 {
 	bIsHoverEnabled = HoverState;
+}
+
+void UHover_Component::IncreaseHoverHeight()
+{
+	IncreasingHover = true;
+}
+
+void UHover_Component::DecreaseHoverHeight()
+{
+	IncreasingHover = false;
 }
 
 bool UHover_Component::AmIHovering() const

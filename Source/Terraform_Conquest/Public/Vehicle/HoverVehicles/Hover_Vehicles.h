@@ -35,8 +35,8 @@ private:
 	float RestrictedPitch = 0.0f;
 
 	//Movement and flight
-	void RotateMe();
-	void FlightMovement();
+	void RotateMe(float dt);
+	void FlightMovement(float dt);
 	//Movement
 	void Trusters(float Amount);
 	void Strafe(float Amount);
@@ -55,10 +55,8 @@ private:
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "HoverSetUp")
-	class UMaster_Hover_Component* MainHoverComp;
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
-	TArray<class UHover_Component*> AdditionalHoverComp{};
+	class UHover_Component* MainHoverComp;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
 	float ForwardThrust = 500000.0f;

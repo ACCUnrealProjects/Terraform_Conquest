@@ -24,7 +24,7 @@ void AMain_Player_Controller::BeginPlay()
 
 void AMain_Player_Controller::Tick(float DeltaTime)
 {
-
+	Super::Tick(DeltaTime);
 }
 
 void AMain_Player_Controller::SetPawn(APawn* InPawn)
