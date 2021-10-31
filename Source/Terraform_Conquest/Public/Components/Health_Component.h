@@ -7,7 +7,6 @@
 #include "Health_Component.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FActorHasDied);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FActorBeenHit);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TERRAFORM_CONQUEST_API UHealth_Component : public UActorComponent
@@ -64,9 +63,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Shield")
 	float GetShieldPercentage() const;
 
-	UFUNCTION()
-	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+    float TakeDamage(float Damage);
 
 	FActorHasDied IHaveDied;
-	FActorBeenHit IHaveBeenHit;
 };

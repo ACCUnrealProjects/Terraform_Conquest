@@ -94,8 +94,9 @@ void UHover_Component::HoverCalcPid(float DT)
 		HoverGrounded = true;
 		//Get percentage of force to add
 		float ForcePercentage = HoverPid.Calculate(HoverLenght, DownRayCast.Distance,DT);
+		float ForceToAdd = SupressionStiffness * ForcePercentage * MyPrimComponent->GetMass();
 		// Apply the force
-		MyPrimComponent->AddForce((SupressionStiffness * ForcePercentage) * GetUpVector());
+		MyPrimComponent->AddForce(ForceToAdd * GetUpVector());
 		GroundNormal = DownRayCast.ImpactNormal;
 	}
 }
