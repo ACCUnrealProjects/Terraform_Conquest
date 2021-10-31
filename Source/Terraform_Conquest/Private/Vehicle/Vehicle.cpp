@@ -38,14 +38,12 @@ void AVehicle::BeginPlay()
 	MyMesh->SetCenterOfMass(FVector(0, 0, -100));
 
 	MyHealth->IHaveDied.AddUniqueDynamic(this, &AVehicle::Death);
-	MyHealth->IHaveBeenHit.AddUniqueDynamic(this, &AVehicle::imHit);
 }
 
 // Called every frame
 void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -74,15 +72,19 @@ void AVehicle::CameraChange()
 	TPSCamera->SetActive(!BIs1stPersonCamera);
 }
 
+float AVehicle::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (MyHealth) { return MyHealth->TakeDamage(DamageAmount); }
+	else { return DamageAmount; }
+}
+
 void AVehicle::Death()
 {
 	FTimerHandle DeathTimer;
+	MyMesh->SetCenterOfMass(FVector(0, 0, 0));
 	GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AVehicle::DestoryMe, DestroyTime, false);
-}
-
-void AVehicle::imHit()
-{
-
 }
 
 void AVehicle::DestoryMe()
