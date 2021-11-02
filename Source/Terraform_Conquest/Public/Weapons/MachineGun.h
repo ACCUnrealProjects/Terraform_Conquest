@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Weapons/Weapon.h"
-#include "MineWeapon.generated.h"
+#include "MachineGun.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TERRAFORM_CONQUEST_API AMineWeapon : public AWeapon
+class TERRAFORM_CONQUEST_API AMachineGun : public AWeapon
 {
 	GENERATED_BODY()
-	
+
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class AMine> ProjectileBlueprint;
+		TSubclassOf<class ATracer_Round> ProjectileBlueprint;
 
 protected:
 
@@ -27,5 +27,6 @@ protected:
 
 public:
 
-	AMineWeapon();
+	AMachineGun();
+	
 };

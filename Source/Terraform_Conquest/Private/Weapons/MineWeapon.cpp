@@ -10,6 +10,7 @@ AMineWeapon::AMineWeapon()
 
 void AMineWeapon::BeginPlay()
 {
+	Super::BeginPlay();
 	Range = 150.0f;
 	ShotParams.AddIgnoredActor(this);
 }
@@ -38,8 +39,4 @@ void AMineWeapon::Fire()
 
 }
 
-void AMineWeapon::AmmoRegen()
-{
-	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo += AmmoRegened, MaxAmmo);
-}
 

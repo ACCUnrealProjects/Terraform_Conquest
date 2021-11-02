@@ -15,7 +15,7 @@ ACannonWeapon::ACannonWeapon()
 
 void ACannonWeapon::BeginPlay()
 {
-
+	Super::BeginPlay();
 }
 
 void ACannonWeapon::Fire()
@@ -32,11 +32,6 @@ void ACannonWeapon::Fire()
 	}
 
 	AWeapon::Fire();
-}
-
-void ACannonWeapon::AmmoRegen()
-{
-	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo += AmmoRegened, MaxAmmo);
 }
 
 void ACannonWeapon::ChangeActiveState(const bool AmIActive)

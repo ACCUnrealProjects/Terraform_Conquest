@@ -24,6 +24,7 @@ APhasersWeapon::APhasersWeapon()
 
 void APhasersWeapon::BeginPlay()
 {
+	Super::BeginPlay();
 	for (int32 i = 0; i < FireSockets.Num(); i++)
 	{
 		UParticleSystemComponent* PhasersEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect" + FString::FromInt(i))));
@@ -59,10 +60,6 @@ void APhasersWeapon::Fire()
 	AWeapon::Fire();
 }
 
-void APhasersWeapon::AmmoRegen()
-{
-	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo += AmmoRegened, MaxAmmo);
-}
 
 void APhasersWeapon::ChangeActiveState(const bool AmIActive)
 {
