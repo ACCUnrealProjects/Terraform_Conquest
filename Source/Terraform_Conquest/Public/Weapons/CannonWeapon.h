@@ -28,7 +28,6 @@ protected:
 
 	virtual void Fire() override;
 
-	virtual void AmmoRegen() override;
 
 public:
 

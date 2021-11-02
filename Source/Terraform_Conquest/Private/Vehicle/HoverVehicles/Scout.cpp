@@ -7,7 +7,7 @@
 
 AScout::AScout()
 {
-	ForwardThrust = 125000.0f;
+	ForwardThrust = 1200.0f;
 
 	WeaponController = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("MyWeaponSystem"));
 	WeaponController->bEditableWhenInherited = true;

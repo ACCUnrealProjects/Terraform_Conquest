@@ -7,7 +7,6 @@
 #include "WeaponTypeEnum.h"
 #include "Weapon.generated.h"
 
-class USkeletalMeshComponent;
 class USoundBase;
 
 UCLASS()
@@ -66,12 +65,14 @@ protected:
 
 	bool ExternalRegenOn = false;
 
+protected:
+
 	virtual void BeginPlay() override;
 
 	virtual void Fire();
 
 	UFUNCTION()
-	virtual void AmmoRegen() PURE_VIRTUAL(AWeapon::AmmoRegen, return;);
+	virtual void AmmoRegen();
 
 public:	
 

@@ -59,7 +59,7 @@ protected:
 	class UHover_Component* MainHoverComp;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float ForwardThrust = 500000.0f;
+	float ForwardThrust = 500.0f;
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
 	float BackWardsThrust = ForwardThrust * 0.3f;
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")

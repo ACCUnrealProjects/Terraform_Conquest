@@ -23,6 +23,8 @@ AVehicle::AVehicle()
 
 	TPSCameraSpring = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPSCamSpring"));
 	TPSCameraSpring->bUsePawnControlRotation = false;
+	TPSCameraSpring->bEnableCameraLag = true;
+	TPSCameraSpring->bEnableCameraRotationLag = true;
 	TPSCameraSpring->SetupAttachment(MyMesh);
 
 	TPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyTPSCam"));

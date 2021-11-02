@@ -64,6 +64,11 @@ void AWeapon::OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh)
 	MyOwnerMesh = OwnerMesh;
 }
 
+void AWeapon::AmmoRegen()
+{
+	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo += AmmoRegened, MaxAmmo);
+}
+
 void AWeapon::ExternalRegenAmmo()
 {
 	ExternalRegenOn = true;

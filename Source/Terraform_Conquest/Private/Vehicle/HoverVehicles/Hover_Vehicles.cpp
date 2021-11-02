@@ -58,7 +58,7 @@ void AHover_Vehicles::RotateMe(float dt)
 {
 	if (CurrentMoveState == MovementState::Hovering)
 	{
-		RestrictedPitch += -RotationChange.Y * dt;
+		RestrictedPitch += -RotationChange.Y * dt * (RotateSens  * 0.0025f);
 		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
 		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
 		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
@@ -177,11 +177,11 @@ void AHover_Vehicles::Trusters(float Amount)
 	FVector GroundForwardVector = MyMesh->GetForwardVector();
 	if (Amount > 0.1)
 	{
-		MyMesh->AddForce(GroundForwardVector * (ForwardThrust * Amount));
+		MyMesh->AddForce(GroundForwardVector * (ForwardThrust * Amount) * MyMesh->GetMass());
 	}
-	if (Amount < -0.1 && CurrentMoveState != MovementState::Hovering)
+	if (Amount < -0.1 && CurrentMoveState == MovementState::Hovering)
 	{
-		MyMesh->AddForce(GroundForwardVector * (BackWardsThrust * Amount));
+		MyMesh->AddForce(GroundForwardVector * (BackWardsThrust * Amount) * MyMesh->GetMass());
 	}
 }
 
@@ -191,7 +191,7 @@ void AHover_Vehicles::Strafe(float Amount)
 
 	if (Amount > 0.1 || Amount < -0.1)
 	{
-		MyMesh->AddForce(MyMesh->GetRightVector() * (StrafeThrust * Amount));
+		MyMesh->AddForce(MyMesh->GetRightVector() * (StrafeThrust * Amount) * MyMesh->GetMass());
 	}
 }
 
