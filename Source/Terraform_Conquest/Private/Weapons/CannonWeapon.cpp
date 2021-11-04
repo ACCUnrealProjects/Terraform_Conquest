@@ -27,7 +27,7 @@ void ACannonWeapon::Fire()
 
 		//Fire Projectile
 		ACannon_Projectile* CannonProjectile = GetWorld()->SpawnActor<ACannon_Projectile>(ProjectileBlueprint, MyOwnerMesh->GetSocketLocation(FName(Socket)), MyOwnerMesh->GetSocketRotation(FName(Socket)));
-		CannonProjectile->LaunchProjectile(ProjectileSpeed, GetOwner());
+		CannonProjectile->LaunchProjectile(GetOwner());
 		CurrentTotalAmmo--;
 	}
 
