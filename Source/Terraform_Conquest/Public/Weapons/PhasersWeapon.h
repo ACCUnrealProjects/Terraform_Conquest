@@ -17,7 +17,8 @@ class TERRAFORM_CONQUEST_API APhasersWeapon : public AWeapon
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class AProjectile> ProjectileBlueprint;
+	TSubclassOf<class AProjectile> ProjectileBlueprint = nullptr;
+
 
 protected:
 
@@ -27,8 +28,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Damage")
 	int32 DamagePerShot;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileSpeed", meta = (AllowPrivateAccess = "true"))
-	float ProjectileSpeed = 1000.0f;
+protected:
 
 	virtual void BeginPlay() override;
 

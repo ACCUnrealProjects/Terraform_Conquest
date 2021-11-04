@@ -9,17 +9,6 @@
 APhasersWeapon::APhasersWeapon()
 {
 	myWeaponType = GunType::Phasers;
-
-	UParticleSystemComponent* PhasersEffect1 = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect 1")));
-	PhasersEffect1->bAutoActivate = false;
-	FireEffect.Add(PhasersEffect1);
-
-	UParticleSystemComponent* PhasersEffect2 = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect 2")));
-	PhasersEffect2->bAutoActivate = false;
-	FireEffect.Add(PhasersEffect2);
-
-	FireSockets.Add(TEXT("RayFire1"));
-	FireSockets.Add(TEXT("RayFire2"));
 }
 
 void APhasersWeapon::BeginPlay()
@@ -27,34 +16,56 @@ void APhasersWeapon::BeginPlay()
 	Super::BeginPlay();
 	for (int32 i = 0; i < FireSockets.Num(); i++)
 	{
+		if (!MyOwnerMesh->DoesSocketExist(FName(FireSockets[i]))) { continue; }
+
 		UParticleSystemComponent* PhasersEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect" + FString::FromInt(i))));
 		PhasersEffect->bAutoActivate = false;
+		FVector SocketLocation = MyOwnerMesh->GetSocketLocation(FName(FireSockets[i]));
+
+		FParticleSysParam Source;
+		Source.Name = "Source";
+		Source.ParamType = EParticleSysParamType::PSPT_Vector;
+		Source.Vector = SocketLocation;
+		PhasersEffect->InstanceParameters.Add(Source);
+
+		FParticleSysParam Target;
+		Target.Name = "Target";
+		Target.ParamType = EParticleSysParamType::PSPT_Vector;
+		Target.Vector = SocketLocation;
+		PhasersEffect->InstanceParameters.Add(Target);
+
+		PhasersEffect->SetBeamSourcePoint(0, SocketLocation, 0);
+		PhasersEffect->SetBeamEndPoint(0, SocketLocation);
+
 		FireEffect.Add(PhasersEffect);
 	}
 }
 
 void APhasersWeapon::Fire()
 {
-	for (auto Socket : FireSockets)
+	for (int i = 0; i < FireSockets.Num(); i++)
 	{
-		if (!ensure(MyOwnerMesh->DoesSocketExist(FName(Socket)))) { return; }
+		if (!ensure(MyOwnerMesh->DoesSocketExist(FName(FireSockets[i])))) { return; }
 
 		//Raycast fire, also fire projectile flash or laser 
 		FHitResult ShotHit;
-		FVector RayStart = MyOwnerMesh->GetSocketLocation(FName(Socket));
+		FVector RayStart = MyOwnerMesh->GetSocketLocation(FName(FireSockets[i]));
 		FVector RayEnd = RayStart + (GetOwner()->GetActorForwardVector() * Range);
 
 		if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
 		{
 			UGameplayStatics::ApplyDamage(ShotHit.GetActor(), DamagePerShot, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-			//DrawDebugLine(GetWorld(), RayStart, ShotHit.ImpactPoint, FColor(0, 255, 0), true, 0, 0, 10);
+			DrawDebugLine(GetWorld(), RayStart, ShotHit.ImpactPoint, FColor(0, 255, 0), true, 0, 0, 10);
 		}
-		if (ProjectileBlueprint)
+
+		if (FireEffect.Num() < i && FireEffect[i] != nullptr)
 		{
-			AProjectile* PhaserProjectile = GetWorld()->SpawnActor<AProjectile>(ProjectileBlueprint, RayStart, MyOwnerMesh->GetSocketRotation(FName(Socket)));
-			PhaserProjectile->LaunchProjectile(ProjectileSpeed, GetOwner());
+			FireEffect[i]->SetVectorParameter("Source", RayStart);
+			FireEffect[i]->SetVectorParameter("Target", ShotHit.ImpactPoint);
+			FireEffect[i]->SetBeamSourcePoint(0, RayStart, 0);
+			FireEffect[i]->SetBeamEndPoint(0, ShotHit.ImpactPoint);
 		}
-		
+
 		CurrentTotalAmmo--;
 	}
 	AWeapon::Fire();

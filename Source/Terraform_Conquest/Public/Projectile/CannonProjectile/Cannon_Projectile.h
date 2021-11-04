@@ -16,13 +16,35 @@ class TERRAFORM_CONQUEST_API ACannon_Projectile : public AProjectile
 	
 private:
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TracerSpeed", meta = (AllowPrivateAccess = "true"))
+		float CannonSpeed = 5000.0f;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+		class UStaticMeshComponent* ProjectileMesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileMovement", meta = (AllowPrivateAccess = "true"))
+		class UProjectileMovementComponent* ProjectileMovement = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+		class UParticleSystemComponent* TrailEffect = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+		class UShapeComponent* SphereCollider = nullptr;
+
+private:
+
+	UFUNCTION()
+		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float Damage = 10.0f;
+		float Damage = 10.0f;
+
+protected:
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 	virtual void HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 
@@ -30,4 +52,5 @@ public:
 	// Sets default values for this actor's properties
 	ACannon_Projectile();
 
+	virtual void LaunchProjectile(AActor* Shooter) override;
 };

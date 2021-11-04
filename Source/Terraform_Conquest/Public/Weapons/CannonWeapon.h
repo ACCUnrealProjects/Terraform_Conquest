@@ -19,8 +19,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ACannon_Projectile> ProjectileBlueprint;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileSpeed", meta = (AllowPrivateAccess = "true"))
-	float ProjectileSpeed = 1000.0f;
 			
 protected:
 
