@@ -1,7 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Weapons/CannonWeapon.h"
-#include "../../Public/Projectile/CannonProjectile/Cannon_Projectile.h"
+#include "Weapons/Cannon_Weapons/CannonWeapon.h"
+#include "Projectile/CannonProjectile/Cannon_Projectile.h"
 #include "Particles/ParticleSystemComponent.h"
 
 ACannonWeapon::ACannonWeapon()
@@ -23,7 +23,7 @@ void ACannonWeapon::Fire()
 	//Fire Projectile
 	for (auto Socket : FireSockets)
 	{
-		if (!ensure(ProjectileBlueprint && MyOwnerMesh->DoesSocketExist(FName(Socket)))) { return; }
+		if (!ProjectileBlueprint || !MyOwnerMesh->DoesSocketExist(FName(Socket))) { return; }
 
 		//Fire Projectile
 		ACannon_Projectile* CannonProjectile = GetWorld()->SpawnActor<ACannon_Projectile>(ProjectileBlueprint, MyOwnerMesh->GetSocketLocation(FName(Socket)), MyOwnerMesh->GetSocketRotation(FName(Socket)));

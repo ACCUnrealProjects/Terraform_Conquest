@@ -1,7 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Weapons/MineWeapon.h"
-#include "../../Public/Projectile/Mine.h"
+#include "Weapons/Mine_Weapons/MineWeapon.h"
+#include "Projectile/Mines/Mine.h"
 
 AMineWeapon::AMineWeapon()
 {
@@ -19,7 +19,7 @@ void AMineWeapon::Fire()
 {
 	for (auto Socket : FireSockets)
 	{
-		if (!ensure(ProjectileBlueprint && MyOwnerMesh->DoesSocketExist(FName(Socket)))) { return; }
+		if (!ProjectileBlueprint || !MyOwnerMesh->DoesSocketExist(FName(Socket))) { return; }
 
 		FVector DownVector = -GetActorUpVector();
 		FVector DownPlacement = MyOwnerMesh->GetSocketLocation(FName(Socket)) + (DownVector.GetSafeNormal() * Range);

@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Weapons/Weapon.h"
-#include "MachineGun.generated.h"
+#include "MorterWeapon.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TERRAFORM_CONQUEST_API AMachineGun : public AWeapon
+class TERRAFORM_CONQUEST_API AMorterWeapon : public AWeapon
 {
 	GENERATED_BODY()
 
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class ATracer_Round> ProjectileBlueprint;
+		TSubclassOf<class AMorter_Projectile> ProjectileBlueprint;
 
 protected:
 
@@ -27,6 +27,10 @@ protected:
 
 public:
 
-	AMachineGun();
+	AMorterWeapon();
+
+	virtual void ChangeActiveState(const bool AmIActive) override;
+
+	virtual void OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh) override;
 	
 };

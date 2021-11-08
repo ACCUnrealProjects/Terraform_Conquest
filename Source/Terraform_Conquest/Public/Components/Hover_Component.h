@@ -49,7 +49,7 @@ public:
 	// Sets default values for this component's properties
 	UHover_Component();
 
-	void SetUp(float HoverHeight);
+	void SetUp(float HoverHeight, float SupressionStiff, float Dampmulti);
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -60,7 +60,7 @@ public:
 	void ChangeHoverState(bool HoverState);
 	void IncreaseHoverHeight();
 	void DecreaseHoverHeight();
-
+	
 	bool GetbIsHoverEnabled() const { return bIsHoverEnabled; }
 	bool AmIHovering() const;
 	FVector GetGroundNormal() const;
