@@ -1,7 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Weapons/PhasersWeapon.h"
-#include "../../Public/Projectile/Projectile.h"
+#include "Weapons/Phaser_Weapons/PhasersWeapon.h"
+#include "Projectile/Projectile.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
@@ -45,7 +45,7 @@ void APhasersWeapon::Fire()
 {
 	for (int i = 0; i < FireSockets.Num(); i++)
 	{
-		if (!ensure(MyOwnerMesh->DoesSocketExist(FName(FireSockets[i])))) { return; }
+		if (!MyOwnerMesh->DoesSocketExist(FName(FireSockets[i]))) { return; }
 
 		//Raycast fire, also fire projectile flash or laser 
 		FHitResult ShotHit;

@@ -1,7 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
 
-#include "../../../Public/Vehicle/GroundVehicles/Ground_Vehicle.h"
+#include "Vehicle/GroundVehicles/Ground_Vehicle.h"
 #include "Camera/CameraComponent.h"
 
 // Sets default values

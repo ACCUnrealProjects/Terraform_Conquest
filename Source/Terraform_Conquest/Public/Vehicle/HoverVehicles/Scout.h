@@ -20,6 +20,8 @@ private:
 	class UWeapon_Controller_Component* WeaponController = nullptr;
 
 protected:
+	
+	virtual void BeginPlay() override;
 
 public:
 

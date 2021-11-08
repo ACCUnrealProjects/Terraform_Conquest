@@ -12,5 +12,6 @@ enum class GunType : uint8
 	Cannon,
 	Phasers,
 	Mine,
-	Morter
+	Morter,
+	MachineGun,
 };

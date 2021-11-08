@@ -1,7 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Projectile/Mine.h"
-#include "../../Public/Components/Health_Component.h"
+#include "Projectile/Mines/Mine.h"
+#include "Components/Health_Component.h"
 #include "Components/SphereComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"

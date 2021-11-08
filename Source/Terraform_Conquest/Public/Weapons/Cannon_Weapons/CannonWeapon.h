@@ -18,8 +18,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ACannon_Projectile> ProjectileBlueprint;
-
-			
+		
 protected:
 
 	virtual void BeginPlay() override;
