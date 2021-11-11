@@ -9,12 +9,16 @@
 APhasersWeapon::APhasersWeapon()
 {
 	myWeaponType = GunType::Phasers;
+
+	FireSockets.Add("MachineGun_1");
+	FireSockets.Add("MachineGun_2");
 }
 
 void APhasersWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	for (int32 i = 0; i < FireSockets.Num(); i++)
+	
+	/*for (int32 i = 0; i < FireSockets.Num(); i++)
 	{
 		if (!MyOwnerMesh->DoesSocketExist(FName(FireSockets[i]))) { continue; }
 
@@ -38,7 +42,7 @@ void APhasersWeapon::BeginPlay()
 		PhasersEffect->SetBeamEndPoint(0, SocketLocation);
 
 		FireEffect.Add(PhasersEffect);
-	}
+	}*/
 }
 
 void APhasersWeapon::Fire()

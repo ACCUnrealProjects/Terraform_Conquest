@@ -21,7 +21,7 @@ class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float HoverMaxMinPitchLook = 10.0f;
+	float HoverMaxMinPitchLook = 20.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
 	float RotateSens = 75.0f;
 
@@ -57,6 +57,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
 	class UHover_Component* MainHoverComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TArray<class UParticleSystemComponent*> TrusterEffect;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
 	float ForwardThrust = 500.0f;

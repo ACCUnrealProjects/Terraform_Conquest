@@ -8,7 +8,6 @@
 #include "Weapon_Controller_Component.generated.h"
 
 class AWeapon;
-class UWeaponPoint;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TERRAFORM_CONQUEST_API UWeapon_Controller_Component : public UActorComponent

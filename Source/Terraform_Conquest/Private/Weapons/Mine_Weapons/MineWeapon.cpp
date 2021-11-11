@@ -6,6 +6,7 @@
 AMineWeapon::AMineWeapon()
 {
 	myWeaponType = GunType::Mine;
+	FireSockets.Add("MineSlot");
 }
 
 void AMineWeapon::BeginPlay()

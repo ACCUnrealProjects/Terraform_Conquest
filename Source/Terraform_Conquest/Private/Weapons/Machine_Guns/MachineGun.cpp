@@ -8,9 +8,12 @@ AMachineGun::AMachineGun()
 {
 	myWeaponType = GunType::MachineGun;
 
-	UParticleSystemComponent* MachineGunEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Tracer Fire Effect"));
+	/*UParticleSystemComponent* MachineGunEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Tracer Fire Effect"));
 	MachineGunEffect->bAutoActivate = false;
-	FireEffect.Add(MachineGunEffect);
+	FireEffect.Add(MachineGunEffect);*/
+
+	FireSockets.Add("MachineGun_1");
+	FireSockets.Add("MachineGun_2");
 }
 
 void AMachineGun::BeginPlay()

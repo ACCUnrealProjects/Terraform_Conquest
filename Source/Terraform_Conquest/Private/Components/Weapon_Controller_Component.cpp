@@ -1,7 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Components/Weapon_Controller_Component.h"
-#include "../../Public/Weapons/Weapon.h"
+#include "Components/Weapon_Controller_Component.h"
+#include "Weapons/Weapon.h"
 #include "Components/SceneComponent.h"
 
 // Sets default values for this component's properties
@@ -9,7 +9,6 @@ UWeapon_Controller_Component::UWeapon_Controller_Component()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 }
-
 
 // Called when the game starts
 void UWeapon_Controller_Component::BeginPlay()

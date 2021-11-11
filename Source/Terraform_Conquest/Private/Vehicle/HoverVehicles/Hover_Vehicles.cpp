@@ -1,10 +1,11 @@
 // Alex Chatt Terraform_Conquest 2020
 
 
-#include "../../../Public/Vehicle/HoverVehicles/Hover_Vehicles.h"
-#include "../../../Public/Components/Hover_Component.h"
+#include "Vehicle/HoverVehicles/Hover_Vehicles.h"
+#include "Components/Hover_Component.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -31,7 +32,7 @@ void AHover_Vehicles::BeginPlay()
 {
 	AVehicle::BeginPlay();
 
-	BackWardsThrust = ForwardThrust * 0.3f;
+	BackWardsThrust = ForwardThrust * 0.5f;
 	StrafeThrust = ForwardThrust * 0.60f;
 	RestrictedPitch = 0.0f;
 }

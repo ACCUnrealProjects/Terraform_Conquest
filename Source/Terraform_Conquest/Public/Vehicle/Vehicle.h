@@ -34,6 +34,8 @@ protected:
 	class USpringArmComponent* TPSCameraSpring = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	bool BIs1stPersonCamera = true;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "WeaponController")
+	class UWeapon_Controller_Component* VehicleWeaponController = nullptr;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

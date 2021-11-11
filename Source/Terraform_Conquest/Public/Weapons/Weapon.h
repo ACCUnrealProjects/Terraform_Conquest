@@ -22,9 +22,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = (AllowPrivateAccess = "true"))
 	USoundBase* DryClipSound = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation", meta = (AllowPrivateAccess = "true"))
-	UAnimSequence* FireAnimation = nullptr;
-
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Name")

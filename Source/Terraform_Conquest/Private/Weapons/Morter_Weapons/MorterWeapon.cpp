@@ -8,9 +8,11 @@ AMorterWeapon::AMorterWeapon()
 {
 	myWeaponType = GunType::Morter;
 
-	UParticleSystemComponent* CannonEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Morter Fire Effect"));
-	CannonEffect->bAutoActivate = false;
-	FireEffect.Add(CannonEffect);
+	UParticleSystemComponent* MorterEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Morter Fire Effect"));
+	MorterEffect->bAutoActivate = false;
+	FireEffect.Add(MorterEffect);
+
+	FireSockets.Add("MorterGun");
 }
 
 void AMorterWeapon::BeginPlay()

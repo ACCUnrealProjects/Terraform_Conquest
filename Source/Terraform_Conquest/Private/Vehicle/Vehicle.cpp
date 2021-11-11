@@ -1,7 +1,8 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Vehicle/Vehicle.h"
-#include "../../Public/Components/Health_Component.h"
+#include "Vehicle/Vehicle.h"
+#include "Components/Health_Component.h"
+#include "Components/Weapon_Controller_Component.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -30,6 +31,9 @@ AVehicle::AVehicle()
 	TPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyTPSCam"));
 	TPSCamera->bUsePawnControlRotation = false;
 	TPSCamera->SetupAttachment(TPSCameraSpring);
+
+	VehicleWeaponController = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
+	VehicleWeaponController->bEditableWhenInherited = true;
 }
 
 

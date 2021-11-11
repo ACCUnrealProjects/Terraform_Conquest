@@ -8,9 +8,12 @@ ACannonWeapon::ACannonWeapon()
 {
 	myWeaponType = GunType::Cannon;
 
-	UParticleSystemComponent *CannonEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Cannon Fire Effect"));
+	/*UParticleSystemComponent *CannonEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Cannon Fire Effect"));
 	CannonEffect->bAutoActivate = false;
-	FireEffect.Add(CannonEffect);
+	FireEffect.Add(CannonEffect);*/
+
+	FireSockets.Add("CannonGun_1");
+	FireSockets.Add("CannonGun_2");
 }
 
 void ACannonWeapon::BeginPlay()

@@ -1,6 +1,6 @@
 //Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Components/Hover_Component.h"
+#include "Components/Hover_Component.h"
 
 // Sets default values for this component's properties
 UHover_Component::UHover_Component()
@@ -9,7 +9,6 @@ UHover_Component::UHover_Component()
 
 	SetVisibility(false);
 }
-
 
 // Called when the game starts
 void UHover_Component::BeginPlay()
