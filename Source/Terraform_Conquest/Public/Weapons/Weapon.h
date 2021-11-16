@@ -31,10 +31,7 @@ protected:
 	GunType myWeaponType = GunType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
-	TArray<class UParticleSystemComponent*> FireEffect;
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "FireSocket")
-	TArray<FString> FireSockets;
+	class UParticleSystemComponent* FireEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
 	int32 CurrentTotalAmmo;
@@ -52,11 +49,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Firing")
 	float FireRate;
 
+	FActorSpawnParameters ActorParams;
+
 	FCollisionQueryParams ShotParams;
 
 	FTimerHandle AmmoRegenTimer;
-
-	USceneComponent* MyOwnerMesh = nullptr;
 
 	float LastFire = -10.0f;
 
@@ -77,8 +74,6 @@ public:
 	AWeapon();
 
 	void AttemptToFire();
-
-	virtual void OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh);
 
 	virtual void ChangeActiveState(const bool AmIActive) PURE_VIRTUAL(AWeapon::ChangeActiveState, return;);
 

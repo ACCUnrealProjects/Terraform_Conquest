@@ -32,8 +32,12 @@ void AProjectile::LaunchProjectile(AActor* Shooter)
 
 void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	ImpactBlast->Activate();
-	SetRootComponent(ImpactBlast);
+	if(ImpactBlast)
+	{
+		ImpactBlast->Activate();
+		SetRootComponent(ImpactBlast);
+	}
+
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AProjectile::Death, DeathTime, false);

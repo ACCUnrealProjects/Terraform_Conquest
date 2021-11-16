@@ -16,6 +16,9 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+	ShotParams.AddIgnoredActor(GetOwner());
+	ActorParams.Owner = GetOwner();
+	ActorParams.Instigator = Cast<APawn>(GetOwner());
 
 	CurrentTotalAmmo = MaxAmmo;
 }
@@ -24,16 +27,10 @@ void AWeapon::Fire()
 {
 	if (FireSound)
 	{
-		for (auto Socket : FireSockets)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, FireSound, MyOwnerMesh->GetSocketLocation(FName(Socket)));
-		}
+	  UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
-	for (int i = 0; i < FireEffect.Num(); i++)
-	{
-		FireEffect[i]->Activate();
-	}
+	FireEffect->Activate();
 }
 
 void AWeapon::AttemptToFire()
@@ -55,13 +52,6 @@ void AWeapon::AttemptToFire()
 			return;
 		}
 	} 
-}
-
-void AWeapon::OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh)
-{
-	SetOwner(MyOwner);
-	ShotParams.AddIgnoredActor(MyOwner);
-	MyOwnerMesh = OwnerMesh;
 }
 
 void AWeapon::AmmoRegen()

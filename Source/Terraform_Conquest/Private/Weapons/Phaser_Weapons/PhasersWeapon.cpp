@@ -10,68 +10,51 @@ APhasersWeapon::APhasersWeapon()
 {
 	myWeaponType = GunType::Phasers;
 
-	FireSockets.Add("MachineGun_1");
-	FireSockets.Add("MachineGun_2");
+	UParticleSystemComponent* FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect")));
+	FireEffect->bAutoActivate = false;
+	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	FParticleSysParam Source;
+	Source.Name = "Source";
+	Source.ParamType = EParticleSysParamType::PSPT_Vector;
+	Source.Vector = GetActorLocation();
+	FireEffect->InstanceParameters.Add(Source);
+
+	FParticleSysParam Target;
+	Target.Name = "Target";
+	Target.ParamType = EParticleSysParamType::PSPT_Vector;
+	Target.Vector = GetActorLocation();
+	FireEffect->InstanceParameters.Add(Target);
+
+	FireEffect->SetBeamSourcePoint(0, GetActorLocation(), 0);
+	FireEffect->SetBeamEndPoint(0, GetActorLocation());
 }
 
 void APhasersWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	/*for (int32 i = 0; i < FireSockets.Num(); i++)
-	{
-		if (!MyOwnerMesh->DoesSocketExist(FName(FireSockets[i]))) { continue; }
-
-		UParticleSystemComponent* PhasersEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect" + FString::FromInt(i))));
-		PhasersEffect->bAutoActivate = false;
-		FVector SocketLocation = MyOwnerMesh->GetSocketLocation(FName(FireSockets[i]));
-
-		FParticleSysParam Source;
-		Source.Name = "Source";
-		Source.ParamType = EParticleSysParamType::PSPT_Vector;
-		Source.Vector = SocketLocation;
-		PhasersEffect->InstanceParameters.Add(Source);
-
-		FParticleSysParam Target;
-		Target.Name = "Target";
-		Target.ParamType = EParticleSysParamType::PSPT_Vector;
-		Target.Vector = SocketLocation;
-		PhasersEffect->InstanceParameters.Add(Target);
-
-		PhasersEffect->SetBeamSourcePoint(0, SocketLocation, 0);
-		PhasersEffect->SetBeamEndPoint(0, SocketLocation);
-
-		FireEffect.Add(PhasersEffect);
-	}*/
 }
 
 void APhasersWeapon::Fire()
 {
-	for (int i = 0; i < FireSockets.Num(); i++)
+	//Raycast fire, also fire projectile flash or laser 
+	FHitResult ShotHit;
+	FVector RayStart = GetActorLocation();
+	FVector RayEnd = RayStart + (GetActorForwardVector() * Range);
+
+	if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
 	{
-		if (!MyOwnerMesh->DoesSocketExist(FName(FireSockets[i]))) { return; }
-
-		//Raycast fire, also fire projectile flash or laser 
-		FHitResult ShotHit;
-		FVector RayStart = MyOwnerMesh->GetSocketLocation(FName(FireSockets[i]));
-		FVector RayEnd = RayStart + (GetOwner()->GetActorForwardVector() * Range);
-
-		if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
-		{
-			UGameplayStatics::ApplyDamage(ShotHit.GetActor(), DamagePerShot, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-			DrawDebugLine(GetWorld(), RayStart, ShotHit.ImpactPoint, FColor(0, 255, 0), true, 0, 0, 10);
-		}
-
-		if (FireEffect.Num() < i && FireEffect[i] != nullptr)
-		{
-			FireEffect[i]->SetVectorParameter("Source", RayStart);
-			FireEffect[i]->SetVectorParameter("Target", ShotHit.ImpactPoint);
-			FireEffect[i]->SetBeamSourcePoint(0, RayStart, 0);
-			FireEffect[i]->SetBeamEndPoint(0, ShotHit.ImpactPoint);
-		}
-
-		CurrentTotalAmmo--;
+		UGameplayStatics::ApplyDamage(ShotHit.GetActor(), Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
+		DrawDebugLine(GetWorld(), RayStart, ShotHit.ImpactPoint, FColor(0, 255, 0), true, 0, 0, 10);
 	}
+
+	FireEffect->SetVectorParameter("Source", RayStart);
+	FireEffect->SetVectorParameter("Target", ShotHit.ImpactPoint);
+	FireEffect->SetBeamSourcePoint(0, RayStart, 0);
+	FireEffect->SetBeamEndPoint(0, ShotHit.ImpactPoint);
+
+	CurrentTotalAmmo--;
+
 	AWeapon::Fire();
 }
 
@@ -85,21 +68,5 @@ void APhasersWeapon::ChangeActiveState(const bool AmIActive)
 	else if(!ExternalRegenOn)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
-}
-
-void APhasersWeapon::OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh)
-{
-	AWeapon::OnAttach(MyOwner, OwnerMesh);
-
-	if (MyOwnerMesh)
-	{
-		for (int32 i = 0; i < FireEffect.Num(); i++)
-		{
-			if (FireSockets.Num() < i)
-			{
-				FireEffect[i]->AttachToComponent(MyOwnerMesh, FAttachmentTransformRules::KeepRelativeTransform, FName(FireSockets[i]));
-			}	
-		}
 	}
 }

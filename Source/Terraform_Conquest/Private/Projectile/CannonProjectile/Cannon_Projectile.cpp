@@ -53,6 +53,7 @@ void ACannon_Projectile::LaunchProjectile(AActor* Shooter)
 
 void ACannon_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (OtherActor == WhoShotMe) { return; }
 	HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
 

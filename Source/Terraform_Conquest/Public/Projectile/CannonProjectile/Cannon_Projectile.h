@@ -38,8 +38,6 @@ private:
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-		float Damage = 10.0f;
 
 protected:
 

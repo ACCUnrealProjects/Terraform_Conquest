@@ -19,18 +19,19 @@ private:
 	bool IsFiring = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
-	TArray<AWeapon*> AllGuns;
+	TMap<GunType, TArray<AWeapon*>> AllGuns;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
-	AWeapon* ActiveWeapon = nullptr;
+	GunType ActiveWeaponType = GunType::None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
 	TArray<GunType> AllowedGunTypes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots", meta = (AllowPrivateAccess = "true"))
+	TMap<GunType, TArray<FName>> WeaponSlotsMap;
 
 	// Info for where to attach new guns to
 	USceneComponent* MeshToAttachTo = nullptr;
 
 	FActorSpawnParameters SpawnParams;
-
-	void PlayerInputSetUp();
 
 protected:
 	// Called when the game starts
@@ -45,9 +46,10 @@ public:
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	//Weapon Setup
+	void AddSocketsForWeapons(GunType WeaponType, TArray<FName> SlotNames);
 	void SwitchWeapon();
 	void SwitchWeapon(GunType GunToLookFor);
-	void AddWeapon(TSubclassOf<AWeapon> NewWeapon);
+	void AddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
 	void SetWeaponSlots(TArray<GunType> WeaponsICanHave);
 
 	//Adding Ammo And Different Guns
@@ -58,8 +60,8 @@ public:
 	void FireCurrent();
 
 	UFUNCTION(BlueprintCallable, Category = "WeaponInfo")
-	AWeapon* GetCurrentGun() const;
+	TArray<AWeapon*> GetCurrentGun() const;
 	UFUNCTION(BlueprintCallable, Category = "WeaponInfo")
-	FName GetWeaponWithIndexName(int32 index) const;
+	FName GetWeaponNameOfGunType(GunType GunType) const;
 
 };

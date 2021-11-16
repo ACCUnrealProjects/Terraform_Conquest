@@ -52,9 +52,9 @@ void AMorter_Projectile::LaunchProjectile(AActor* Shooter)
 
 void AMorter_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (OtherActor == WhoShotMe) { return; }
 	HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
-
 
 void AMorter_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {

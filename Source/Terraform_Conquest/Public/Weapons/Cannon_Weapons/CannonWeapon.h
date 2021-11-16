@@ -32,6 +32,4 @@ public:
 
 	virtual void ChangeActiveState(const bool AmIActive) override;
 
-	virtual void OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh) override;
-	
 };

@@ -23,6 +23,9 @@ private:
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+		float Damage = 10.0f;
+
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
 		class UParticleSystemComponent* ImpactBlast = nullptr;
 

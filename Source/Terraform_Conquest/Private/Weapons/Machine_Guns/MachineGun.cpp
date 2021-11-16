@@ -8,12 +8,9 @@ AMachineGun::AMachineGun()
 {
 	myWeaponType = GunType::MachineGun;
 
-	/*UParticleSystemComponent* MachineGunEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Tracer Fire Effect"));
-	MachineGunEffect->bAutoActivate = false;
-	FireEffect.Add(MachineGunEffect);*/
-
-	FireSockets.Add("MachineGun_1");
-	FireSockets.Add("MachineGun_2");
+	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Tracer Fire Effect"));
+	FireEffect->bAutoActivate = false;
+	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 }
 
 void AMachineGun::BeginPlay()
@@ -24,15 +21,12 @@ void AMachineGun::BeginPlay()
 void AMachineGun::Fire()
 {
 	//Fire Projectile
-	for (auto Socket : FireSockets)
-	{
-		if (!ProjectileBlueprint || !MyOwnerMesh->DoesSocketExist(FName(Socket))) { return; }
+	if (!ProjectileBlueprint) { return; }
 
-		//Fire Projectile
-		ATracer_Round* TracerProjectile = GetWorld()->SpawnActor<ATracer_Round>(ProjectileBlueprint, MyOwnerMesh->GetSocketLocation(FName(Socket)), MyOwnerMesh->GetSocketRotation(FName(Socket)));
-		TracerProjectile->LaunchProjectile(GetOwner());
-		CurrentTotalAmmo--;
-	}
+	//Fire Projectile 
+	ATracer_Round* TracerProjectile = GetWorld()->SpawnActor<ATracer_Round>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
+	TracerProjectile->LaunchProjectile(GetOwner());
+	CurrentTotalAmmo--;
 
 	AWeapon::Fire();
 }
@@ -46,21 +40,5 @@ void AMachineGun::ChangeActiveState(const bool AmIActive)
 	else if (!ExternalRegenOn)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
-}
-
-void AMachineGun::OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh)
-{
-	AWeapon::OnAttach(MyOwner, OwnerMesh);
-
-	if (MyOwnerMesh)
-	{
-		for (int32 i = 0; i < FireEffect.Num(); i++)
-		{
-			if (FireSockets.Num() < i)
-			{
-				FireEffect[i]->AttachToComponent(MyOwnerMesh, FAttachmentTransformRules::KeepRelativeTransform, FName(FireSockets[i]));
-			}
-		}
 	}
 }
