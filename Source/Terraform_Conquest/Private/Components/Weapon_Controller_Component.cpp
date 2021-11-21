@@ -28,9 +28,9 @@ void UWeapon_Controller_Component::SetWeaponSlots(TArray<GunType> WeaponsICanHav
 
 void UWeapon_Controller_Component::AddAmmoForGuns(float AmmoPercent)
 {
-	for (const TPair <GunType, TArray<AWeapon*>>& pair : AllGuns)
+	for (const TPair <GunType, FWeaponContainer>& pair : AllGuns)
 	{
-		for (auto Gun : pair.Value)
+		for (auto Gun : pair.Value.WeaponsList)
 		{
 			Gun->AddAmmo(AmmoPercent);
 		}
@@ -51,7 +51,15 @@ bool UWeapon_Controller_Component::CanIHaveGunType(GunType NewGunType)
 
 void UWeapon_Controller_Component::AddSocketsForWeapons(GunType WeaponType, TArray<FName> SlotNames)
 {
-	WeaponSlotsMap[WeaponType] = SlotNames;
+	if(WeaponSlotsMap.Contains(WeaponType))
+	{
+		WeaponSlotsMap[WeaponType].WeaponSlots = SlotNames;
+		return;
+	}
+
+	FWeaponSlotList NewSlots;
+	NewSlots.WeaponSlots = SlotNames;
+	WeaponSlotsMap.Add(WeaponType, NewSlots);
 }
 
 void UWeapon_Controller_Component::SwitchWeapon()
@@ -73,12 +81,12 @@ void UWeapon_Controller_Component::SwitchWeapon()
 		else if (AllGuns.Contains((GunType)SearchGunNum))
 		{
 			FinishedLooking = true;
-			for (auto CurretGun : AllGuns[ActiveWeaponType])
+			for (auto CurretGun : AllGuns[ActiveWeaponType].WeaponsList)
 			{
 				CurretGun->ChangeActiveState(false);
 			}
 			ActiveWeaponType = (GunType)SearchGunNum;
-			for (auto CurretGun : AllGuns[ActiveWeaponType])
+			for (auto CurretGun : AllGuns[ActiveWeaponType].WeaponsList)
 			{
 				CurretGun->ChangeActiveState(true);
 			}
@@ -97,14 +105,14 @@ void UWeapon_Controller_Component::SwitchWeapon(GunType GunToLookFor)
 
 	if (AllGuns.Contains(ActiveWeaponType))
 	{
-		for (auto CurretGun : AllGuns[ActiveWeaponType])
+		for (auto CurretGun : AllGuns[ActiveWeaponType].WeaponsList)
 		{
 			CurretGun->ChangeActiveState(false);
 		}
 	} 
 
 	ActiveWeaponType = GunToLookFor;
-	for (auto CurretGun : AllGuns[ActiveWeaponType])
+	for (auto CurretGun : AllGuns[ActiveWeaponType].WeaponsList)
 	{
 		CurretGun->ChangeActiveState(true);
 	}
@@ -112,7 +120,7 @@ void UWeapon_Controller_Component::SwitchWeapon(GunType GunToLookFor)
 
 void UWeapon_Controller_Component::AddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType)
 {
-	if (!NewWeapon) { return; }
+	if (!NewWeapon || !CanIHaveGunType(WeaponType)) { return; }
 
 	for (int32 i = 0; i < AllowedGunTypes.Num(); i++)
 	{
@@ -120,66 +128,67 @@ void UWeapon_Controller_Component::AddWeapon(TSubclassOf<AWeapon> NewWeapon, Gun
 		{
 			if (AllGuns.Contains(WeaponType))
 			{
-				for(int i = 0; i < AllGuns[WeaponType].Num(); i++)
+				for(int32 j = 0; j < AllGuns[WeaponType].WeaponsList.Num(); j++)
 				{ 
-					AllGuns[WeaponType][i]->Destroy();
-					i--;
+					AllGuns[WeaponType].WeaponsList[j]->Destroy();
 				}
+				AllGuns[WeaponType].WeaponsList.Empty();
 			}
 			break;
 		}
 	}
 
-	if (WeaponSlotsMap.Contains(WeaponType))
+	if (!AllGuns.Contains(WeaponType))
 	{
-		for (auto WeaponSocket : WeaponSlotsMap[WeaponType])
-		{
-			AWeapon* NewGun = GetWorld()->SpawnActor<AWeapon>(NewWeapon, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation(), SpawnParams);
-			NewGun->AttachToActor(GetOwner(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), WeaponSocket);
-		}
+		AllGuns.Add(WeaponType, FWeaponContainer());
+	}
+
+	for (auto WeaponSocket : WeaponSlotsMap[WeaponType].WeaponSlots)
+	{
+		AWeapon* NewGun = GetWorld()->SpawnActor<AWeapon>(NewWeapon, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation(), SpawnParams);
+		NewGun->AttachToActor(GetOwner(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), WeaponSocket);
+		NewGun->ChangeActiveState(true);
+		AllGuns[WeaponType].WeaponsList.Add(NewGun);
 	}
 
 	if (AllGuns.Contains(ActiveWeaponType))
 	{
-		for (auto CurretGun : AllGuns[ActiveWeaponType])
+		for (auto CurretGun : AllGuns[ActiveWeaponType].WeaponsList)
 		{
 			CurretGun->ChangeActiveState(false);
 		}
 	}
+
 	ActiveWeaponType = WeaponType;
-	for (auto CurretGun : AllGuns[ActiveWeaponType])
-	{
-		CurretGun->ChangeActiveState(true);
-	}
 }
 
 void UWeapon_Controller_Component::FireCurrent()
 {
 	if (AllGuns.Contains(ActiveWeaponType))
 	{
-		for (auto Gun : AllGuns[ActiveWeaponType])
+		for (auto Gun : AllGuns[ActiveWeaponType].WeaponsList)
 		{
 			Gun->AttemptToFire();
 		}
 	}
 }
 
-TArray<AWeapon*> UWeapon_Controller_Component::GetCurrentGun() const
+TArray<AWeapon*> UWeapon_Controller_Component::GetCurrentGuns() const
 {
 	if (ActiveWeaponType == GunType::None)
 	{
 		return TArray<AWeapon*>();
 	}
 
-	return AllGuns[ActiveWeaponType];
+	return AllGuns[ActiveWeaponType].WeaponsList;
 }
 
 FName UWeapon_Controller_Component::GetWeaponNameOfGunType(GunType GunType) const
 {
-	if (AllGuns.Contains(GunType) && AllGuns[GunType].Num() > 0)
+	if (AllGuns.Contains(GunType) && AllGuns[GunType].WeaponsList.Num() > 0)
 	{
-		return AllGuns[GunType][0]->GetWeaponName();
+		return AllGuns[GunType].WeaponsList[0]->GetWeaponName();
 	}
 
-	return FName(TEXT(""));
+	return FName(TEXT("N/A"));
 }

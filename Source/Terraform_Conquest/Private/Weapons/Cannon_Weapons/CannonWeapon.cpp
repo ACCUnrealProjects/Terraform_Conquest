@@ -11,6 +11,7 @@ ACannonWeapon::ACannonWeapon()
 	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Cannon Fire Effect"));
 	FireEffect->bAutoActivate = false;
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	FireEffect->SetRelativeRotation(FRotator(0, -90.0f, 0));
 }
 
 void ACannonWeapon::BeginPlay()

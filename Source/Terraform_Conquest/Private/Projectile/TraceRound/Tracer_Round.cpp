@@ -13,10 +13,12 @@ ATracer_Round::ATracer_Round()
 	ProjectileMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	ProjectileMesh->SetRelativeLocation(FVector(0, 0, 0));
 	ProjectileMesh->SetNotifyRigidBodyCollision(true);
-	ProjectileMesh->SetVisibility(false);
+	ProjectileMesh->SetVisibility(true);
 	SetRootComponent(ProjectileMesh);
 
 	ImpactBlast->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	ProjectileLifeTime = 30.0f;
 }
 
 void ATracer_Round::BeginPlay()

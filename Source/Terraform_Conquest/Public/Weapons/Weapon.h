@@ -16,6 +16,9 @@ class TERRAFORM_CONQUEST_API AWeapon : public AActor
 
 private:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scene", meta = (AllowPrivateAccess = "true"))
+	USceneComponent* WeaponSC = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = (AllowPrivateAccess = "true"))
 	USoundBase* FireSound = nullptr;
 
@@ -42,9 +45,6 @@ protected:
 	float AmmoRegenRate = 3.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
 	int AmmoRegened = 1;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Range")
-	float Range;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Firing")
 	float FireRate;

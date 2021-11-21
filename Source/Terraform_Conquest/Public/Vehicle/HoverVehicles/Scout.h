@@ -16,6 +16,9 @@ class TERRAFORM_CONQUEST_API AScout : public AHover_Vehicles
 	
 private:
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "StartingWeapon", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class AMachineGun> MachineGunBlueprint = nullptr;
+
 protected:
 	
 	virtual void BeginPlay() override;

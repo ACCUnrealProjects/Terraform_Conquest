@@ -10,6 +10,9 @@ AWeapon::AWeapon()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryActorTick.bCanEverTick = false;
+
+	WeaponSC = CreateDefaultSubobject<USceneComponent>(TEXT("MySceneComp"));
+	SetRootComponent(WeaponSC);
 }
 
 // Called when the game starts

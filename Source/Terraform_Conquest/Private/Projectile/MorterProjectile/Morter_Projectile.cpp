@@ -35,6 +35,8 @@ AMorter_Projectile::AMorter_Projectile()
 	TrailEffect->bAutoActivate = true;
 
 	ImpactBlast->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	ProjectileLifeTime = 300.0f;
 }
 
 // Called when the game starts or when spawned

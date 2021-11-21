@@ -6,8 +6,8 @@
 AMineWeapon::AMineWeapon()
 {
 	myWeaponType = GunType::Mine;
+	AmmoRegened = 0;
 }
-
 
 void AMineWeapon::BeginPlay()
 {

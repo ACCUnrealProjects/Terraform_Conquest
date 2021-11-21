@@ -36,6 +36,8 @@ ACannon_Projectile::ACannon_Projectile()
 	TrailEffect->bAutoActivate = true;
 
 	ImpactBlast->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	ProjectileLifeTime = 50.0f;
 }
 
 // Called when the game starts or when spawned

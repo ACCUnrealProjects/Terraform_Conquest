@@ -57,8 +57,11 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
 
+	//Change Camera
 	PlayerInputComponent->BindAction(TEXT("Change_Camera"), EInputEvent::IE_Released, this, &AVehicle::CameraChange);
-
+	//Weapon System
+	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::Fire);
+	PlayerInputComponent->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::ChangeWeapon);
 }
 
 void AVehicle::SetTeamID(FGenericTeamId TeamID)
@@ -66,10 +69,6 @@ void AVehicle::SetTeamID(FGenericTeamId TeamID)
 	TeamId = TeamID;
 }
 
-FGenericTeamId AVehicle::GetTeamId() const
-{
-	return TeamId;
-}
 
 void AVehicle::CameraChange()
 {
@@ -78,12 +77,27 @@ void AVehicle::CameraChange()
 	TPSCamera->SetActive(!BIs1stPersonCamera);
 }
 
+void AVehicle::Fire()
+{
+	VehicleWeaponController->FireCurrent();
+}
+
+void AVehicle::ChangeWeapon()
+{
+	VehicleWeaponController->SwitchWeapon();
+}
+
 float AVehicle::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	if (MyHealth) { return MyHealth->TakeDamage(DamageAmount); }
 	else { return DamageAmount; }
+}
+
+FGenericTeamId AVehicle::GetTeamId() const
+{
+	return TeamId;
 }
 
 void AVehicle::Death()

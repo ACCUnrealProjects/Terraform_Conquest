@@ -33,7 +33,7 @@ protected:
 		float ProjectileLifeTime = 4.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
-		float DeathTime = 4.0f;
+		float DeathTime = 0.5f;
 
 	AActor* WhoShotMe;
 

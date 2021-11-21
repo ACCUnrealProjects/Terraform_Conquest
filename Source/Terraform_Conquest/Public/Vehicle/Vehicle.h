@@ -14,9 +14,15 @@ class TERRAFORM_CONQUEST_API AVehicle : public APawn
 
 private:
 
+private:
+
 	FGenericTeamId TeamId;
 
 	void CameraChange();
+
+	void Fire();
+
+	void ChangeWeapon();
 
 	void DestoryMe();
 
@@ -37,6 +43,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "WeaponController")
 	class UWeapon_Controller_Component* VehicleWeaponController = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
+	float DestroyTime = 1.0f;
+
+protected:
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -45,8 +56,7 @@ protected:
 	UFUNCTION()
 	virtual void Death();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
-	float DestroyTime = 1.0f;
+public:
 
 public:	
 	// Sets default values for this pawn's properties

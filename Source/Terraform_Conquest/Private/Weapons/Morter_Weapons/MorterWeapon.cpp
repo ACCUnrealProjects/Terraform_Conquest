@@ -8,9 +8,10 @@ AMorterWeapon::AMorterWeapon()
 {
 	myWeaponType = GunType::Morter;
 
-	UParticleSystemComponent* FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Morter Fire Effect"));
+	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Morter Fire Effect"));
 	FireEffect->bAutoActivate = false;
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	FireEffect->SetRelativeRotation(FRotator(0,-90.0f,0));
 }
 
 void AMorterWeapon::BeginPlay()

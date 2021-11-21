@@ -27,6 +27,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Damage")
 		int32 Damage;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Range")
+		float Range;
+
 protected:
 
 	virtual void BeginPlay() override;

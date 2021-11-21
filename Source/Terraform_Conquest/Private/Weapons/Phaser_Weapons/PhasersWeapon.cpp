@@ -10,7 +10,7 @@ APhasersWeapon::APhasersWeapon()
 {
 	myWeaponType = GunType::Phasers;
 
-	UParticleSystemComponent* FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect")));
+	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect")));
 	FireEffect->bAutoActivate = false;
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 

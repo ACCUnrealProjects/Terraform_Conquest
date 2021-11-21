@@ -10,7 +10,7 @@
 AMine::AMine()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	TriggerSphere = CreateDefaultSubobject<USphereComponent>(FName(TEXT("Collision Mesh")));
 	SetRootComponent(TriggerSphere);
@@ -24,6 +24,8 @@ AMine::AMine()
 
 	MyHealthComp = CreateDefaultSubobject<UHealth_Component>(FName(TEXT("Health Comp")));
 	MyHealthComp->bEditableWhenInherited = true;
+
+	MyHealthComp->SetUp(1, 0);
 }
 
 
@@ -46,12 +48,19 @@ void AMine::BeginPlay()
 void AMine::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AMine::ActivateMine()
 {
 	TriggerSphere->Activate();
+}
+
+float AMine::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (MyHealthComp) { return MyHealthComp->TakeDamage(DamageAmount); }
+	else { return DamageAmount; }
 }
 
 void AMine::Trigger()

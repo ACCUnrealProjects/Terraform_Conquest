@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Utility/WeaponContainer.h"
 #include "WeaponTypeEnum.h"
 #include "Weapon_Controller_Component.generated.h"
 
@@ -19,14 +20,14 @@ private:
 	bool IsFiring = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
-	TMap<GunType, TArray<AWeapon*>> AllGuns;
+	TMap<GunType, FWeaponContainer> AllGuns;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
 	GunType ActiveWeaponType = GunType::None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
 	TArray<GunType> AllowedGunTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots", meta = (AllowPrivateAccess = "true"))
-	TMap<GunType, TArray<FName>> WeaponSlotsMap;
+	TMap<GunType, FWeaponSlotList> WeaponSlotsMap;
 
 	// Info for where to attach new guns to
 	USceneComponent* MeshToAttachTo = nullptr;
@@ -60,7 +61,7 @@ public:
 	void FireCurrent();
 
 	UFUNCTION(BlueprintCallable, Category = "WeaponInfo")
-	TArray<AWeapon*> GetCurrentGun() const;
+	TArray<AWeapon*> GetCurrentGuns() const;
 	UFUNCTION(BlueprintCallable, Category = "WeaponInfo")
 	FName GetWeaponNameOfGunType(GunType GunType) const;
 
