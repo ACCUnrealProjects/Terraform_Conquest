@@ -16,15 +16,34 @@ class TERRAFORM_CONQUEST_API AMorter_Projectile : public AProjectile
 	
 private:
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TracerSpeed", meta = (AllowPrivateAccess = "true"))
+		float MorterSpeed = 5000.0f;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
+		class UStaticMeshComponent* ProjectileMesh = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileMovement", meta = (AllowPrivateAccess = "true"))
+		class UProjectileMovementComponent* ProjectileMovement = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+		class UParticleSystemComponent* TrailEffect = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+		class UShapeComponent* SphereCollider = nullptr;
+
+private:
+
+	UFUNCTION()
+		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+		float DamageRadius = 1.0f;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float Damage = 10.0f;
-
-	float DamageRadius;
 
 	virtual void HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 
@@ -32,5 +51,5 @@ public:
 	// Sets default values for this actor's properties
 	AMorter_Projectile();
 
-
+	virtual void LaunchProjectile() override;
 };

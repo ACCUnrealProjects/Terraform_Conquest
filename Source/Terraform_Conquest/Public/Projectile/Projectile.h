@@ -12,20 +12,23 @@ class TERRAFORM_CONQUEST_API AProjectile : public AActor
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* ProjectileMesh = nullptr;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileMovement", meta = (AllowPrivateAccess = "true"))
-	class UProjectileMovementComponent* ProjectileMovement = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-	UParticleSystemComponent* TraceEffect = nullptr;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-	UParticleSystemComponent* ImpactBlast = nullptr;
+	FTimerHandle LifeTimer;
 
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+private:
 
 	void Death();
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+		float Damage = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
+		class UParticleSystem* ImpactBlast = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Death")
+		float ProjectileLifeTime = 4.0f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,16 +36,10 @@ protected:
 
 	virtual void HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Death")
-	float DeathTime = 4.0f;
-
-	AActor* WhoShotMe;
-
-
 public:	
 	// Sets default values for this actor's properties
 	AProjectile();
 
-	void LaunchProjectile(float Speed, AActor* Shooter);
+	virtual void LaunchProjectile();
 
 };

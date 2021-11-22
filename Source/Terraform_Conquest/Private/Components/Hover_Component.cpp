@@ -1,6 +1,6 @@
 //Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Components/Hover_Component.h"
+#include "Components/Hover_Component.h"
 
 // Sets default values for this component's properties
 UHover_Component::UHover_Component()
@@ -9,7 +9,6 @@ UHover_Component::UHover_Component()
 
 	SetVisibility(false);
 }
-
 
 // Called when the game starts
 void UHover_Component::BeginPlay()
@@ -25,10 +24,12 @@ void UHover_Component::BeginPlay()
 
 }
 
-void UHover_Component::SetUp(float HoverHeight)
+void UHover_Component::SetUp(float HoverHeight, float SupressionStiff, float Dampmulti)
 {
 	HoverLenght = HoverHeight;
 	OGHoverLenght = HoverLenght;
+	SupressionStiffness = SupressionStiff;
+	Dampening = Dampmulti;
 }
 
 // Called every frame
@@ -68,7 +69,6 @@ void UHover_Component::HoverCalc()
 		FVector CF = CV.ProjectOnToNormal(GetUpVector()) * Dampening;
 		// see how far we are off the ground
 		float DistanceNormal = 1.0f - (DownRayCast.Distance / HoverLenght);
-		UE_LOG(LogTemp, Warning, TEXT("DistanceNormal = %f"), DistanceNormal);
 		// Get a counter-acting up force
 		FVector NF = GetUpVector() * DistanceNormal * SupressionStiffness;
 		// get what we want the new vel to be for the point
@@ -94,8 +94,9 @@ void UHover_Component::HoverCalcPid(float DT)
 		HoverGrounded = true;
 		//Get percentage of force to add
 		float ForcePercentage = HoverPid.Calculate(HoverLenght, DownRayCast.Distance,DT);
+		float ForceToAdd = SupressionStiffness * ForcePercentage * MyPrimComponent->GetMass();
 		// Apply the force
-		MyPrimComponent->AddForce((SupressionStiffness * ForcePercentage) * GetUpVector());
+		MyPrimComponent->AddForce(ForceToAdd * GetUpVector());
 		GroundNormal = DownRayCast.ImpactNormal;
 	}
 }

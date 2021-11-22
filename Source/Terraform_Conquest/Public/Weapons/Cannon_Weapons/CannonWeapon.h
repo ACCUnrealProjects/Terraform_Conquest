@@ -18,17 +18,13 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class ACannon_Projectile> ProjectileBlueprint;
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileSpeed", meta = (AllowPrivateAccess = "true"))
-	float ProjectileSpeed = 1000.0f;
-			
+		
 protected:
 
 	virtual void BeginPlay() override;
 
 	virtual void Fire() override;
 
-	virtual void AmmoRegen() override;
 
 public:
 
@@ -36,6 +32,4 @@ public:
 
 	virtual void ChangeActiveState(const bool AmIActive) override;
 
-	virtual void OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh) override;
-	
 };

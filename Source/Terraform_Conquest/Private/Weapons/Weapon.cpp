@@ -10,12 +10,18 @@ AWeapon::AWeapon()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryActorTick.bCanEverTick = false;
+
+	WeaponSC = CreateDefaultSubobject<USceneComponent>(TEXT("MySceneComp"));
+	SetRootComponent(WeaponSC);
 }
 
 // Called when the game starts
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+	ShotParams.AddIgnoredActor(GetOwner());
+	ActorParams.Owner = GetOwner();
+	ActorParams.Instigator = Cast<APawn>(GetOwner());
 
 	CurrentTotalAmmo = MaxAmmo;
 }
@@ -24,16 +30,10 @@ void AWeapon::Fire()
 {
 	if (FireSound)
 	{
-		for (auto Socket : FireSockets)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, FireSound, MyOwnerMesh->GetSocketLocation(FName(Socket)));
-		}
+	  UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
-	for (int i = 0; i < FireEffect.Num(); i++)
-	{
-		FireEffect[i]->Activate();
-	}
+	FireEffect->Activate();
 }
 
 void AWeapon::AttemptToFire()
@@ -57,11 +57,9 @@ void AWeapon::AttemptToFire()
 	} 
 }
 
-void AWeapon::OnAttach(AActor* MyOwner, USceneComponent* OwnerMesh)
+void AWeapon::AmmoRegen()
 {
-	SetOwner(MyOwner);
-	ShotParams.AddIgnoredActor(MyOwner);
-	MyOwnerMesh = OwnerMesh;
+	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo + AmmoRegened, MaxAmmo);
 }
 
 void AWeapon::ExternalRegenAmmo()

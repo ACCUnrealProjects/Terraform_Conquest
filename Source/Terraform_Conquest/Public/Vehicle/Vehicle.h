@@ -16,7 +16,13 @@ private:
 
 	FGenericTeamId TeamId;
 
+	bool WantToFire = false;
+
+private:
+
 	void CameraChange();
+
+	void ChangeWeapon();
 
 	void DestoryMe();
 
@@ -34,17 +40,25 @@ protected:
 	class USpringArmComponent* TPSCameraSpring = nullptr;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	bool BIs1stPersonCamera = true;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "WeaponController")
+	class UWeapon_Controller_Component* VehicleWeaponController = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
+	float DestroyTime = 1.0f;
+
+	FVector FireDir;
+
+protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
 	UFUNCTION()
 	virtual void Death();
-	UFUNCTION()
-	virtual void imHit();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
-	float DestroyTime = 1.0f;
+public:
 
 public:	
 	// Sets default values for this pawn's properties
@@ -59,5 +73,9 @@ public:
 	void SetTeamID(FGenericTeamId TeamID);
 
 	FGenericTeamId GetTeamId() const;
+
+	void Fire();
+
+	void StopFiring();
 
 };

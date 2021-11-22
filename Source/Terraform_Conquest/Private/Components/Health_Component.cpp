@@ -9,8 +9,6 @@ UHealth_Component::UHealth_Component()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -18,12 +16,6 @@ UHealth_Component::UHealth_Component()
 void UHealth_Component::BeginPlay()
 {
 	Super::BeginPlay();
-
-	AActor* MyOwner = GetOwner();
-	if (MyOwner)
-	{
-		MyOwner->OnTakeAnyDamage.AddUniqueDynamic(this, &UHealth_Component::TakeDamage);
-	}
 }
 
 
@@ -96,7 +88,7 @@ bool UHealth_Component::AmIDead() const
 	return Health <= 0;
 }
 
-void UHealth_Component::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+float UHealth_Component::TakeDamage(float Damage)
 {
 	int32 intDamage = FPlatformMath::RoundToInt(Damage);
 	intDamage = FMath::Clamp<int32>(intDamage, 0, Health);
@@ -106,15 +98,13 @@ void UHealth_Component::TakeDamage(AActor* DamagedActor, float Damage, const UDa
 	{
 		IHaveDied.Broadcast();
 	}
-	else if (Damage > 0)
-	{
-		IHaveBeenHit.Broadcast();
-	}
 
 	//Sheild related changes
 	TimeSinceLastHit = TimeBeforeShieldRegenBegins;
 	GetWorld()->GetTimerManager().ClearTimer(SheildRegenTickTimer);
 	SheildRegenOn = false;
+
+	return intDamage;
 }
 
 void UHealth_Component::KillMe()

@@ -22,11 +22,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
 	class UParticleSystemComponent* ActivateEffect = nullptr;
 
-	UFUNCTION()
-	void Death();
-
-	void DestoryMe();
-
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Health")
@@ -45,8 +40,20 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
 	float DestroyTime = 1.0f;
 
+
+private:
+
+	UFUNCTION()
+	void Death();
+
+	void DestoryMe();
+
+protected:
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void ActivateMine();
 

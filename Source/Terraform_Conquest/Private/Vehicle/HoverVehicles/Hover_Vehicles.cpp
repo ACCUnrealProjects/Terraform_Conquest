@@ -1,10 +1,11 @@
 // Alex Chatt Terraform_Conquest 2020
 
-
-#include "../../../Public/Vehicle/HoverVehicles/Hover_Vehicles.h"
-#include "../../../Public/Components/Hover_Component.h"
+#include "Vehicle/HoverVehicles/Hover_Vehicles.h"
+#include "Components/Hover_Component.h"
+#include "Components/Weapon_Controller_Component.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -31,7 +32,7 @@ void AHover_Vehicles::BeginPlay()
 {
 	AVehicle::BeginPlay();
 
-	BackWardsThrust = ForwardThrust * 0.3f;
+	BackWardsThrust = ForwardThrust * 0.5f;
 	StrafeThrust = ForwardThrust * 0.60f;
 	RestrictedPitch = 0.0f;
 }
@@ -58,7 +59,7 @@ void AHover_Vehicles::RotateMe(float dt)
 {
 	if (CurrentMoveState == MovementState::Hovering)
 	{
-		RestrictedPitch += -RotationChange.Y * dt;
+		RestrictedPitch += -RotationChange.Y * dt * (RotateSens  * 0.0025f);
 		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
 		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
 		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
@@ -75,6 +76,7 @@ void AHover_Vehicles::RotateMe(float dt)
 	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
 	RotationChange = FVector::ZeroVector;
 
+	VehicleWeaponController->RotateCurrentWeapons(FPSCamera->GetRelativeRotation());
 }
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)
@@ -177,11 +179,11 @@ void AHover_Vehicles::Trusters(float Amount)
 	FVector GroundForwardVector = MyMesh->GetForwardVector();
 	if (Amount > 0.1)
 	{
-		MyMesh->AddForce(GroundForwardVector * (ForwardThrust * Amount));
+		MyMesh->AddForce(GroundForwardVector * (ForwardThrust * Amount) * MyMesh->GetMass());
 	}
-	if (Amount < -0.1 && CurrentMoveState != MovementState::Hovering)
+	if (Amount < -0.1 && CurrentMoveState == MovementState::Hovering)
 	{
-		MyMesh->AddForce(GroundForwardVector * (BackWardsThrust * Amount));
+		MyMesh->AddForce(GroundForwardVector * (BackWardsThrust * Amount) * MyMesh->GetMass());
 	}
 }
 
@@ -191,7 +193,7 @@ void AHover_Vehicles::Strafe(float Amount)
 
 	if (Amount > 0.1 || Amount < -0.1)
 	{
-		MyMesh->AddForce(MyMesh->GetRightVector() * (StrafeThrust * Amount));
+		MyMesh->AddForce(MyMesh->GetRightVector() * (StrafeThrust * Amount) * MyMesh->GetMass());
 	}
 }
 

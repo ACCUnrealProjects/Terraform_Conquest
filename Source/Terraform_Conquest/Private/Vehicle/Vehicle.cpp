@@ -1,7 +1,8 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Vehicle/Vehicle.h"
-#include "../../Public/Components/Health_Component.h"
+#include "Vehicle/Vehicle.h"
+#include "Components/Health_Component.h"
+#include "Components/Weapon_Controller_Component.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -9,7 +10,7 @@
 AVehicle::AVehicle()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	MyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyMesh"));
 	SetRootComponent(MyMesh);
@@ -23,11 +24,16 @@ AVehicle::AVehicle()
 
 	TPSCameraSpring = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPSCamSpring"));
 	TPSCameraSpring->bUsePawnControlRotation = false;
+	TPSCameraSpring->bEnableCameraLag = true;
+	TPSCameraSpring->bEnableCameraRotationLag = true;
 	TPSCameraSpring->SetupAttachment(MyMesh);
 
 	TPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyTPSCam"));
 	TPSCamera->bUsePawnControlRotation = false;
 	TPSCamera->SetupAttachment(TPSCameraSpring);
+
+	VehicleWeaponController = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
+	VehicleWeaponController->bEditableWhenInherited = true;
 }
 
 
@@ -38,7 +44,6 @@ void AVehicle::BeginPlay()
 	MyMesh->SetCenterOfMass(FVector(0, 0, -100));
 
 	MyHealth->IHaveDied.AddUniqueDynamic(this, &AVehicle::Death);
-	MyHealth->IHaveBeenHit.AddUniqueDynamic(this, &AVehicle::imHit);
 }
 
 // Called every frame
@@ -46,6 +51,10 @@ void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (WantToFire)
+	{
+		VehicleWeaponController->FireCurrent();
+	}
 }
 
 void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -53,8 +62,12 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	check(PlayerInputComponent);
 
+	//Change Camera
 	PlayerInputComponent->BindAction(TEXT("Change_Camera"), EInputEvent::IE_Released, this, &AVehicle::CameraChange);
-
+	//Weapon System
+	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::Fire);
+	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Released, this, &AVehicle::StopFiring);
+	PlayerInputComponent->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::ChangeWeapon);
 }
 
 void AVehicle::SetTeamID(FGenericTeamId TeamID)
@@ -62,27 +75,48 @@ void AVehicle::SetTeamID(FGenericTeamId TeamID)
 	TeamId = TeamID;
 }
 
-FGenericTeamId AVehicle::GetTeamId() const
-{
-	return TeamId;
-}
 
 void AVehicle::CameraChange()
 {
 	BIs1stPersonCamera = !BIs1stPersonCamera;
 	FPSCamera->SetActive(BIs1stPersonCamera);
 	TPSCamera->SetActive(!BIs1stPersonCamera);
+	FPSCamera->GetForwardVector();
+}
+
+void AVehicle::Fire()
+{
+	WantToFire = true;
+}
+
+void AVehicle::StopFiring()
+{
+	WantToFire = false;
+}
+
+void AVehicle::ChangeWeapon()
+{
+	VehicleWeaponController->SwitchWeapon();
+}
+
+float AVehicle::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (MyHealth) { return MyHealth->TakeDamage(DamageAmount); }
+	else { return DamageAmount; }
+}
+
+FGenericTeamId AVehicle::GetTeamId() const
+{
+	return TeamId;
 }
 
 void AVehicle::Death()
 {
 	FTimerHandle DeathTimer;
+	MyMesh->SetCenterOfMass(FVector(0, 0, 0));
 	GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AVehicle::DestoryMe, DestroyTime, false);
-}
-
-void AVehicle::imHit()
-{
-
 }
 
 void AVehicle::DestoryMe()
