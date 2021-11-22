@@ -14,13 +14,13 @@ class TERRAFORM_CONQUEST_API AVehicle : public APawn
 
 private:
 
-private:
-
 	FGenericTeamId TeamId;
 
-	void CameraChange();
+	bool WantToFire = false;
 
-	void Fire();
+private:
+
+	void CameraChange();
 
 	void ChangeWeapon();
 
@@ -45,6 +45,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
 	float DestroyTime = 1.0f;
+
+	FVector FireDir;
 
 protected:
 
@@ -71,5 +73,9 @@ public:
 	void SetTeamID(FGenericTeamId TeamID);
 
 	FGenericTeamId GetTeamId() const;
+
+	void Fire();
+
+	void StopFiring();
 
 };

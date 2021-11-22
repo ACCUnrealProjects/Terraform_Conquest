@@ -26,7 +26,7 @@ void ACannonWeapon::Fire()
 
 	//Fire Projectile
 	ACannon_Projectile* CannonProjectile = GetWorld()->SpawnActor<ACannon_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
-	CannonProjectile->LaunchProjectile(GetOwner());
+	CannonProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
 
 	AWeapon::Fire();

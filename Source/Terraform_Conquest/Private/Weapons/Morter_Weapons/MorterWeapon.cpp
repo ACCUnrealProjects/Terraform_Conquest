@@ -26,7 +26,7 @@ void AMorterWeapon::Fire()
 
 	//Fire Projectile
 	AMorter_Projectile* MorterProjectile = GetWorld()->SpawnActor<AMorter_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
-	MorterProjectile->LaunchProjectile(GetOwner());
+	MorterProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
 
 	AWeapon::Fire();

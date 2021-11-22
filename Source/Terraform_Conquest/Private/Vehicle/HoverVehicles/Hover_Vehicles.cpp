@@ -1,8 +1,8 @@
 // Alex Chatt Terraform_Conquest 2020
 
-
 #include "Vehicle/HoverVehicles/Hover_Vehicles.h"
 #include "Components/Hover_Component.h"
+#include "Components/Weapon_Controller_Component.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -76,6 +76,7 @@ void AHover_Vehicles::RotateMe(float dt)
 	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
 	RotationChange = FVector::ZeroVector;
 
+	VehicleWeaponController->RotateCurrentWeapons(FPSCamera->GetRelativeRotation());
 }
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)

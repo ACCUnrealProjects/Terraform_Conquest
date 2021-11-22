@@ -34,7 +34,7 @@ AMorter_Projectile::AMorter_Projectile()
 	TrailEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	TrailEffect->bAutoActivate = true;
 
-	ImpactBlast->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	ImpactBlast = CreateDefaultSubobject<UParticleSystem>(FName(TEXT("Impact Blast")));
 
 	ProjectileLifeTime = 300.0f;
 }
@@ -43,23 +43,25 @@ AMorter_Projectile::AMorter_Projectile()
 void AMorter_Projectile::BeginPlay()
 {
 	AProjectile::BeginPlay();
-	ProjectileMesh->OnComponentHit.AddDynamic(this, &AMorter_Projectile::OnHit);
+	SphereCollider->OnComponentHit.AddDynamic(this, &AMorter_Projectile::OnHit);
 }
 
-void AMorter_Projectile::LaunchProjectile(AActor* Shooter)
+void AMorter_Projectile::LaunchProjectile()
 {
 	ProjectileMovement->Activate();
-	Super::LaunchProjectile(Shooter);
+	Super::LaunchProjectile();
 }
 
 void AMorter_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor == WhoShotMe) { return; }
+	if (OtherActor == GetOwner()) { return; }
 	HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
 
 void AMorter_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (!OtherActor) { return; }
+
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), this, Cast<APawn>(GetOwner())->GetController(), true, ECC_Visibility);
 	AProjectile::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), this, Cast<APawn>(WhoShotMe)->GetController(), true, ECC_Visibility);
 }

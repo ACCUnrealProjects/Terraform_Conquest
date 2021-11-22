@@ -173,6 +173,20 @@ void UWeapon_Controller_Component::FireCurrent()
 	}
 }
 
+
+void UWeapon_Controller_Component::RotateCurrentWeapons(FRotator NewRotation)
+{
+	if (ActiveWeaponType == GunType::Mine) { return; }
+
+	if (AllGuns.Contains(ActiveWeaponType))
+	{
+		for (auto Gun : AllGuns[ActiveWeaponType].WeaponsList)
+		{
+			Gun->SetActorRelativeRotation(NewRotation);
+		}
+	}
+}
+
 TArray<AWeapon*> UWeapon_Controller_Component::GetCurrentGuns() const
 {
 	if (ActiveWeaponType == GunType::None)

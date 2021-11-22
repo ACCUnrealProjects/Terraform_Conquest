@@ -3,6 +3,7 @@
 #include "Projectile/TraceRound/Tracer_Round.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ATracer_Round::ATracer_Round()
 {
@@ -14,28 +15,33 @@ ATracer_Round::ATracer_Round()
 	ProjectileMesh->SetRelativeLocation(FVector(0, 0, 0));
 	ProjectileMesh->SetNotifyRigidBodyCollision(true);
 	ProjectileMesh->SetVisibility(true);
+	ProjectileMesh->SetCollisionProfileName("NoCollision");
 	SetRootComponent(ProjectileMesh);
 
-	ImpactBlast->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	ImpactBlast = CreateDefaultSubobject<UParticleSystem>(FName(TEXT("Impact Blast")));
 
-	ProjectileLifeTime = 30.0f;
+	ProjectileLifeTime = 15.0f;
 }
 
 void ATracer_Round::BeginPlay()
 {
+	Super::BeginPlay();
 	ShotParams.AddIgnoredActor(GetOwner());
 }
 
 void ATracer_Round::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+	if (HitTarget) { return; }
+
 	FHitResult ShotHit;
 	FVector RayStart = GetActorLocation();
-	FVector RayEnd = RayStart + ((GetActorForwardVector() + FVector(0, 0, GetWorld()->GetGravityZ()))
-		* TracerSpeed) * DeltaTime;
+	FVector Velocity = (GetActorForwardVector() * TracerSpeed) + (FVector(0, 0, GetWorld()->GetGravityZ()) * DeltaTime);
+	FVector RayEnd = RayStart + (Velocity * DeltaTime);
 
 	if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
 	{
-		SetActorLocation(ShotHit.Location);
+		HitTarget = true;
 		HitResponse(ShotHit.Component.Get(), ShotHit.Actor.Get(), nullptr, ShotHit.ImpactNormal, ShotHit);
 	}
 
@@ -44,9 +50,8 @@ void ATracer_Round::Tick(float DeltaTime)
 
 void ATracer_Round::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	ProjectileMesh->DestroyComponent();
+	if (!OtherActor) { return; }
 
 	UGameplayStatics::ApplyDamage(OtherActor, Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-
-	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);	
 }

@@ -59,7 +59,7 @@ void AWeapon::AttemptToFire()
 
 void AWeapon::AmmoRegen()
 {
-	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo += AmmoRegened, MaxAmmo);
+	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo + AmmoRegened, MaxAmmo);
 }
 
 void AWeapon::ExternalRegenAmmo()

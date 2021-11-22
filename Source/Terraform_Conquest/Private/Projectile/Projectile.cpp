@@ -11,9 +11,6 @@ AProjectile::AProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
-	ImpactBlast = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Impact Blast")));
-	ImpactBlast->bAutoActivate = false;
 }
 
 void AProjectile::BeginPlay()
@@ -25,23 +22,18 @@ void AProjectile::BeginPlay()
 	}
 }
 
-void AProjectile::LaunchProjectile(AActor* Shooter)
+void AProjectile::LaunchProjectile()
 {
-	WhoShotMe = Shooter;
+	
 }
 
 void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if(ImpactBlast)
 	{
-		ImpactBlast->Activate();
-		SetRootComponent(ImpactBlast);
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactBlast, Hit.Location + Hit.ImpactNormal, FRotator());
 	}
-
-	if (GetWorld())
-	{
-		GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AProjectile::Death, DeathTime, false);
-	}
+	Death();
 }
 
 void AProjectile::Death()

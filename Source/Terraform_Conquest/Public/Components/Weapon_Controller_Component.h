@@ -48,10 +48,15 @@ public:
 
 	//Weapon Setup
 	void AddSocketsForWeapons(GunType WeaponType, TArray<FName> SlotNames);
-	void SwitchWeapon();
-	void SwitchWeapon(GunType GunToLookFor);
 	void AddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
 	void SetWeaponSlots(TArray<GunType> WeaponsICanHave);
+
+	//Switch Weapons 
+	void SwitchWeapon();
+	void SwitchWeapon(GunType GunToLookFor);
+
+	//Rotate Weapon
+	void RotateCurrentWeapons(FRotator NewRotation);
 
 	//Adding Ammo And Different Guns
 	void AddAmmoForGuns(float AmmoPercent);

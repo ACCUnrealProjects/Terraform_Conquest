@@ -26,7 +26,7 @@ void AMachineGun::Fire()
 
 	//Fire Projectile 
 	ATracer_Round* TracerProjectile = GetWorld()->SpawnActor<ATracer_Round>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
-	TracerProjectile->LaunchProjectile(GetOwner());
+	TracerProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
 
 	AWeapon::Fire();

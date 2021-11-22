@@ -50,5 +50,5 @@ public:
 	// Sets default values for this actor's properties
 	ACannon_Projectile();
 
-	virtual void LaunchProjectile(AActor* Shooter) override;
+	virtual void LaunchProjectile() override;
 };

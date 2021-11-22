@@ -22,6 +22,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		class UStaticMeshComponent* ProjectileMesh = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Collison", meta = (AllowPrivateAccess = "true"))
+	bool HitTarget = false;
+
 private:
 
 protected:

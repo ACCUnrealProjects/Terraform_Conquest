@@ -15,8 +15,6 @@ private:
 
 	FTimerHandle LifeTimer;
 
-	FTimerHandle DeathTimer;
-
 private:
 
 	void Death();
@@ -27,15 +25,10 @@ protected:
 		float Damage = 10.0f;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-		class UParticleSystemComponent* ImpactBlast = nullptr;
+		class UParticleSystem* ImpactBlast = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 		float ProjectileLifeTime = 4.0f;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Death")
-		float DeathTime = 0.5f;
-
-	AActor* WhoShotMe;
 
 protected:
 	// Called when the game starts or when spawned
@@ -47,6 +40,6 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
-	virtual void LaunchProjectile(AActor* Shooter);
+	virtual void LaunchProjectile();
 
 };

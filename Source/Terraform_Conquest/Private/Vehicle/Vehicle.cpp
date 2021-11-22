@@ -10,7 +10,7 @@
 AVehicle::AVehicle()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	MyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyMesh"));
 	SetRootComponent(MyMesh);
@@ -50,6 +50,11 @@ void AVehicle::BeginPlay()
 void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (WantToFire)
+	{
+		VehicleWeaponController->FireCurrent();
+	}
 }
 
 void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -61,6 +66,7 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Change_Camera"), EInputEvent::IE_Released, this, &AVehicle::CameraChange);
 	//Weapon System
 	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::Fire);
+	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Released, this, &AVehicle::StopFiring);
 	PlayerInputComponent->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::ChangeWeapon);
 }
 
@@ -75,11 +81,17 @@ void AVehicle::CameraChange()
 	BIs1stPersonCamera = !BIs1stPersonCamera;
 	FPSCamera->SetActive(BIs1stPersonCamera);
 	TPSCamera->SetActive(!BIs1stPersonCamera);
+	FPSCamera->GetForwardVector();
 }
 
 void AVehicle::Fire()
 {
-	VehicleWeaponController->FireCurrent();
+	WantToFire = true;
+}
+
+void AVehicle::StopFiring()
+{
+	WantToFire = false;
 }
 
 void AVehicle::ChangeWeapon()
