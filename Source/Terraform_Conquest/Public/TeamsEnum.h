@@ -8,7 +8,7 @@
 #include "GenericTeamAgentInterface.h"
 
 UENUM(BlueprintType)
-enum class TeamsEnum : uint8
+enum class ETeam : uint8
 {
 	Neutral,
 	Team1,

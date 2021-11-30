@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "GenericTeamAgentInterface.h"
+#include "TeamsEnum.h"
 #include "Vehicle.generated.h"
 
 UCLASS()
@@ -14,7 +14,7 @@ class TERRAFORM_CONQUEST_API AVehicle : public APawn
 
 private:
 
-	FGenericTeamId TeamId;
+	ETeam TeamId;
 
 	bool WantToFire = false;
 
@@ -70,9 +70,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void SetTeamID(FGenericTeamId TeamID);
+	void SetTeamID(ETeam TeamID);
 
-	FGenericTeamId GetTeamId() const;
+	ETeam GetTeamId() const;
 
 	void Fire();
 

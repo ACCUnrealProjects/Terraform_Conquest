@@ -70,7 +70,7 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::ChangeWeapon);
 }
 
-void AVehicle::SetTeamID(FGenericTeamId TeamID)
+void AVehicle::SetTeamID(ETeam TeamID)
 {
 	TeamId = TeamID;
 }
@@ -107,7 +107,7 @@ float AVehicle::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	else { return DamageAmount; }
 }
 
-FGenericTeamId AVehicle::GetTeamId() const
+ETeam AVehicle::GetTeamId() const
 {
 	return TeamId;
 }
