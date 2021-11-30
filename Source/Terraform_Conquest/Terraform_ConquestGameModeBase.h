@@ -13,5 +13,17 @@ UCLASS()
 class TERRAFORM_CONQUEST_API ATerraform_ConquestGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+private:
+
+public:
+
+private:
+
+	ATerraform_ConquestGameModeBase();
+
+public:
+
+	virtual void StartPlay() override;
 	
 };
