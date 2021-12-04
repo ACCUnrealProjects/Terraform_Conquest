@@ -3,6 +3,7 @@
 #include "Vehicle/Vehicle.h"
 #include "Components/Health_Component.h"
 #include "Components/Weapon_Controller_Component.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -32,8 +33,8 @@ AVehicle::AVehicle()
 	TPSCamera->bUsePawnControlRotation = false;
 	TPSCamera->SetupAttachment(TPSCameraSpring);
 
-	VehicleWeaponController = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
-	VehicleWeaponController->bEditableWhenInherited = true;
+	VehicleWeaponControllerComp = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
+	VehicleWeaponControllerComp->bEditableWhenInherited = true;
 }
 
 
@@ -53,7 +54,7 @@ void AVehicle::Tick(float DeltaTime)
 
 	if (WantToFire)
 	{
-		VehicleWeaponController->FireCurrent();
+		VehicleWeaponControllerComp->FireCurrent();
 	}
 }
 
@@ -75,7 +76,6 @@ void AVehicle::SetTeamID(ETeam TeamID)
 	TeamId = TeamID;
 }
 
-
 void AVehicle::CameraChange()
 {
 	BIs1stPersonCamera = !BIs1stPersonCamera;
@@ -96,7 +96,7 @@ void AVehicle::StopFiring()
 
 void AVehicle::ChangeWeapon()
 {
-	VehicleWeaponController->SwitchWeapon();
+	VehicleWeaponControllerComp->SwitchWeapon();
 }
 
 float AVehicle::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

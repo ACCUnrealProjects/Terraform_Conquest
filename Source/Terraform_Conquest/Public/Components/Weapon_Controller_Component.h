@@ -59,7 +59,8 @@ public:
 	void RotateCurrentWeapons(FRotator NewRotation);
 
 	//Adding Ammo And Different Guns
-	void AddAmmoForGuns(float AmmoPercent);
+	void StartRegenForGuns();
+	void StopRegenForGuns();
 	bool CanIHaveGunType(GunType NewGunType);
 
 	//Weapon Controls

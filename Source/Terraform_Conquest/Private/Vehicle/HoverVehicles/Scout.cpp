@@ -10,14 +10,14 @@ AScout::AScout()
 {
 	ForwardThrust = 1200.0f;
 
-	VehicleWeaponController->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
-	VehicleWeaponController->SetWeaponSlots(TArray<GunType>{GunType::MachineGun});
+	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
+	VehicleWeaponControllerComp->SetWeaponSlots(TArray<GunType>{GunType::MachineGun});
 }
 
 void AScout::BeginPlay()
 {
 	Super::BeginPlay();
 	MainHoverComp->SetUp(50.0f, 5000.0f, 6.0f);
-	VehicleWeaponController->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
+	VehicleWeaponControllerComp->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
 
 }

@@ -31,15 +31,3 @@ void AMachineGun::Fire()
 
 	AWeapon::Fire();
 }
-
-void AMachineGun::ChangeActiveState(const bool AmIActive)
-{
-	if (AmIActive)
-	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AMachineGun::AmmoRegen, AmmoRegened, true);
-	}
-	else if (!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
-}

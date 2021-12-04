@@ -31,15 +31,3 @@ void AMorterWeapon::Fire()
 
 	AWeapon::Fire();
 }
-
-void AMorterWeapon::ChangeActiveState(const bool AmIActive)
-{
-	if (AmIActive)
-	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AMorterWeapon::AmmoRegen, AmmoRegened, true);
-	}
-	else if (!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
-}

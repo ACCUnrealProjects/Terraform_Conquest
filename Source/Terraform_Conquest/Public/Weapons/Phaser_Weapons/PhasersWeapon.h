@@ -39,7 +39,4 @@ protected:
 public:
 
 	APhasersWeapon();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-
 };

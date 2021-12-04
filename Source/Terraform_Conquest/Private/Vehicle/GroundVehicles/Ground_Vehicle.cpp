@@ -2,6 +2,8 @@
 
 
 #include "Vehicle/GroundVehicles/Ground_Vehicle.h"
+#include "Components/WidgetComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 
 // Sets default values
@@ -18,16 +20,16 @@ AGround_Vehicle::AGround_Vehicle()
 // Called when the game starts or when spawned
 void AGround_Vehicle::BeginPlay()
 {
-	AVehicle::BeginPlay();
+	Super::BeginPlay();
 
 }
 
 // Called every frame
 void AGround_Vehicle::Tick(float DeltaTime)
 {
-	AVehicle::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 
-	RotationCorrection(DeltaTime);
+	Rotation(DeltaTime);
 }
 
 void AGround_Vehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -37,7 +39,13 @@ void AGround_Vehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 }
 
-void AGround_Vehicle::RotationCorrection(float DeltaTime)
+void AGround_Vehicle::CameraChange()
+{
+	Super::CameraChange();
+    CameraChangeActions(BIs1stPersonCamera);
+}
+
+void AGround_Vehicle::Rotation(float DeltaTime)
 {
 
 

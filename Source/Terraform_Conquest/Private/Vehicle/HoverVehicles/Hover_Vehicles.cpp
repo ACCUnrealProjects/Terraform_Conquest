@@ -3,6 +3,7 @@
 #include "Vehicle/HoverVehicles/Hover_Vehicles.h"
 #include "Components/Hover_Component.h"
 #include "Components/Weapon_Controller_Component.h"
+#include "Components/WidgetComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -30,7 +31,7 @@ AHover_Vehicles::AHover_Vehicles()
 // Called when the game starts or when spawned
 void AHover_Vehicles::BeginPlay()
 {
-	AVehicle::BeginPlay();
+	Super::BeginPlay();
 
 	BackWardsThrust = ForwardThrust * 0.5f;
 	StrafeThrust = ForwardThrust * 0.60f;
@@ -40,7 +41,7 @@ void AHover_Vehicles::BeginPlay()
 // Called every frame
 void AHover_Vehicles::Tick(float DeltaTime)
 {
-	AVehicle::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 
 	switch (CurrentMoveState)
 	{
@@ -76,7 +77,7 @@ void AHover_Vehicles::RotateMe(float dt)
 	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
 	RotationChange = FVector::ZeroVector;
 
-	VehicleWeaponController->RotateCurrentWeapons(FPSCamera->GetRelativeRotation());
+	VehicleWeaponControllerComp->RotateCurrentWeapons(FPSCamera->GetRelativeRotation());
 }
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)
@@ -118,10 +119,10 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 
 	FRotator CameraRotation = FPSCamera->GetRelativeRotation();
 	float PitchBase = CameraRotation.Pitch;
-	CameraRotation.Pitch = FMath::FInterpTo(PitchBase, 0.0f, dt, 2.0f);
+	CameraRotation.Pitch = FMath::FInterpTo(PitchBase, 0.0f, dt, 0.1f);
 	FPSCamera->SetRelativeRotation(CameraRotation);
 	CameraRotation.Pitch = FMath::FInterpTo(PitchBase + 
-		-TPSCameraSpring->GetRelativeRotation().Pitch, 0.0f, dt, 2.0f);
+		-TPSCameraSpring->GetRelativeRotation().Pitch, 0.0f, dt, 0.1f);
 	TPSCamera->SetRelativeRotation(CameraRotation);
 }
 
@@ -141,6 +142,12 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AHover_Vehicles::DecreaseJumpHeight);
 	//Switch Movement Mode
 	PlayerInputComponent->BindAction(TEXT("SwitchMode"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::SwitchMovementMode);
+}
+
+void AHover_Vehicles::CameraChange()
+{
+	Super::CameraChange();
+	CameraChangeActions(BIs1stPersonCamera);
 }
 
 void AHover_Vehicles::ActivateHoverSystem()

@@ -7,6 +7,7 @@ AMineWeapon::AMineWeapon()
 {
 	myWeaponType = GunType::Mine;
 	AmmoRegened = 0;
+	bCanIRegen = false;
 }
 
 void AMineWeapon::BeginPlay()

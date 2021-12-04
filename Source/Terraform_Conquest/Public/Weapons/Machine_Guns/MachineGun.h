@@ -28,7 +28,4 @@ protected:
 public:
 
 	AMachineGun();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-
 };

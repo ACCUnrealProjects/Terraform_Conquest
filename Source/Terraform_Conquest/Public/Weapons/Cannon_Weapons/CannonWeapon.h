@@ -29,7 +29,4 @@ protected:
 public:
 
 	ACannonWeapon();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-
 };

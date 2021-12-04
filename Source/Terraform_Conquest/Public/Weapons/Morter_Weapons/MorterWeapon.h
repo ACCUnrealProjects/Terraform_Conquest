@@ -28,7 +28,4 @@ protected:
 public:
 
 	AMorterWeapon();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-	
 };

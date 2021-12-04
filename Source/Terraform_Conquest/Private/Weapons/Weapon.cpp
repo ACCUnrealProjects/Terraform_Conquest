@@ -23,17 +23,23 @@ void AWeapon::BeginPlay()
 	ActorParams.Owner = GetOwner();
 	ActorParams.Instigator = Cast<APawn>(GetOwner());
 
+	AmmoRegenStartTimerParam.BindUFunction(this, FName("StartRegenAmmo"), false);
+
 	CurrentTotalAmmo = MaxAmmo;
+	AmmoRegened = MaxAmmo * AmmoRegenPercentage;
 }
 
 void AWeapon::Fire()
 {
 	if (FireSound)
 	{
-	  UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
-
 	FireEffect->Activate();
+
+	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
+	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
+	GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
 }
 
 void AWeapon::AttemptToFire()
@@ -59,13 +65,13 @@ void AWeapon::AttemptToFire()
 
 void AWeapon::AmmoRegen()
 {
-	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo + AmmoRegened, MaxAmmo);
+	CurrentTotalAmmo = FMath::Min(CurrentTotalAmmo + AmmoRegened, MaxAmmo);
 }
 
-void AWeapon::ExternalRegenAmmo()
+void AWeapon::StartRegenAmmo(const bool bExternalTrigger)
 {
-	ExternalRegenOn = true;
-	GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AWeapon::AmmoRegen, AmmoRegened, true);
+	ExternalRegenOn = bExternalTrigger;
+	GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AWeapon::AmmoRegen, AmmoRegenRate, true);
 }
 
 void AWeapon::CancelRegenAmmo()
@@ -74,14 +80,18 @@ void AWeapon::CancelRegenAmmo()
 	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
 }
 
+void AWeapon::ChangeActiveState(const bool AmIActive)
+{
+	if (AmIActive)
+	{
+		FTimerDelegate TimerParam;
+		GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
+	}
+}
+
 bool AWeapon::OutOfAmmo() const
 {
 	return CurrentTotalAmmo <= 0;
-}
-
-void AWeapon::AddAmmo(const float AmmoPercent)
-{
-	CurrentTotalAmmo = FMath::Min(CurrentTotalAmmo + (int32)(MaxAmmo * AmmoPercent), MaxAmmo);
 }
 
 GunType AWeapon::GetGunType() const

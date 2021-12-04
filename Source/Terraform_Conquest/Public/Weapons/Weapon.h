@@ -37,27 +37,37 @@ protected:
 	class UParticleSystemComponent* FireEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
-	int32 CurrentTotalAmmo;
+	int32 CurrentTotalAmmo = 0;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
-	int32 MaxAmmo;
+	int32 MaxAmmo = 0;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
-	float AmmoRegenRate = 3.0f;
+	float TimeTillAmmoRegenStarts = 15.0f;
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
-	int AmmoRegened = 1;
+	float AmmoRegenRate = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
+	float AmmoRegenPercentage = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
+	bool bCanIRegen = true;
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "AmmoRegen")
+	int32 AmmoRegened = 1;
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "AmmoRegen")
+	bool ExternalRegenOn = false;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Firing")
-	float FireRate;
-
-	FActorSpawnParameters ActorParams;
-
-	FCollisionQueryParams ShotParams;
-
-	FTimerHandle AmmoRegenTimer;
-
+	float FireRate = 1.0f;
 	float LastFire = -10.0f;
 
-	bool ExternalRegenOn = false;
+	//Collision and Spawn Info for bullets/projectiles
+	FActorSpawnParameters ActorParams;
+	FCollisionQueryParams ShotParams;
+
+    //Timer to regenerating Ammo
+	FTimerHandle AmmoRegenTimer;
+	//Timer and TimeDelegate for starting the regen process
+	FTimerHandle AmmoRegenStartTimer;
+	FTimerDelegate AmmoRegenStartTimerParam;
 
 protected:
 
@@ -75,9 +85,10 @@ public:
 
 	void AttemptToFire();
 
-	virtual void ChangeActiveState(const bool AmIActive) PURE_VIRTUAL(AWeapon::ChangeActiveState, return;);
+	virtual void ChangeActiveState(const bool AmIActive);
 
-	void ExternalRegenAmmo();
+	UFUNCTION()
+	void StartRegenAmmo(const bool bExternalTrigger);
 
 	void CancelRegenAmmo();
 

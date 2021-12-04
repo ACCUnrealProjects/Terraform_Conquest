@@ -26,13 +26,24 @@ void UWeapon_Controller_Component::SetWeaponSlots(TArray<GunType> WeaponsICanHav
 	AllowedGunTypes = WeaponsICanHave;
 }
 
-void UWeapon_Controller_Component::AddAmmoForGuns(float AmmoPercent)
+void UWeapon_Controller_Component::StartRegenForGuns()
 {
 	for (const TPair <GunType, FWeaponContainer>& pair : AllGuns)
 	{
 		for (auto Gun : pair.Value.WeaponsList)
 		{
-			Gun->AddAmmo(AmmoPercent);
+			Gun->StartRegenAmmo(true);
+		}
+	}
+}
+
+void UWeapon_Controller_Component::StopRegenForGuns()
+{
+	for (const TPair <GunType, FWeaponContainer>& pair : AllGuns)
+	{
+		for (auto Gun : pair.Value.WeaponsList)
+		{
+			Gun->CancelRegenAmmo();
 		}
 	}
 }

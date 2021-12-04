@@ -57,16 +57,3 @@ void APhasersWeapon::Fire()
 
 	AWeapon::Fire();
 }
-
-
-void APhasersWeapon::ChangeActiveState(const bool AmIActive)
-{
-	if (AmIActive)
-	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &APhasersWeapon::AmmoRegen, AmmoRegened, true);
-	}
-	else if(!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
-}

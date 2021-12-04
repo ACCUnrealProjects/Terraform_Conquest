@@ -34,6 +34,7 @@ private:
 	FVector RotationChange = FVector(0.0f);
 	float RestrictedPitch = 0.0f;
 
+private:
 	//Movement and flight
 	void RotateMe(float dt);
 	void FlightMovement(float dt);
@@ -44,10 +45,8 @@ private:
 	void YawLook(float Amount);
 	void PitchLook(float Amount);
 	void RollLook(float Amount);
-
 	// Rotation correction for hover mode
 	void RotationCorrection(float DeltaTime);
-
 	//Activate/Deactivate Hover
 	UFUNCTION()
 	void ActivateHoverSystem();
@@ -76,8 +75,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
 	float GravitySpeedCutoff = 1000.0f;
 
+protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Camera Change (FPS/TPS)
+	virtual void CameraChange() override;
 
 public:	
 
