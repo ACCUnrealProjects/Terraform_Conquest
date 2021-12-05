@@ -62,6 +62,6 @@ void AMorter_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* Other
 {
 	if (!OtherActor) { return; }
 
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), this, Cast<APawn>(GetOwner())->GetController(), true, ECC_Visibility);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), false, Cast<APawn>(GetOwner())->GetController(), true, ECC_Visibility);
 	AProjectile::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }

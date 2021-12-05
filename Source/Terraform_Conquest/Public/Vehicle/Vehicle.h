@@ -44,6 +44,9 @@ protected:
 
 	FVector FireDir;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Name")
+	FName VehicleName = "";
+
 protected:
 
 	// Called when the game starts or when spawned

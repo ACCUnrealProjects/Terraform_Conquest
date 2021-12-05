@@ -26,6 +26,10 @@ AHover_Vehicles::AHover_Vehicles()
 	BIs1stPersonCamera = true;
 	FPSCamera->SetActive(BIs1stPersonCamera);
 	TPSCamera->SetActive(!BIs1stPersonCamera);
+
+	TPSCameraSpring->TargetArmLength = 400.0f;
+	TPSCameraSpring->SetRelativeRotation(FRotator(0, -20.0f, 0));
+	TPSCamera->SetRelativeRotation(FRotator(0, 20.0f, 0));
 }
 
 // Called when the game starts or when spawned

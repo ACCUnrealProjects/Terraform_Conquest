@@ -9,6 +9,7 @@
 AScout::AScout()
 {
 	ForwardThrust = 1200.0f;
+	VehicleName = "Scout";
 
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
 	VehicleWeaponControllerComp->SetWeaponSlots(TArray<GunType>{GunType::MachineGun});

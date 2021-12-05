@@ -38,7 +38,10 @@ void AWeapon::Fire()
 	FireEffect->Activate();
 
 	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
-	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
+	if (!ExternalRegenOn)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
+	}
 	GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
 }
 
@@ -71,6 +74,10 @@ void AWeapon::AmmoRegen()
 void AWeapon::StartRegenAmmo(const bool bExternalTrigger)
 {
 	ExternalRegenOn = bExternalTrigger;
+	if (bExternalTrigger)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
+	}
 	GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AWeapon::AmmoRegen, AmmoRegenRate, true);
 }
 
