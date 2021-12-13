@@ -26,6 +26,7 @@ void AMachineGun::Fire()
 
 	//Fire Projectile 
 	ATracer_Round* TracerProjectile = GetWorld()->SpawnActor<ATracer_Round>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
+	TracerProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	TracerProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
 

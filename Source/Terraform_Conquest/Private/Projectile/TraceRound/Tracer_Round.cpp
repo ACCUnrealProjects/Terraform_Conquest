@@ -48,6 +48,12 @@ void ATracer_Round::Tick(float DeltaTime)
 	SetActorLocation(RayEnd);
 }
 
+void ATracer_Round::LaunchProjectile()
+{
+
+
+}
+
 void ATracer_Round::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (!OtherActor) { return; }

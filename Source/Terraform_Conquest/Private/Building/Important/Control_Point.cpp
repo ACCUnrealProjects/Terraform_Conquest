@@ -58,7 +58,7 @@ void AControl_Point::CapturingPoint()
 	CapturePointSphere->GetOverlappingActors(ActorsIn, AVehicle::StaticClass());
 	if (!ActorsIn.Num()) { return; }
 
-	for (int i = 0; i < ActorsIn.Num(); i++)
+	for (int16 i = 0; i < ActorsIn.Num(); i++)
 	{
 		Contesters[Cast<AVehicle>(ActorsIn[0])->GetTeamId()]++;
 	}

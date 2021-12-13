@@ -27,6 +27,24 @@ void AWeapon::BeginPlay()
 
 	CurrentTotalAmmo = MaxAmmo;
 	AmmoRegened = MaxAmmo * AmmoRegenPercentage;
+	
+	GetTeam();
+}
+
+void AWeapon::GetTeam()
+{
+	if (!GetOwner()) { return; }
+
+	for (auto tag : GetOwner()->Tags)
+	{
+		for (uint8 i = 0; i < (uint8)ETeam::Last; i++)
+		{
+			if (GetTeamName(ETeam(i)) == tag.ToString())
+			{
+				TeamId = ETeam(i);
+			}
+		}
+	}
 }
 
 void AWeapon::Fire()
@@ -94,19 +112,4 @@ void AWeapon::ChangeActiveState(const bool AmIActive)
 		FTimerDelegate TimerParam;
 		GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
 	}
-}
-
-bool AWeapon::OutOfAmmo() const
-{
-	return CurrentTotalAmmo <= 0;
-}
-
-GunType AWeapon::GetGunType() const
-{
-	return myWeaponType;
-}
-
-FName AWeapon::GetWeaponName() const
-{
-	return WeaponName;
 }

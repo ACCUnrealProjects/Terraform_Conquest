@@ -42,16 +42,23 @@ void APhasersWeapon::Fire()
 	FVector RayStart = GetActorLocation();
 	FVector RayEnd = RayStart + (GetActorForwardVector() * Range);
 
-	if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
-	{
-		UGameplayStatics::ApplyDamage(ShotHit.GetActor(), Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-		DrawDebugLine(GetWorld(), RayStart, ShotHit.ImpactPoint, FColor(0, 255, 0), true, 0, 0, 10);
-	}
+	bool bPhaserHit = GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams);
 
 	FireEffect->SetVectorParameter("Source", RayStart);
-	FireEffect->SetVectorParameter("Target", ShotHit.ImpactPoint);
 	FireEffect->SetBeamSourcePoint(0, RayStart, 0);
-	FireEffect->SetBeamEndPoint(0, ShotHit.ImpactPoint);
+
+	if (bPhaserHit)
+	{
+		UGameplayStatics::ApplyDamage(ShotHit.GetActor(), Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, ShotHit.Location + ShotHit.ImpactNormal, FRotator());
+		FireEffect->SetVectorParameter("Target", ShotHit.ImpactPoint);
+		FireEffect->SetBeamEndPoint(0, ShotHit.ImpactPoint);
+	}
+	else
+	{
+		FireEffect->SetVectorParameter("Target", RayEnd);
+		FireEffect->SetBeamEndPoint(0, RayEnd);
+	}
 
 	CurrentTotalAmmo--;
 

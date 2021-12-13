@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "WeaponTypeEnum.h"
+#include "TeamsEnum.h"
 #include "Weapon.generated.h"
 
 class USoundBase;
@@ -25,10 +26,17 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = (AllowPrivateAccess = "true"))
 	USoundBase* DryClipSound = nullptr;
 
+private:
+
+	void GetTeam();
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Name")
 	FName WeaponName = "TEMPLATE";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
+	ETeam TeamId = ETeam::Neutral;
 
 	UPROPERTY(BlueprintReadOnly, Category = "WeaponType")
 	GunType myWeaponType = GunType::None;
@@ -92,11 +100,11 @@ public:
 
 	void CancelRegenAmmo();
 
-	bool OutOfAmmo() const;
-
 	void AddAmmo(const float AmmoPercent);
 
-	GunType GetGunType() const;
+	GunType GetGunType() const { return myWeaponType; }
 
-	FName GetWeaponName() const;
+	bool OutOfAmmo() const { return CurrentTotalAmmo <= 0; }
+
+	FName GetWeaponName() const { return WeaponName; }
 };

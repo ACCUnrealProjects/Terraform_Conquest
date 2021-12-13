@@ -24,15 +24,18 @@ void AMineWeapon::Fire()
 	FVector DownVector = -GetActorUpVector();
 	FVector DownPlacement = GetActorLocation() + (DownVector.GetSafeNormal() * Range);
 	FHitResult DownCast;
+	AActor* Mine = nullptr;
 
 	if (GetWorld()->LineTraceSingleByChannel(DownCast, GetActorLocation(), DownPlacement, ECollisionChannel::ECC_Camera, ShotParams))
 	{
-		GetWorld()->SpawnActor<AMine>(ProjectileBlueprint, DownCast.ImpactPoint, GetActorRotation(), ActorParams);
+		Mine = GetWorld()->SpawnActor<AMine>(ProjectileBlueprint, DownCast.ImpactPoint, GetActorRotation(), ActorParams);
 	}
 	else
 	{
-		GetWorld()->SpawnActor<AMine>(ProjectileBlueprint, DownPlacement, GetActorRotation(), ActorParams);
+		Mine = GetWorld()->SpawnActor<AMine>(ProjectileBlueprint, DownPlacement, GetActorRotation(), ActorParams);
 	}
+
+	Mine->Tags.Add(FName(GetTeamName(TeamId)));
 
 	AWeapon::Fire();
 

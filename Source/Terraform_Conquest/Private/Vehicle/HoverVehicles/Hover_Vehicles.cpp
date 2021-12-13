@@ -57,30 +57,6 @@ void AHover_Vehicles::Tick(float DeltaTime)
 		break;
 	}
 
-	RotateMe(DeltaTime);
-}
-
-void AHover_Vehicles::RotateMe(float dt)
-{
-	if (CurrentMoveState == MovementState::Hovering)
-	{
-		RestrictedPitch += -RotationChange.Y * dt * (RotateSens  * 0.0025f);
-		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
-		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
-		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
-		CameraRotation.Pitch = RestrictedPitch;
-		FPSCamera->SetRelativeRotation(CameraRotation);
-		CameraRotation.Pitch = RestrictedPitch + -TPSCameraSpring->GetRelativeRotation().Pitch;
-		TPSCamera->SetRelativeRotation(CameraRotation);
-	}
-	else if (CurrentMoveState == MovementState::Flying)
-	{
-		MyMesh->AddTorqueInDegrees(RotationChange.Y * GetActorRightVector(), NAME_None, true); //Pitch
-	}
-	MyMesh->AddTorqueInDegrees(RotationChange.Z * GetActorUpVector(), NAME_None, true); //Yaw
-	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
-	RotationChange = FVector::ZeroVector;
-
 	VehicleWeaponControllerComp->RotateCurrentWeapons(FPSCamera->GetRelativeRotation());
 }
 
@@ -158,12 +134,20 @@ void AHover_Vehicles::ActivateHoverSystem()
 {
 	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(true);
+	for (auto HoverComp : SupportHoverComps)
+	{
+		HoverComp->ChangeHoverState(true);
+	}
 }
 
 void AHover_Vehicles::DeactivateHoverSystem()
 {
 	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(false);
+	for (auto HoverComp : SupportHoverComps)
+	{
+		HoverComp->ChangeHoverState(false);
+	}
 }
 
 void AHover_Vehicles::SwitchMovementMode()
@@ -210,20 +194,42 @@ void AHover_Vehicles::Strafe(float Amount)
 
 void AHover_Vehicles::YawLook(float Amount)
 {
-	RotationChange.Z += Amount * RotateSens;
+	MyMesh->AddTorqueInDegrees(Amount * RotateSens * GetActorUpVector(), NAME_None, true); //Yaw
 }
 
 void AHover_Vehicles::PitchLook(float Amount)
 {
-	RotationChange.Y += (Amount * RotateSens) * -1.0f;
+	if (!GetWorld()) { return; }
+
+	if (CurrentMoveState == MovementState::Hovering)
+	{
+		RestrictedPitch += (Amount * RotateSens * 0.5f) * GetWorld()->GetDeltaSeconds();
+		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
+		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
+		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
+		CameraRotation.Pitch = RestrictedPitch;
+		FPSCamera->SetRelativeRotation(CameraRotation);
+		CameraRotation.Pitch = RestrictedPitch + -TPSCameraSpring->GetRelativeRotation().Pitch;
+		TPSCamera->SetRelativeRotation(CameraRotation);
+	}
+	else if (CurrentMoveState == MovementState::Flying)
+	{
+		MyMesh->AddTorqueInDegrees(((Amount * RotateSens) * -1.0f) * GetActorRightVector(), NAME_None, true); //Pitch
+	}
+
 }
 
 void AHover_Vehicles::RollLook(float Amount)
 {
 	if(CurrentMoveState == MovementState::Flying)
 	{
-		RotationChange.X += Amount * RotateSens;
+		MyMesh->AddTorqueInDegrees(Amount * RotateSens * GetActorForwardVector(), NAME_None, true); //Roll
 	}
+}
+
+void AHover_Vehicles::Fire()
+{
+	Super::Fire();
 }
 
 void AHover_Vehicles::IncreaseJumpHeight()

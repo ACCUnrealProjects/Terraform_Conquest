@@ -26,6 +26,7 @@ void ACannonWeapon::Fire()
 
 	//Fire Projectile
 	ACannon_Projectile* CannonProjectile = GetWorld()->SpawnActor<ACannon_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
+	CannonProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	CannonProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
 

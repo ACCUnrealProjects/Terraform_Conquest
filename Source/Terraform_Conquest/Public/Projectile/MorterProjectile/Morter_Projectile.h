@@ -16,9 +16,6 @@ class TERRAFORM_CONQUEST_API AMorter_Projectile : public AProjectile
 	
 private:
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TracerSpeed", meta = (AllowPrivateAccess = "true"))
-		float MorterSpeed = 5000.0f;
-
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		class UStaticMeshComponent* ProjectileMesh = nullptr;
 
@@ -37,6 +34,9 @@ private:
 		void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "MorterSpeed")
+		float MorterSpeed = 5000.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 		float DamageRadius = 1.0f;

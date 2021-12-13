@@ -25,18 +25,20 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
 	float RotateSens = 75.0f;
 
-	//Time handler for Hover booster to turn off
-	FTimerHandle HoverSwitchHandle;
-
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	MovementState CurrentMoveState = MovementState::Hovering;
 
-	FVector RotationChange = FVector(0.0f);
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Trusters", meta = (AllowPrivateAccess = "true"))
+	TArray<class UParticleSystemComponent*> TrusterEffects;
+
+	//Time handler for Hover booster to turn off
+	FTimerHandle HoverSwitchHandle;
+
 	float RestrictedPitch = 0.0f;
 
 private:
+
 	//Movement and flight
-	void RotateMe(float dt);
 	void FlightMovement(float dt);
 	//Movement
 	void Trusters(float Amount);
@@ -56,6 +58,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
 	class UHover_Component* MainHoverComp;
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
+	TArray<class UHover_Component*> SupportHoverComps;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	TArray<class UParticleSystemComponent*> TrusterEffect;
@@ -91,6 +95,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//Fire Override
+	virtual void Fire() override;
 
 	//Hover Control
 	void IncreaseJumpHeight();

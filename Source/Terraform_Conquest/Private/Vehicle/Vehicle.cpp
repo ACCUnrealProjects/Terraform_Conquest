@@ -3,6 +3,7 @@
 #include "Vehicle/Vehicle.h"
 #include "Components/Health_Component.h"
 #include "Components/Weapon_Controller_Component.h"
+#include "Components/RectLightComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -35,6 +36,8 @@ AVehicle::AVehicle()
 
 	VehicleWeaponControllerComp = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
 	VehicleWeaponControllerComp->bEditableWhenInherited = true;
+
+	Tags.Add("Vehicle");
 }
 
 
@@ -69,11 +72,14 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::Fire);
 	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Released, this, &AVehicle::StopFiring);
 	PlayerInputComponent->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::ChangeWeapon);
+	//Lights
+	PlayerInputComponent->BindAction(TEXT("Lights"), EInputEvent::IE_Pressed, this, &AVehicle::ToggleLights);
 }
 
 void AVehicle::SetTeamID(ETeam TeamID)
 {
 	TeamId = TeamID;
+	Tags.Add(FName(GetTeamName(TeamID)));
 }
 
 void AVehicle::CameraChange()
@@ -81,7 +87,6 @@ void AVehicle::CameraChange()
 	BIs1stPersonCamera = !BIs1stPersonCamera;
 	FPSCamera->SetActive(BIs1stPersonCamera);
 	TPSCamera->SetActive(!BIs1stPersonCamera);
-	FPSCamera->GetForwardVector();
 }
 
 void AVehicle::Fire()
@@ -107,11 +112,6 @@ float AVehicle::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 	else { return DamageAmount; }
 }
 
-ETeam AVehicle::GetTeamId() const
-{
-	return TeamId;
-}
-
 void AVehicle::Death()
 {
 	FTimerHandle DeathTimer;
@@ -122,4 +122,14 @@ void AVehicle::Death()
 void AVehicle::DestoryMe()
 {
 	Destroy();
+}
+
+void AVehicle::ToggleLights()
+{
+	bAreLightsOn = !bAreLightsOn;
+
+	for (auto Light : Lights)
+	{
+		Light->SetVisibility(bAreLightsOn);
+	}
 }

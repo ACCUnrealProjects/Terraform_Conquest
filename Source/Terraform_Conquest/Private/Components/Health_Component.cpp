@@ -11,13 +11,11 @@ UHealth_Component::UHealth_Component()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 // Called when the game starts
 void UHealth_Component::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
 
 // Called every frame
 void UHealth_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -91,6 +89,15 @@ bool UHealth_Component::AmIDead() const
 float UHealth_Component::TakeDamage(float Damage)
 {
 	int32 intDamage = FPlatformMath::RoundToInt(Damage);
+
+	if (!intDamage) { return 0; }
+
+	if (Shield > 0)
+	{
+		intDamage = FMath::Abs(FMath::Min<int32>(Shield -= intDamage, 0));
+		Shield = FMath::Clamp<int32>(Shield, 0, MaxShield);
+	}
+
 	intDamage = FMath::Clamp<int32>(intDamage, 0, Health);
 	Health -= intDamage;
 
@@ -99,7 +106,7 @@ float UHealth_Component::TakeDamage(float Damage)
 		IHaveDied.Broadcast();
 	}
 
-	//Sheild related changes
+	//Shield related changes
 	TimeSinceLastHit = TimeBeforeShieldRegenBegins;
 	GetWorld()->GetTimerManager().ClearTimer(SheildRegenTickTimer);
 	SheildRegenOn = false;

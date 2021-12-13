@@ -27,6 +27,7 @@ void AMorterWeapon::Fire()
 	//Fire Projectile
 	AMorter_Projectile* MorterProjectile = GetWorld()->SpawnActor<AMorter_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
 	MorterProjectile->LaunchProjectile();
+	MorterProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	CurrentTotalAmmo--;
 
 	AWeapon::Fire();
