@@ -62,6 +62,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "AmmoRegen")
 	bool ExternalRegenOn = false;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Range")
+	float Range = 5000.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Firing")
 	float FireRate = 1.0f;
@@ -101,6 +103,8 @@ public:
 	void CancelRegenAmmo();
 
 	void AddAmmo(const float AmmoPercent);
+
+	float GetRange() const { return Range; }
 
 	GunType GetGunType() const { return myWeaponType; }
 

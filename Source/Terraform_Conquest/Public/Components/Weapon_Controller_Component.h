@@ -33,6 +33,7 @@ private:
 	USceneComponent* MeshToAttachTo = nullptr;
 
 	FActorSpawnParameters SpawnParams;
+	FCollisionQueryParams RayColParams;
 
 protected:
 	// Called when the game starts
@@ -56,7 +57,7 @@ public:
 	void SwitchWeapon(GunType GunToLookFor);
 
 	//Rotate Weapon
-	void RotateCurrentWeapons(FRotator NewRotation);
+	void RotateCurrentWeapons(FVector CamPos, FVector CamDirection);
 
 	//Adding Ammo And Different Guns
 	void StartRegenForGuns();

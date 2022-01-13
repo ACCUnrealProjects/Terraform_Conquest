@@ -50,6 +50,24 @@ void AVehicle::BeginPlay()
 	MyHealth->IHaveDied.AddUniqueDynamic(this, &AVehicle::Death);
 }
 
+void AVehicle::SetUpLights()
+{
+	TArray<FName> LightNames = { FName(TEXT("Light_1")), FName(TEXT("Light_2")) };
+
+	if (!MyMesh) { return; }
+
+	for (auto LightName : LightNames)
+	{
+		if (MyMesh->DoesSocketExist(LightName))
+		{
+			URectLightComponent* NewLight = CreateDefaultSubobject<URectLightComponent>(LightName);
+			NewLight->bEditableWhenInherited = true;
+			NewLight->SetupAttachment(MyMesh, LightName);
+			NewLight->SetVisibility(bAreLightsOn);
+		}
+	}
+}
+
 // Called every frame
 void AVehicle::Tick(float DeltaTime)
 {

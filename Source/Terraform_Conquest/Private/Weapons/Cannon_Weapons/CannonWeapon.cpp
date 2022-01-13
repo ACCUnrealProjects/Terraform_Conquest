@@ -12,6 +12,8 @@ ACannonWeapon::ACannonWeapon()
 	FireEffect->bAutoActivate = false;
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FireEffect->SetRelativeRotation(FRotator(0, -90.0f, 0));
+
+	Range = 10000.0f;
 }
 
 void ACannonWeapon::BeginPlay()

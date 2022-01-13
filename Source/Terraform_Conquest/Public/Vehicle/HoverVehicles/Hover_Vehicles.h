@@ -22,8 +22,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
 	float HoverMaxMinPitchLook = 15.0f;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float RotateSens = 75.0f;
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	MovementState CurrentMoveState = MovementState::Hovering;
@@ -47,6 +45,7 @@ private:
 	void YawLook(float Amount);
 	void PitchLook(float Amount);
 	void RollLook(float Amount);
+	void SetWeaponRotation();
 	// Rotation correction for hover mode
 	void RotationCorrection(float DeltaTime);
 	//Activate/Deactivate Hover

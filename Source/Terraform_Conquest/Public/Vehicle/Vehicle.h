@@ -45,6 +45,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	bool BIs1stPersonCamera = true;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
+	float TorqueSense = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
+	float CamSense = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
+	float DefaultCameraRotation = 20.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
+	float DefaultTorqueForce = 75.0f;
+
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "WeaponController")
 	class UWeapon_Controller_Component* VehicleWeaponControllerComp = nullptr;
 
@@ -54,8 +63,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
 	float DestroyTime = 1.0f;
 
-	FVector FireDir;
-
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Name")
 	FName VehicleName = "";
 
@@ -64,11 +71,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void CameraChange();
+	void SetUpLights();
 
-	// Things to change on Camera Change
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "UI")
-	void CameraChangeActions(bool bChangetoFPSCam);
+	virtual void CameraChange();
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 

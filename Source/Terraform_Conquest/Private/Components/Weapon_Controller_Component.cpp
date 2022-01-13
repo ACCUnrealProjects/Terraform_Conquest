@@ -3,6 +3,7 @@
 #include "Components/Weapon_Controller_Component.h"
 #include "Weapons/Weapon.h"
 #include "Components/SceneComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values for this component's properties
 UWeapon_Controller_Component::UWeapon_Controller_Component()
@@ -17,6 +18,7 @@ void UWeapon_Controller_Component::BeginPlay()
 
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.Instigator = Cast<APawn>(SpawnParams.Owner);
+	RayColParams.AddIgnoredActor(GetOwner());
 
 	MeshToAttachTo = GetOwner()->FindComponentByClass<USceneComponent>();
 }
@@ -185,22 +187,32 @@ void UWeapon_Controller_Component::FireCurrent()
 }
 
 
-void UWeapon_Controller_Component::RotateCurrentWeapons(FRotator NewRotation)
+void UWeapon_Controller_Component::RotateCurrentWeapons(FVector CamPos, FVector CamDirection)
 {
-	if (ActiveWeaponType == GunType::Mine) { return; }
+	if (ActiveWeaponType == GunType::Mine || !GetWorld()) { return; }
 
 	if (AllGuns.Contains(ActiveWeaponType))
 	{
 		for (auto Gun : AllGuns[ActiveWeaponType].WeaponsList)
 		{
-			Gun->SetActorRelativeRotation(NewRotation);
+			FHitResult RayHit;
+			FVector RayEnd = CamPos + (CamDirection * Gun->GetRange());
+			FVector AimPosition = RayEnd;
+			if (GetWorld()->LineTraceSingleByChannel(RayHit, CamPos, RayEnd, ECollisionChannel::ECC_Camera, RayColParams))
+			{
+				AimPosition = RayHit.ImpactPoint;
+			}
+
+			FVector AimDir = (AimPosition - Gun->GetActorLocation()).GetSafeNormal();
+			FRotator RotationChange = AimDir.Rotation() - Gun->GetActorForwardVector().Rotation();
+			Gun->AddActorLocalRotation(FRotator(RotationChange.Pitch, RotationChange.Yaw,0));
 		}
 	}
 }
 
 TArray<AWeapon*> UWeapon_Controller_Component::GetCurrentGuns() const
 {
-	if (ActiveWeaponType == GunType::None)
+	if (ActiveWeaponType == GunType::None || !AllGuns.Contains(ActiveWeaponType))
 	{
 		return TArray<AWeapon*>();
 	}

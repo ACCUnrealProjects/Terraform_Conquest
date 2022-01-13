@@ -28,6 +28,8 @@ APhasersWeapon::APhasersWeapon()
 
 	FireEffect->SetBeamSourcePoint(0, GetActorLocation(), 0);
 	FireEffect->SetBeamEndPoint(0, GetActorLocation());
+	
+	Range = 10000.0f;
 }
 
 void APhasersWeapon::BeginPlay()
@@ -37,6 +39,8 @@ void APhasersWeapon::BeginPlay()
 
 void APhasersWeapon::Fire()
 {
+	if (!GetWorld()) { return; }
+
 	//Raycast fire, also fire projectile flash or laser 
 	FHitResult ShotHit;
 	FVector RayStart = GetActorLocation();

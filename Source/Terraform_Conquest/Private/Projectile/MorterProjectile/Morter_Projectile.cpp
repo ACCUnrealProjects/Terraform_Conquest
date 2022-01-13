@@ -49,7 +49,6 @@ void AMorter_Projectile::BeginPlay()
 void AMorter_Projectile::LaunchProjectile()
 {
 	ProjectileMovement->Activate();
-	Super::LaunchProjectile();
 }
 
 void AMorter_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

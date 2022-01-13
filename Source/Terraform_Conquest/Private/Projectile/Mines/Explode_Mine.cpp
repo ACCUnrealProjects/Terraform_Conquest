@@ -13,6 +13,6 @@ AExplode_Mine::AExplode_Mine()
 
 void AExplode_Mine::Trigger()
 {
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), this, Cast<APawn>(GetOwner())->GetController(), false, ECC_Visibility);
 	Super::Trigger();
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), this, Cast<APawn>(GetOwner())->GetController(), false, ECC_Visibility);
 }

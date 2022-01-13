@@ -42,7 +42,6 @@ void AGround_Vehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 void AGround_Vehicle::CameraChange()
 {
 	Super::CameraChange();
-    CameraChangeActions(BIs1stPersonCamera);
 }
 
 void AGround_Vehicle::Rotation(float DeltaTime)

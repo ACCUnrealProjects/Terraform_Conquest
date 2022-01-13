@@ -14,6 +14,13 @@ ATank::ATank()
 	ForwardThrust = 800.0f;
 	VehicleName = "Hover_Tank";
 
+	const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObj(TEXT("/Game/Meshes/Ships/craft_cargoA"));
+	if (MeshObj.Succeeded())
+	{
+		MyMesh->SetStaticMesh(MeshObj.Object);
+	}
+	SetUpLights();
+
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Cannon, TArray<FName>{"CannonGun_1"});
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Mine, TArray<FName>{"MineSlot"});
