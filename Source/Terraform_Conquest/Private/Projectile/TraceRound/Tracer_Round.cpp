@@ -55,7 +55,7 @@ void ATracer_Round::LaunchProjectile()
 
 void ATracer_Round::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!OtherActor) { return; }
+	if (!OtherActor || !GetOwner()) { return; }
 
 	UGameplayStatics::ApplyDamage(OtherActor, Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
 	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);	

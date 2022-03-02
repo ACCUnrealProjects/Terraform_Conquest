@@ -17,12 +17,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthSetUp", meta = (AllowPrivateAccess = "true"))
 	int32 MaxHealth = 100;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthSetUp", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "HealthSetUp", meta = (AllowPrivateAccess = "true"))
 	int32 Health = MaxHealth;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShieldSetUp", meta = (AllowPrivateAccess = "true"))
 	int32 MaxShield = 100;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ShieldSetUp", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "ShieldSetUp", meta = (AllowPrivateAccess = "true"))
 	int32 Shield = MaxShield;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "ShieldRegenSetUp", meta = (AllowPrivateAccess = "true"))
@@ -44,19 +44,41 @@ public:
 
 	UHealth_Component();
 
+	virtual void PostInitProperties() override;
+
+	/** Property replication */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
 	void SheildRegenTick();
 
 	void SetUp(int32 StartHealth, int32 StartShield);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerSetUp(int32 StartHealth, int32 StartShield);
+	virtual bool ServerSetUp_Validate(int32 StartHealth, int32 StartShield);
+	virtual void ServerSetUp_Implementation(int32 StartHealth, int32 StartShield);
+
 	void IncreaseHealth(int32 HealthIncrease);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerIncreaseHealth(int32 HealthIncrease);
+	virtual bool ServerIncreaseHealth_Validate(int32 HealthIncrease);
+	virtual void ServerIncreaseHealth_Implementation(int32 HealthIncrease);
+
 	void IncreaseShield(int32 ShieldIncrease);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerIncreaseShield(int32 ShieldIncrease);
+	virtual bool ServerIncreaseShield_Validate(int32 ShieldIncrease);
+	virtual void ServerIncreaseShield_Implementation(int32 ShieldIncrease);
 
 	bool AmIAtMaxHealthAndShield() const;
 	bool AmIDead() const;
 
-	void KillMe();
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerKillMe();
+	virtual bool ServerKillMe_Validate();
+	virtual void ServerKillMe_Implementation();
 
 	UFUNCTION(BlueprintPure, Category = "Health")
 	float GetHealthPercentage() const;

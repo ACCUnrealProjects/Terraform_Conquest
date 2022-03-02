@@ -21,9 +21,10 @@ void ACannonWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ACannonWeapon::Fire()
+void ACannonWeapon::Fire_Implementation()
 {
-	//Fire Projectile
+	AWeapon::Fire_Implementation();
+
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile
@@ -31,6 +32,4 @@ void ACannonWeapon::Fire()
 	CannonProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	CannonProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
 }

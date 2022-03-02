@@ -2,6 +2,7 @@
 
 #include "../../Public/Components/Health_Component.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UHealth_Component::UHealth_Component()
@@ -11,10 +12,30 @@ UHealth_Component::UHealth_Component()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
+void UHealth_Component::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	if (GetOwner() && GetOwner()->HasAuthority())
+	{
+		Health = MaxHealth;
+		Shield = MaxShield;
+	}
+}
+
 // Called when the game starts
 void UHealth_Component::BeginPlay()
 {
 	Super::BeginPlay();
+	SetIsReplicated(true);
+}
+
+void UHealth_Component::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHealth_Component, Health);
+	DOREPLIFETIME(UHealth_Component, Shield);
 }
 
 // Called every frame
@@ -35,19 +56,31 @@ void UHealth_Component::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UHealth_Component::SheildRegenTick()
 {
-	IncreaseShield(ShieldRegenPerTick);
-	if (Shield < MaxShield)
+	if (GetOwner()->HasAuthority())
 	{
-		GetWorld()->GetTimerManager().SetTimer(SheildRegenTickTimer, this, &UHealth_Component::SheildRegenTick, ShieldRegenRate, false);
-	}
-	else
-	{
-		SheildRegenOn = false;
+		IncreaseShield(ShieldRegenPerTick);
+		if (Shield < MaxShield)
+		{
+			GetWorld()->GetTimerManager().SetTimer(SheildRegenTickTimer, this, &UHealth_Component::SheildRegenTick, ShieldRegenRate, false);
+		}
+		else
+		{
+			SheildRegenOn = false;
+		}
 	}
 }
 
-
 void UHealth_Component::SetUp(int32 StartHealth, int32 StartShield)
+{
+	ServerSetUp(StartHealth, StartShield);
+}
+
+bool UHealth_Component::ServerSetUp_Validate(int32 StartHealth, int32 StartShield)
+{
+	return true;
+}
+
+void UHealth_Component::ServerSetUp_Implementation(int32 StartHealth, int32 StartShield)
 {
 	MaxHealth = StartHealth;
 	Health = StartHealth;
@@ -58,10 +91,30 @@ void UHealth_Component::SetUp(int32 StartHealth, int32 StartShield)
 
 void UHealth_Component::IncreaseHealth(int32 HealthIncrease)
 {
+	ServerIncreaseHealth(HealthIncrease);
+}
+
+bool UHealth_Component::ServerIncreaseHealth_Validate(int32 HealthIncrease)
+{
+	return true;
+}
+
+void UHealth_Component::ServerIncreaseHealth_Implementation(int32 HealthIncrease)
+{
 	Health = FMath::Min(Health + HealthIncrease, MaxHealth);
 }
 
 void UHealth_Component::IncreaseShield(int32 ShieldIncrease)
+{
+	ServerIncreaseShield(ShieldIncrease);
+}
+
+bool UHealth_Component::ServerIncreaseShield_Validate(int32 ShieldIncrease)
+{
+	return true;
+}
+
+void UHealth_Component::ServerIncreaseShield_Implementation(int32 ShieldIncrease)
 {
 	Shield = FMath::Min(Shield + ShieldIncrease, MaxShield);
 }
@@ -88,6 +141,8 @@ bool UHealth_Component::AmIDead() const
 
 float UHealth_Component::TakeDamage(float Damage)
 {
+	if (!GetOwner()->HasAuthority()) { return 0; }
+
 	int32 intDamage = FPlatformMath::RoundToInt(Damage);
 
 	if (!intDamage) { return 0; }
@@ -103,7 +158,7 @@ float UHealth_Component::TakeDamage(float Damage)
 
 	if (Health <= 0)
 	{
-		IHaveDied.Broadcast();
+		ServerKillMe();
 	}
 
 	//Shield related changes
@@ -114,7 +169,12 @@ float UHealth_Component::TakeDamage(float Damage)
 	return intDamage;
 }
 
-void UHealth_Component::KillMe()
+bool UHealth_Component::ServerKillMe_Validate()
+{
+	return true;
+}
+
+void UHealth_Component::ServerKillMe_Implementation()
 {
 	Health = 0;
 	IHaveDied.Broadcast();

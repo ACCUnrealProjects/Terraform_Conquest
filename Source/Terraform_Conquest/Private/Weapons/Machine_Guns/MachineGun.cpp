@@ -21,9 +21,10 @@ void AMachineGun::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMachineGun::Fire()
+void AMachineGun::Fire_Implementation()
 {
-	//Fire Projectile
+	AWeapon::Fire_Implementation();
+
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile 
@@ -31,6 +32,4 @@ void AMachineGun::Fire()
 	TracerProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	TracerProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
 }

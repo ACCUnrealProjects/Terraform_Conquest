@@ -32,21 +32,21 @@ private:
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Name")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Name")
 	FName WeaponName = "TEMPLATE";
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Team")
 	ETeam TeamId = ETeam::Neutral;
 
-	UPROPERTY(BlueprintReadOnly, Category = "WeaponType")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "WeaponType")
 	GunType myWeaponType = GunType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	class UParticleSystemComponent* FireEffect;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
 	int32 CurrentTotalAmmo = 0;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Ammo")
 	int32 MaxAmmo = 0;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AmmoRegen")
@@ -83,7 +83,10 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire();
+	UFUNCTION(reliable, server, WithValidation)
+	void Fire();
+	virtual bool Fire_Validate();
+	virtual void Fire_Implementation();
 
 	UFUNCTION()
 	virtual void AmmoRegen();
@@ -93,7 +96,14 @@ public:
 	// Sets default values for this component's properties
 	AWeapon();
 
+	/** Property replication */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void AttemptToFire();
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerAttemptToFire();
+	virtual bool ServerAttemptToFire_Validate();
+	virtual void ServerAttemptToFire_Implementation();
 
 	virtual void ChangeActiveState(const bool AmIActive);
 
@@ -102,7 +112,13 @@ public:
 
 	void CancelRegenAmmo();
 
-	void AddAmmo(const float AmmoPercent);
+	void AddExternalAmmo(const float AmmoPercent);
+
+	void AddAmmo(const int32 AmmoAmount);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerAddAmmo(const int32 AmmoAmount);
+	virtual bool ServerAddAmmo_Validate(const int32 AmmoAmount);
+	virtual void ServerAddAmmo_Implementation(const int32 AmmoAmount);
 
 	float GetRange() const { return Range; }
 

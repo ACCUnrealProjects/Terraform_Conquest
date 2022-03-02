@@ -14,4 +14,5 @@ enum class GunType : uint8
 	Phasers = 3,
 	Morter = 4,
 	Mine = 5,
+	End = 6,
 };

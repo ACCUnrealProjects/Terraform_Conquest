@@ -21,9 +21,10 @@ void AMorterWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMorterWeapon::Fire()
+void AMorterWeapon::Fire_Implementation()
 {
-	//Fire Projectile
+	AWeapon::Fire_Implementation();
+
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile
@@ -31,6 +32,4 @@ void AMorterWeapon::Fire()
 	MorterProjectile->LaunchProjectile();
 	MorterProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
 }

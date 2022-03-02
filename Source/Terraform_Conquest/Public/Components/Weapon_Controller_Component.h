@@ -4,11 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Utility/WeaponContainer.h"
 #include "WeaponTypeEnum.h"
 #include "Weapon_Controller_Component.generated.h"
 
 class AWeapon;
+class UWeaponContainerV2;
+
+USTRUCT(BlueprintType)
+struct TERRAFORM_CONQUEST_API FWeaponSlotList
+{
+	GENERATED_USTRUCT_BODY()
+
+public:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "WeaponsType")
+		GunType WeaponsType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponsSocketList")
+		TArray<FName> WeaponSlots;
+};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TERRAFORM_CONQUEST_API UWeapon_Controller_Component : public UActorComponent
@@ -17,17 +32,15 @@ class TERRAFORM_CONQUEST_API UWeapon_Controller_Component : public UActorCompone
 
 private:	
 
-	bool IsFiring = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
-	TMap<GunType, FWeaponContainer> AllGuns;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
-	GunType ActiveWeaponType = GunType::None;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
+	TArray<UWeaponContainerV2*> AllGuns;
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
+	UWeaponContainerV2* ActiveWeapon = nullptr;
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
 	TArray<GunType> AllowedGunTypes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slots", meta = (AllowPrivateAccess = "true"))
-	TMap<GunType, FWeaponSlotList> WeaponSlotsMap;
+	TArray<FWeaponSlotList> WeaponSlotsList;
 
 	// Info for where to attach new guns to
 	USceneComponent* MeshToAttachTo = nullptr;
@@ -44,17 +57,35 @@ public:
 	// Sets default values for this component's properties
 	UWeapon_Controller_Component();
 
-	// Called every frame
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	// Property replication 
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	// Needed to replicate UObject UWeaponContainerV2 
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
 	//Weapon Setup
 	void AddSocketsForWeapons(GunType WeaponType, TArray<FName> SlotNames);
+	// Guns im allowed
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerSetWeaponSlots(const TArray<GunType> &WeaponsICanHave);
+	virtual bool ServerSetWeaponSlots_Validate(const TArray<GunType> &WeaponsICanHave);
+	virtual void ServerSetWeaponSlots_Implementation(const TArray<GunType> &WeaponsICanHave);
+	//Adding Weapon
 	void AddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
-	void SetWeaponSlots(TArray<GunType> WeaponsICanHave);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerAddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
+	virtual bool ServerAddWeapon_Validate(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
+	virtual void ServerAddWeapon_Implementation(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
 
 	//Switch Weapons 
 	void SwitchWeapon();
 	void SwitchWeapon(GunType GunToLookFor);
+	
+	//Change active weapon on server
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerChangeWeapon(GunType NewWeapon);
+	virtual bool ServerChangeWeapon_Validate(GunType NewWeapon);
+	virtual void ServerChangeWeapon_Implementation(GunType NewWeapon);
 
 	//Rotate Weapon
 	void RotateCurrentWeapons(FVector CamPos, FVector CamDirection);

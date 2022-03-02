@@ -19,7 +19,7 @@ AScout::AScout()
 	SetUpLights();
 
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
-	VehicleWeaponControllerComp->SetWeaponSlots(TArray<GunType>{GunType::MachineGun});
+	VehicleWeaponControllerComp->ServerSetWeaponSlots(TArray<GunType>{GunType::MachineGun});
 }
 
 void AScout::BeginPlay()

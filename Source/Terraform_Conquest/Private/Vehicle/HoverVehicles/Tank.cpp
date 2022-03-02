@@ -24,7 +24,7 @@ ATank::ATank()
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Cannon, TArray<FName>{"CannonGun_1"});
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Mine, TArray<FName>{"MineSlot"});
-	VehicleWeaponControllerComp->SetWeaponSlots(TArray<GunType>{GunType::MachineGun, GunType::Cannon, GunType::Mine});
+	VehicleWeaponControllerComp->ServerSetWeaponSlots(TArray<GunType>{GunType::MachineGun, GunType::Cannon, GunType::Mine});
 }
 
 void ATank::BeginPlay()

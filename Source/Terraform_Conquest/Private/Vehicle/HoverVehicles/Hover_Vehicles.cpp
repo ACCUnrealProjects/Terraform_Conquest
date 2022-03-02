@@ -60,7 +60,9 @@ void AHover_Vehicles::Tick(float DeltaTime)
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)
 {
-	FRotator MyRotation = MyMesh->GetComponentRotation();
+	if (!IsLocallyControlled()) { return; }
+
+	FRotator CurrentRotation = MyMesh->GetComponentRotation();
 	// start to correct roll of ship when we are hovering
 	if (MainHoverComp && MainHoverComp->AmIHovering())
 	{
@@ -68,22 +70,25 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 		// Lerp Towards Pitch and Roll
 		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
 		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch, DeltaTime, 1.0f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 2.0f);
-		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
+		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, GroundPitch.Pitch, DeltaTime, 1.0f);
+		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, GroundRoll.Roll, DeltaTime, 2.0f);
+		FRotator NewRotation = FRotator(WantedGroundPitch, CurrentRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
 	else
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0, DeltaTime, 0.75f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.25f);
-		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
+		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, 0, DeltaTime, 0.75f);
+		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, 0, DeltaTime, 1.25f);
+		FRotator NewRotation = FRotator(WantedGroundPitch, CurrentRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
+}
 
-}void AHover_Vehicles::FlightMovement(float dt)
+void AHover_Vehicles::FlightMovement(float dt)
 {
+	if (!IsLocallyControlled()) { return; }
+
 	//Check is speed is below certain ammount
 	//If so, re-enable gravity on ship so it starts to drop
 	if (GetVelocity().Size() >= GravitySpeedCutoff)

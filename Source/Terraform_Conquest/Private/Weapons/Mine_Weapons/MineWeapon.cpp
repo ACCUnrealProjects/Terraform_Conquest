@@ -17,8 +17,10 @@ void AMineWeapon::BeginPlay()
 	Range = 150.0f;
 }
 
-void AMineWeapon::Fire()
+void AMineWeapon::Fire_Implementation()
 {
+	AWeapon::Fire_Implementation();
+
 	if (!ProjectileBlueprint) { return; }
 
 	FVector DownVector = -GetActorUpVector();
@@ -36,9 +38,6 @@ void AMineWeapon::Fire()
 	}
 
 	Mine->Tags.Add(FName(GetTeamName(TeamId)));
-
-	AWeapon::Fire();
-
 }
 
 

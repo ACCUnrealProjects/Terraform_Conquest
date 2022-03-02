@@ -37,8 +37,10 @@ void APhasersWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void APhasersWeapon::Fire()
+void APhasersWeapon::Fire_Implementation()
 {
+	AWeapon::Fire_Implementation();
+
 	if (!GetWorld()) { return; }
 
 	//Raycast fire, also fire projectile flash or laser 
@@ -65,6 +67,4 @@ void APhasersWeapon::Fire()
 	}
 
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
 }

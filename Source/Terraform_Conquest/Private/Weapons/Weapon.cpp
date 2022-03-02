@@ -1,8 +1,10 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Weapons/Weapon.h"
+#include "Weapons/Weapon.h"
+#include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+
 
 // Sets default values for this component's properties
 AWeapon::AWeapon()
@@ -11,8 +13,14 @@ AWeapon::AWeapon()
 	// off to improve performance if you don't need them.
 	PrimaryActorTick.bCanEverTick = false;
 
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicatingMovement(true);
+
 	WeaponSC = CreateDefaultSubobject<USceneComponent>(TEXT("MySceneComp"));
 	SetRootComponent(WeaponSC);
+
+	Tags.Add("Weapon");
 }
 
 // Called when the game starts
@@ -31,6 +39,21 @@ void AWeapon::BeginPlay()
 	GetTeam();
 }
 
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	DOREPLIFETIME(AWeapon, WeaponName);
+	DOREPLIFETIME(AWeapon, myWeaponType);
+	DOREPLIFETIME(AWeapon, TeamId);
+	DOREPLIFETIME(AWeapon, CurrentTotalAmmo);
+	DOREPLIFETIME(AWeapon, MaxAmmo);
+
+	//Replicate to owner client and server only
+	//DOREPLIFETIME_CONDITION(AWeapon, , COND_OwnerOnly);
+}
+
 void AWeapon::GetTeam()
 {
 	if (!GetOwner()) { return; }
@@ -47,7 +70,12 @@ void AWeapon::GetTeam()
 	}
 }
 
-void AWeapon::Fire()
+bool AWeapon::Fire_Validate()
+{
+	return true;
+}
+
+void AWeapon::Fire_Implementation()
 {
 	if (FireSound)
 	{
@@ -65,28 +93,61 @@ void AWeapon::Fire()
 
 void AWeapon::AttemptToFire()
 {
-	if (GetWorld()->GetRealTimeSeconds() - LastFire >= FireRate)
+	ServerAttemptToFire();
+}
+
+bool AWeapon::ServerAttemptToFire_Validate()
+{
+	if (GetWorld()->GetRealTimeSeconds() - LastFire < FireRate)
 	{
-		LastFire = GetWorld()->GetRealTimeSeconds();
-		if  (CurrentTotalAmmo <= 0)
+		return false;
+	}
+
+	return true;
+}
+
+void AWeapon::ServerAttemptToFire_Implementation()
+{
+	LastFire = GetWorld()->GetRealTimeSeconds();
+	if (CurrentTotalAmmo <= 0)
+	{
+		if (DryClipSound)
 		{
-			if (DryClipSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, DryClipSound, GetActorLocation());
-			}
-			return;
+			UGameplayStatics::PlaySoundAtLocation(this, DryClipSound, GetActorLocation());
 		}
-		else if (CurrentTotalAmmo > 0)
-		{
-			Fire();
-			return;
-		}
-	} 
+		return;
+	}
+	else if (CurrentTotalAmmo > 0)
+	{
+		Fire();
+		return;
+	}
+}
+
+void AWeapon::AddExternalAmmo(const float AmmoPercent)
+{
+	int32 AmmoToAdd = FMath::Floor(MaxAmmo * AmmoPercent);
+	AddAmmo(AmmoToAdd);
 }
 
 void AWeapon::AmmoRegen()
 {
-	CurrentTotalAmmo = FMath::Min(CurrentTotalAmmo + AmmoRegened, MaxAmmo);
+	AddAmmo(AmmoRegened);
+}
+
+void AWeapon::AddAmmo(const int32 AmmoAmount)
+{
+	ServerAddAmmo(AmmoAmount);
+}
+
+bool AWeapon::ServerAddAmmo_Validate(const int32 AmmoAmount)
+{
+	return true;
+}
+
+void AWeapon::ServerAddAmmo_Implementation(const int32 AmmoAmount)
+{
+	CurrentTotalAmmo = FMath::Min(CurrentTotalAmmo + AmmoAmount, MaxAmmo);
 }
 
 void AWeapon::StartRegenAmmo(const bool bExternalTrigger)
