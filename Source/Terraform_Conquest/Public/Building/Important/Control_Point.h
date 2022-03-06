@@ -13,7 +13,7 @@ class TERRAFORM_CONQUEST_API AControl_Point : public AActor
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Capture", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Capture", meta = (AllowPrivateAccess = "true"))
 	float CapPercentage = 0.0f;
 
 	const float FullCap = 100.0f;
@@ -21,7 +21,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Capture", meta = (AllowPrivateAccess = "true"))
 	float CapturePercentPerPerson = 1.0f;
 
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Capture", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BluePrintReadOnly, Category = "Capture", meta = (AllowPrivateAccess = "true"))
     bool bBeingCaptured = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Points", meta = (AllowPrivateAccess = "true"))
@@ -45,10 +45,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* CaptureIcon = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Teams", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BluePrintReadOnly, Category = "Teams", meta = (AllowPrivateAccess = "true"))
 	ETeam CurrentTeamControl = ETeam::Neutral;
 
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Teams", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, VisibleAnywhere, BluePrintReadOnly, Category = "Teams", meta = (AllowPrivateAccess = "true"))
 	ETeam CurrentTeamCapturing = ETeam::Neutral;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Teams", meta = (AllowPrivateAccess = "true"))
@@ -65,6 +65,7 @@ private:
 	UFUNCTION()
 	void CapturingPoint();
 
+	UFUNCTION()
 	void CapturedPoint(ETeam TeamThatCaptured);
 
 	UFUNCTION()
@@ -77,5 +78,8 @@ protected:
 public:	
 	// Sets default values for this actor's properties
 	AControl_Point();
+
+	/* Property replication */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 };

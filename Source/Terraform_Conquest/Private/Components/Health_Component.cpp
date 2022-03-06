@@ -43,15 +43,19 @@ void UHealth_Component::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (TimeSinceLastHit > 0.0f)
+	if (GetOwner()->HasAuthority())
 	{
-		TimeSinceLastHit -= DeltaTime;
+		if (TimeSinceLastHit > 0.0f)
+		{
+			TimeSinceLastHit -= DeltaTime;
+		}
+		else if (TimeSinceLastHit <= 0.0f && Shield != MaxShield && !SheildRegenOn)
+		{
+			SheildRegenOn = true;
+			GetWorld()->GetTimerManager().SetTimer(SheildRegenTickTimer, this, &UHealth_Component::SheildRegenTick, ShieldRegenRate, false);
+		}
 	}
-	else if (TimeSinceLastHit <= 0.0f && Shield != MaxShield && !SheildRegenOn)
-	{
-		SheildRegenOn = true;
-		GetWorld()->GetTimerManager().SetTimer(SheildRegenTickTimer, this, &UHealth_Component::SheildRegenTick, ShieldRegenRate, false);
-	}
+
 }
 
 void UHealth_Component::SheildRegenTick()

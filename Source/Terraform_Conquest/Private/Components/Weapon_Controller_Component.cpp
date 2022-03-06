@@ -111,10 +111,12 @@ void UWeapon_Controller_Component::AddSocketsForWeapons(GunType WeaponType, TArr
 
 void UWeapon_Controller_Component::SwitchWeapon()
 {
-	if (AllGuns.Num() <= 0) { return; }
+	// If we only have 1 gun then we cant really switch to another
+	if (AllGuns.Num() <= 1) { return; }
 
 	bool FinishedLooking = false;
 	uint8 SearchGunNum, CurrectGunNum = 0;
+
 	if (ActiveWeapon && (uint8)ActiveWeapon->WeaponsType)
 	{ 
 		CurrectGunNum = SearchGunNum = (uint8)ActiveWeapon->WeaponsType; 
@@ -122,8 +124,14 @@ void UWeapon_Controller_Component::SwitchWeapon()
 
 	while (!FinishedLooking)
 	{
-		SearchGunNum = FMath::Clamp(SearchGunNum++, (uint8)((uint8)GunType::None + 1), (uint8)((uint8)GunType::End - 1));
-		if (SearchGunNum == CurrectGunNum) { break; }
+		if (SearchGunNum >= (uint8)GunType::End) { (uint8)GunType::None + 1; }
+
+		//We have looped back to our original weapon, so nothing to switch to
+		if (SearchGunNum == CurrectGunNum) 
+		{ 
+			FinishedLooking = true; 
+			break; 
+		}
 
 		for (auto GunSet : AllGuns)
 		{
@@ -133,11 +141,6 @@ void UWeapon_Controller_Component::SwitchWeapon()
 				ServerChangeWeapon((GunType)SearchGunNum);
 				break;
 			}
-		}
-		//We have looped back to our original weapon, so nothing to switch to
-		if (CurrectGunNum == (uint8)ActiveWeapon->WeaponsType)
-		{
-			FinishedLooking = true;
 		}
 	}
 }
@@ -157,10 +160,8 @@ void UWeapon_Controller_Component::SwitchWeapon(GunType GunToLookFor)
 
 bool UWeapon_Controller_Component::ServerChangeWeapon_Validate(GunType NewWeapon)
 {
-	if(NewWeapon == GunType::None)
-	{
-		return false;
-	}
+	if (NewWeapon == GunType::None) { return false; }
+
 	return true;
 }
 
