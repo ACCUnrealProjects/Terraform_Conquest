@@ -19,8 +19,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
 	float MaxMinPitchLook = 30.0f;
 
-	void RotationCorrection(float DeltaTime);
-
+private:
+	//Rotation
+	void Rotation(float DeltaTime);
 	//Movement
 	void ForwardMovement(float Amount);
 
@@ -31,8 +32,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
 	float BackWardsThrust = ForwardThrust * 0.3f;
 
+protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	// Camera Change (FPS/TPS)
+	virtual void CameraChange() override;
 
 public:
 

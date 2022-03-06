@@ -28,6 +28,8 @@ APhasersWeapon::APhasersWeapon()
 
 	FireEffect->SetBeamSourcePoint(0, GetActorLocation(), 0);
 	FireEffect->SetBeamEndPoint(0, GetActorLocation());
+	
+	Range = 10000.0f;
 }
 
 void APhasersWeapon::BeginPlay()
@@ -35,38 +37,34 @@ void APhasersWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void APhasersWeapon::Fire()
+void APhasersWeapon::Fire_Implementation()
 {
+	AWeapon::Fire_Implementation();
+
+	if (!GetWorld()) { return; }
+
 	//Raycast fire, also fire projectile flash or laser 
 	FHitResult ShotHit;
 	FVector RayStart = GetActorLocation();
 	FVector RayEnd = RayStart + (GetActorForwardVector() * Range);
 
-	if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
-	{
-		UGameplayStatics::ApplyDamage(ShotHit.GetActor(), Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-		DrawDebugLine(GetWorld(), RayStart, ShotHit.ImpactPoint, FColor(0, 255, 0), true, 0, 0, 10);
-	}
+	bool bPhaserHit = GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams);
 
 	FireEffect->SetVectorParameter("Source", RayStart);
-	FireEffect->SetVectorParameter("Target", ShotHit.ImpactPoint);
 	FireEffect->SetBeamSourcePoint(0, RayStart, 0);
-	FireEffect->SetBeamEndPoint(0, ShotHit.ImpactPoint);
+
+	if (bPhaserHit)
+	{
+		UGameplayStatics::ApplyDamage(ShotHit.GetActor(), Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, ShotHit.Location + ShotHit.ImpactNormal, FRotator());
+		FireEffect->SetVectorParameter("Target", ShotHit.ImpactPoint);
+		FireEffect->SetBeamEndPoint(0, ShotHit.ImpactPoint);
+	}
+	else
+	{
+		FireEffect->SetVectorParameter("Target", RayEnd);
+		FireEffect->SetBeamEndPoint(0, RayEnd);
+	}
 
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
-}
-
-
-void APhasersWeapon::ChangeActiveState(const bool AmIActive)
-{
-	if (AmIActive)
-	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &APhasersWeapon::AmmoRegen, AmmoRegened, true);
-	}
-	else if(!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
 }

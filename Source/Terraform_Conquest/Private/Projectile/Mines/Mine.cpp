@@ -26,6 +26,8 @@ AMine::AMine()
 	MyHealthComp->bEditableWhenInherited = true;
 
 	MyHealthComp->SetUp(1, 0);
+
+	Tags.Add("Mine");
 }
 
 
@@ -70,6 +72,19 @@ void AMine::Trigger()
 
 void AMine::MineOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	for (auto myTag : Tags)
+	{
+		for (auto OtherTag : OtherActor->Tags)
+		{
+			// Check to make sure we are not blowing up on a Friendly
+			if (myTag == OtherTag &&
+				myTag.ToString().Find("ETeam"))
+			{
+				return;
+			}
+		}
+	}
+
 	Trigger();
 }
 

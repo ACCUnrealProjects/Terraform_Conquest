@@ -9,15 +9,22 @@
 AScout::AScout()
 {
 	ForwardThrust = 1200.0f;
+	VehicleName = "Scout";
 
-	VehicleWeaponController->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
-	VehicleWeaponController->SetWeaponSlots(TArray<GunType>{GunType::MachineGun});
+	const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObj(TEXT("/Game/Meshes/Ships/craft_racer"));
+	if (MeshObj.Succeeded())
+	{
+		MyMesh->SetStaticMesh(MeshObj.Object);
+	}
+	SetUpLights();
+
+	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
+	VehicleWeaponControllerComp->ServerSetWeaponSlots(TArray<GunType>{GunType::MachineGun});
 }
 
 void AScout::BeginPlay()
 {
 	Super::BeginPlay();
 	MainHoverComp->SetUp(50.0f, 5000.0f, 6.0f);
-	VehicleWeaponController->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
-
+	VehicleWeaponControllerComp->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
 }

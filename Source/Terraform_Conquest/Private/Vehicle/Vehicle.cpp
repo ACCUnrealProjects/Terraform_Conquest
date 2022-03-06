@@ -1,8 +1,11 @@
 // Alex Chatt Terraform_Conquest 2020
 
 #include "Vehicle/Vehicle.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/Health_Component.h"
 #include "Components/Weapon_Controller_Component.h"
+#include "Components/RectLightComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -12,11 +15,16 @@ AVehicle::AVehicle()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicateMovement(false);
+
 	MyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyMesh"));
 	SetRootComponent(MyMesh);
 
 	MyHealth = CreateDefaultSubobject<UHealth_Component>(TEXT("MyHealthComp"));
 	MyHealth->bEditableWhenInherited = true;
+	MyHealth->SetIsReplicated(true);
 
 	FPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyFPSCam"));
 	FPSCamera->bUsePawnControlRotation = false;
@@ -32,19 +40,60 @@ AVehicle::AVehicle()
 	TPSCamera->bUsePawnControlRotation = false;
 	TPSCamera->SetupAttachment(TPSCameraSpring);
 
-	VehicleWeaponController = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
-	VehicleWeaponController->bEditableWhenInherited = true;
-}
+	VehicleWeaponControllerComp = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
+	VehicleWeaponControllerComp->bEditableWhenInherited = true;
+	VehicleWeaponControllerComp->SetIsReplicated(true);
 
+	Tags.Add("Vehicle");
+}
 
 // Called when the game starts or when spawned
 void AVehicle::BeginPlay()
 {
 	Super::BeginPlay();
-	MyMesh->SetCenterOfMass(FVector(0, 0, -100));
 
-	MyHealth->IHaveDied.AddUniqueDynamic(this, &AVehicle::Death);
+	MyMesh->SetCenterOfMass(FVector(0, 0, -100));
+	if (HasAuthority())
+	{
+		MyHealth->IHaveDied.AddUniqueDynamic(this, &AVehicle::Death);
+	}
 }
+
+void AVehicle::SetUpLights()
+{
+	TArray<FName> LightNames = { FName(TEXT("Light_1")), FName(TEXT("Light_2")) };
+
+	if (!MyMesh) { return; }
+
+	for (auto LightName : LightNames)
+	{
+		if (MyMesh->DoesSocketExist(LightName))
+		{
+			URectLightComponent* NewLight = CreateDefaultSubobject<URectLightComponent>(LightName);
+			NewLight->bEditableWhenInherited = true;
+			NewLight->SetupAttachment(MyMesh, LightName);
+			NewLight->SetVisibility(bAreLightsOn);
+			NewLight->SetIsReplicated(true);
+			Lights.Add(NewLight);
+		}
+	}
+}
+
+void AVehicle::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	DOREPLIFETIME(AVehicle, MyPosition);
+	DOREPLIFETIME(AVehicle, MyRotation);
+	DOREPLIFETIME(AVehicle, TeamId);
+
+	//Replicate to owner client and server only
+	DOREPLIFETIME_CONDITION(AVehicle, WantToFire, COND_OwnerOnly);
+
+	//Replicate to none owner client and server only
+}
+
 
 // Called every frame
 void AVehicle::Tick(float DeltaTime)
@@ -53,8 +102,44 @@ void AVehicle::Tick(float DeltaTime)
 
 	if (WantToFire)
 	{
-		VehicleWeaponController->FireCurrent();
+		VehicleWeaponControllerComp->FireCurrent();
 	}
+
+	UpdateTransform();
+}
+
+void AVehicle::UpdateTransform()
+{
+	if (IsLocallyControlled())
+	{
+		if (HasAuthority())
+		{
+			MyPosition = GetActorLocation();
+			MyRotation = GetActorRotation();
+		}
+		else
+		{
+			ServerSetTransform(GetActorLocation(), GetActorRotation());
+		}
+	}
+	else
+	{
+		FVector NewPos = FMath::VInterpTo(GetActorLocation(), MyPosition, GetWorld()->GetDeltaSeconds(), 50.0f);
+		FRotator NewRot = FMath::RInterpTo(GetActorRotation(), MyRotation, GetWorld()->GetDeltaSeconds(), 50.0f);
+		SetActorLocation(NewPos);
+		SetActorRotation(NewRot);
+	}
+}
+
+bool AVehicle::ServerSetTransform_Validate(FVector NewPosition, FRotator NewRotation)
+{
+	return true;
+}
+
+void AVehicle::ServerSetTransform_Implementation(FVector NewPosition, FRotator NewRotation)
+{
+	MyPosition = NewPosition;
+	MyRotation = NewRotation;
 }
 
 void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -68,20 +153,36 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::Fire);
 	PlayerInputComponent->BindAction(TEXT("LeftClickAction"), EInputEvent::IE_Released, this, &AVehicle::StopFiring);
 	PlayerInputComponent->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::ChangeWeapon);
+	//Lights
+	PlayerInputComponent->BindAction(TEXT("Lights"), EInputEvent::IE_Pressed, this, &AVehicle::ToggleLights);
 }
 
 void AVehicle::SetTeamID(ETeam TeamID)
 {
 	TeamId = TeamID;
+	Tags.Add(FName(GetTeamName(TeamID)));
 }
-
 
 void AVehicle::CameraChange()
 {
 	BIs1stPersonCamera = !BIs1stPersonCamera;
+	ServerCameraChange(BIs1stPersonCamera);
+}
+
+bool AVehicle::ServerCameraChange_Validate(bool bIsFPSCam)
+{
+	return true;
+}
+
+void AVehicle::ServerCameraChange_Implementation(bool bIsFPSCam)
+{
+	MultiCameraChange(bIsFPSCam);
+}
+
+void AVehicle::MultiCameraChange_Implementation(bool bIsFPSCam)
+{
 	FPSCamera->SetActive(BIs1stPersonCamera);
 	TPSCamera->SetActive(!BIs1stPersonCamera);
-	FPSCamera->GetForwardVector();
 }
 
 void AVehicle::Fire()
@@ -96,20 +197,45 @@ void AVehicle::StopFiring()
 
 void AVehicle::ChangeWeapon()
 {
-	VehicleWeaponController->SwitchWeapon();
+	VehicleWeaponControllerComp->SwitchWeapon();
+}
+
+void AVehicle::ToggleLights()
+{
+	bAreLightsOn = !bAreLightsOn;
+	ServerToggleLights(bAreLightsOn);
+}
+
+bool AVehicle::ServerToggleLights_Validate(bool bLightState)
+{
+	return true;
+}
+
+void AVehicle::ServerToggleLights_Implementation(bool bLightState)
+{
+	MultiToggleLights(bLightState);
+}
+
+void AVehicle::MultiToggleLights_Implementation(bool bLightState)
+{
+	for (auto Light : Lights)
+	{
+		Light->SetVisibility(bLightState);
+	}
 }
 
 float AVehicle::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	if (MyHealth) { return MyHealth->TakeDamage(DamageAmount); }
-	else { return DamageAmount; }
-}
-
-ETeam AVehicle::GetTeamId() const
-{
-	return TeamId;
+	if (MyHealth && HasAuthority())
+	{ 
+		return MyHealth->TakeDamage(DamageAmount); 
+	}
+	else 
+	{ 
+		return DamageAmount; 
+	}
 }
 
 void AVehicle::Death()

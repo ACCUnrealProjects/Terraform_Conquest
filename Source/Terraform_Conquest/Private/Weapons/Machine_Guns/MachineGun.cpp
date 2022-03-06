@@ -12,6 +12,8 @@ AMachineGun::AMachineGun()
 	FireEffect->bAutoActivate = false;
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FireEffect->SetRelativeRotation(FRotator(0, -90.0f, 0));
+
+	Range = 10000.0f;
 }
 
 void AMachineGun::BeginPlay()
@@ -19,27 +21,15 @@ void AMachineGun::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMachineGun::Fire()
+void AMachineGun::Fire_Implementation()
 {
-	//Fire Projectile
+	AWeapon::Fire_Implementation();
+
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile 
 	ATracer_Round* TracerProjectile = GetWorld()->SpawnActor<ATracer_Round>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
+	TracerProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	TracerProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
-}
-
-void AMachineGun::ChangeActiveState(const bool AmIActive)
-{
-	if (AmIActive)
-	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AMachineGun::AmmoRegen, AmmoRegened, true);
-	}
-	else if (!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
 }

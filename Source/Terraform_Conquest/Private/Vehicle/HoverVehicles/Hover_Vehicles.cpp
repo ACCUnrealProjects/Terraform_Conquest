@@ -3,6 +3,7 @@
 #include "Vehicle/HoverVehicles/Hover_Vehicles.h"
 #include "Components/Hover_Component.h"
 #include "Components/Weapon_Controller_Component.h"
+#include "Components/WidgetComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -25,12 +26,16 @@ AHover_Vehicles::AHover_Vehicles()
 	BIs1stPersonCamera = true;
 	FPSCamera->SetActive(BIs1stPersonCamera);
 	TPSCamera->SetActive(!BIs1stPersonCamera);
+
+	TPSCameraSpring->TargetArmLength = 250.0f;
+	TPSCameraSpring->SetRelativeRotation(FRotator(-20.0f, 0, 0));
+	TPSCamera->SetRelativeRotation(FRotator(20.0f, 0, 0));
 }
 
 // Called when the game starts or when spawned
 void AHover_Vehicles::BeginPlay()
 {
-	AVehicle::BeginPlay();
+	Super::BeginPlay();
 
 	BackWardsThrust = ForwardThrust * 0.5f;
 	StrafeThrust = ForwardThrust * 0.60f;
@@ -40,7 +45,7 @@ void AHover_Vehicles::BeginPlay()
 // Called every frame
 void AHover_Vehicles::Tick(float DeltaTime)
 {
-	AVehicle::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
 
 	switch (CurrentMoveState)
 	{
@@ -51,37 +56,13 @@ void AHover_Vehicles::Tick(float DeltaTime)
 		FlightMovement(DeltaTime);
 		break;
 	}
-
-	RotateMe(DeltaTime);
-}
-
-void AHover_Vehicles::RotateMe(float dt)
-{
-	if (CurrentMoveState == MovementState::Hovering)
-	{
-		RestrictedPitch += -RotationChange.Y * dt * (RotateSens  * 0.0025f);
-		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
-		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
-		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
-		CameraRotation.Pitch = RestrictedPitch;
-		FPSCamera->SetRelativeRotation(CameraRotation);
-		CameraRotation.Pitch = RestrictedPitch + -TPSCameraSpring->GetRelativeRotation().Pitch;
-		TPSCamera->SetRelativeRotation(CameraRotation);
-	}
-	else if (CurrentMoveState == MovementState::Flying)
-	{
-		MyMesh->AddTorqueInDegrees(RotationChange.Y * GetActorRightVector(), NAME_None, true); //Pitch
-	}
-	MyMesh->AddTorqueInDegrees(RotationChange.Z * GetActorUpVector(), NAME_None, true); //Yaw
-	MyMesh->AddTorqueInDegrees(RotationChange.X * GetActorForwardVector(), NAME_None, true); //Roll
-	RotationChange = FVector::ZeroVector;
-
-	VehicleWeaponController->RotateCurrentWeapons(FPSCamera->GetRelativeRotation());
 }
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)
 {
-	FRotator MyRotation = MyMesh->GetComponentRotation();
+	if (!IsLocallyControlled()) { return; }
+
+	FRotator CurrentRotation = MyMesh->GetComponentRotation();
 	// start to correct roll of ship when we are hovering
 	if (MainHoverComp && MainHoverComp->AmIHovering())
 	{
@@ -89,22 +70,25 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 		// Lerp Towards Pitch and Roll
 		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
 		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, GroundPitch.Pitch, DeltaTime, 1.0f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, GroundRoll.Roll, DeltaTime, 2.0f);
-		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
+		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, GroundPitch.Pitch, DeltaTime, 1.0f);
+		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, GroundRoll.Roll, DeltaTime, 2.0f);
+		FRotator NewRotation = FRotator(WantedGroundPitch, CurrentRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
 	else
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
-		float WantedGroundPitch = FMath::FInterpTo(MyRotation.Pitch, 0, DeltaTime, 0.75f);
-		float WantedGroundRoll = FMath::FInterpTo(MyRotation.Roll, 0, DeltaTime, 1.25f);
-		FRotator NewRotation = FRotator(WantedGroundPitch, MyRotation.Yaw, WantedGroundRoll);
+		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, 0, DeltaTime, 0.75f);
+		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, 0, DeltaTime, 1.25f);
+		FRotator NewRotation = FRotator(WantedGroundPitch, CurrentRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
+}
 
-}void AHover_Vehicles::FlightMovement(float dt)
+void AHover_Vehicles::FlightMovement(float dt)
 {
+	if (!IsLocallyControlled()) { return; }
+
 	//Check is speed is below certain ammount
 	//If so, re-enable gravity on ship so it starts to drop
 	if (GetVelocity().Size() >= GravitySpeedCutoff)
@@ -117,11 +101,10 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 	}
 
 	FRotator CameraRotation = FPSCamera->GetRelativeRotation();
-	float PitchBase = CameraRotation.Pitch;
-	CameraRotation.Pitch = FMath::FInterpTo(PitchBase, 0.0f, dt, 2.0f);
+	CameraRotation.Pitch = FMath::FInterpTo(CameraRotation.Pitch, 0.0f, dt, 0.1f);
 	FPSCamera->SetRelativeRotation(CameraRotation);
-	CameraRotation.Pitch = FMath::FInterpTo(PitchBase + 
-		-TPSCameraSpring->GetRelativeRotation().Pitch, 0.0f, dt, 2.0f);
+	CameraRotation.Pitch = FMath::FInterpTo(CameraRotation.Pitch +
+		-TPSCameraSpring->GetRelativeRotation().Pitch, 0.0f, dt, 0.1f);
 	TPSCamera->SetRelativeRotation(CameraRotation);
 }
 
@@ -143,16 +126,29 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction(TEXT("SwitchMode"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::SwitchMovementMode);
 }
 
+void AHover_Vehicles::CameraChange()
+{
+	Super::CameraChange();
+}
+
 void AHover_Vehicles::ActivateHoverSystem()
 {
 	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(true);
+	for (auto HoverComp : SupportHoverComps)
+	{
+		HoverComp->ChangeHoverState(true);
+	}
 }
 
 void AHover_Vehicles::DeactivateHoverSystem()
 {
 	if (!MainHoverComp) { return; }
 	MainHoverComp->ChangeHoverState(false);
+	for (auto HoverComp : SupportHoverComps)
+	{
+		HoverComp->ChangeHoverState(false);
+	}
 }
 
 void AHover_Vehicles::SwitchMovementMode()
@@ -199,20 +195,64 @@ void AHover_Vehicles::Strafe(float Amount)
 
 void AHover_Vehicles::YawLook(float Amount)
 {
-	RotationChange.Z += Amount * RotateSens;
+	MyMesh->AddTorqueInDegrees((Amount * TorqueSense * DefaultTorqueForce) 
+		* GetActorUpVector(), NAME_None, true); //Yaw
+	SetWeaponRotation();
 }
 
 void AHover_Vehicles::PitchLook(float Amount)
 {
-	RotationChange.Y += (Amount * RotateSens) * -1.0f;
+	if (!GetWorld()) { return; }
+
+	if (CurrentMoveState == MovementState::Hovering)
+	{
+		RestrictedPitch += (Amount * CamSense * DefaultCameraRotation)
+			* GetWorld()->GetDeltaSeconds();
+		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
+		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
+		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
+		CameraRotation.Pitch = RestrictedPitch;
+		FPSCamera->SetRelativeRotation(CameraRotation);
+		CameraRotation.Pitch = RestrictedPitch + -TPSCameraSpring->GetRelativeRotation().Pitch;
+		TPSCamera->SetRelativeRotation(CameraRotation);
+	}
+	else if (CurrentMoveState == MovementState::Flying)
+	{
+		MyMesh->AddTorqueInDegrees(((Amount * TorqueSense * DefaultTorqueForce)
+			* -1.0f) * GetActorRightVector(), NAME_None, true); //Pitch
+	}
+	SetWeaponRotation();
 }
 
 void AHover_Vehicles::RollLook(float Amount)
 {
 	if(CurrentMoveState == MovementState::Flying)
 	{
-		RotationChange.X += Amount * RotateSens;
+		MyMesh->AddTorqueInDegrees((Amount * TorqueSense * DefaultTorqueForce)
+			* GetActorForwardVector(), NAME_None, true); //Roll
 	}
+}
+
+void AHover_Vehicles::SetWeaponRotation()
+{
+	FVector CamPos;
+	FVector CamDir;
+
+	if (BIs1stPersonCamera && FPSCamera) {
+		CamPos = FPSCamera->GetComponentLocation();
+		CamDir = FPSCamera->GetForwardVector();
+	}
+	else if (TPSCamera) {
+		CamPos = TPSCamera->GetComponentLocation();
+		CamDir = TPSCamera->GetForwardVector();
+	}
+
+	VehicleWeaponControllerComp->RotateCurrentWeapons(CamPos, CamDir);
+}
+
+void AHover_Vehicles::Fire()
+{
+	Super::Fire();
 }
 
 void AHover_Vehicles::IncreaseJumpHeight()

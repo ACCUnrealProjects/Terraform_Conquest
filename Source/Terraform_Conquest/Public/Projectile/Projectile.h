@@ -40,6 +40,6 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
-	virtual void LaunchProjectile();
+	virtual void LaunchProjectile() PURE_VIRTUAL( AProjectile::LaunchProjectile, );
 
 };

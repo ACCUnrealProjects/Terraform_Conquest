@@ -50,7 +50,6 @@ void ACannon_Projectile::BeginPlay()
 void ACannon_Projectile::LaunchProjectile()
 {
 	ProjectileMovement->Activate();
-	Super::LaunchProjectile();
 }
 
 void ACannon_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

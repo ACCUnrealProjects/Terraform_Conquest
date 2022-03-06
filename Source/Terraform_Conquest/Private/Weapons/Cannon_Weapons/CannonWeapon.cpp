@@ -12,6 +12,8 @@ ACannonWeapon::ACannonWeapon()
 	FireEffect->bAutoActivate = false;
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FireEffect->SetRelativeRotation(FRotator(0, -90.0f, 0));
+
+	Range = 10000.0f;
 }
 
 void ACannonWeapon::BeginPlay()
@@ -19,27 +21,15 @@ void ACannonWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ACannonWeapon::Fire()
+void ACannonWeapon::Fire_Implementation()
 {
-	//Fire Projectile
+	AWeapon::Fire_Implementation();
+
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile
 	ACannon_Projectile* CannonProjectile = GetWorld()->SpawnActor<ACannon_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
+	CannonProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	CannonProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
-}
-
-void ACannonWeapon::ChangeActiveState(const bool AmIActive)
-{
-	if (AmIActive)
-	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &ACannonWeapon::AmmoRegen, AmmoRegened, true);
-	}
-	else if (!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
 }

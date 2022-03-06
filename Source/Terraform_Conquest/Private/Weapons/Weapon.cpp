@@ -1,8 +1,10 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Weapons/Weapon.h"
+#include "Weapons/Weapon.h"
+#include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+
 
 // Sets default values for this component's properties
 AWeapon::AWeapon()
@@ -11,8 +13,14 @@ AWeapon::AWeapon()
 	// off to improve performance if you don't need them.
 	PrimaryActorTick.bCanEverTick = false;
 
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicatingMovement(true);
+
 	WeaponSC = CreateDefaultSubobject<USceneComponent>(TEXT("MySceneComp"));
 	SetRootComponent(WeaponSC);
+
+	Tags.Add("Weapon");
 }
 
 // Called when the game starts
@@ -23,49 +31,133 @@ void AWeapon::BeginPlay()
 	ActorParams.Owner = GetOwner();
 	ActorParams.Instigator = Cast<APawn>(GetOwner());
 
+	AmmoRegenStartTimerParam.BindUFunction(this, FName("StartRegenAmmo"), false);
+
 	CurrentTotalAmmo = MaxAmmo;
+	AmmoRegened = MaxAmmo * AmmoRegenPercentage;
+	
+	GetTeam();
 }
 
-void AWeapon::Fire()
+void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	DOREPLIFETIME(AWeapon, WeaponName);
+	DOREPLIFETIME(AWeapon, myWeaponType);
+	DOREPLIFETIME(AWeapon, TeamId);
+	DOREPLIFETIME(AWeapon, CurrentTotalAmmo);
+	DOREPLIFETIME(AWeapon, MaxAmmo);
+
+	//Replicate to owner client and server only
+	//DOREPLIFETIME_CONDITION(AWeapon, , COND_OwnerOnly);
+}
+
+void AWeapon::GetTeam()
+{
+	if (!GetOwner()) { return; }
+
+	for (auto tag : GetOwner()->Tags)
+	{
+		for (uint8 i = 0; i < (uint8)ETeam::Last; i++)
+		{
+			if (GetTeamName(ETeam(i)) == tag.ToString())
+			{
+				TeamId = ETeam(i);
+			}
+		}
+	}
+}
+
+bool AWeapon::Fire_Validate()
+{
+	return true;
+}
+
+void AWeapon::Fire_Implementation()
 {
 	if (FireSound)
 	{
-	  UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
-
 	FireEffect->Activate();
+
+	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
+	if (!ExternalRegenOn)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
+	}
+	GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
 }
 
 void AWeapon::AttemptToFire()
 {
-	if (GetWorld()->GetRealTimeSeconds() - LastFire >= FireRate)
+	ServerAttemptToFire();
+}
+
+bool AWeapon::ServerAttemptToFire_Validate()
+{
+	if (GetWorld()->GetRealTimeSeconds() - LastFire < FireRate)
 	{
-		LastFire = GetWorld()->GetRealTimeSeconds();
-		if  (CurrentTotalAmmo <= 0)
+		return false;
+	}
+
+	return true;
+}
+
+void AWeapon::ServerAttemptToFire_Implementation()
+{
+	LastFire = GetWorld()->GetRealTimeSeconds();
+	if (CurrentTotalAmmo <= 0)
+	{
+		if (DryClipSound)
 		{
-			if (DryClipSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, DryClipSound, GetActorLocation());
-			}
-			return;
+			UGameplayStatics::PlaySoundAtLocation(this, DryClipSound, GetActorLocation());
 		}
-		else if (CurrentTotalAmmo > 0)
-		{
-			Fire();
-			return;
-		}
-	} 
+		return;
+	}
+	else if (CurrentTotalAmmo > 0)
+	{
+		Fire();
+		return;
+	}
+}
+
+void AWeapon::AddExternalAmmo(const float AmmoPercent)
+{
+	int32 AmmoToAdd = FMath::Floor(MaxAmmo * AmmoPercent);
+	AddAmmo(AmmoToAdd);
 }
 
 void AWeapon::AmmoRegen()
 {
-	CurrentTotalAmmo += FMath::Min(CurrentTotalAmmo + AmmoRegened, MaxAmmo);
+	AddAmmo(AmmoRegened);
 }
 
-void AWeapon::ExternalRegenAmmo()
+void AWeapon::AddAmmo(const int32 AmmoAmount)
 {
-	ExternalRegenOn = true;
-	GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AWeapon::AmmoRegen, AmmoRegened, true);
+	ServerAddAmmo(AmmoAmount);
+}
+
+bool AWeapon::ServerAddAmmo_Validate(const int32 AmmoAmount)
+{
+	return true;
+}
+
+void AWeapon::ServerAddAmmo_Implementation(const int32 AmmoAmount)
+{
+	CurrentTotalAmmo = FMath::Min(CurrentTotalAmmo + AmmoAmount, MaxAmmo);
+}
+
+void AWeapon::StartRegenAmmo(const bool bExternalTrigger)
+{
+	ExternalRegenOn = bExternalTrigger;
+	if (bExternalTrigger)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
+	}
+	GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AWeapon::AmmoRegen, AmmoRegenRate, true);
 }
 
 void AWeapon::CancelRegenAmmo()
@@ -74,22 +166,11 @@ void AWeapon::CancelRegenAmmo()
 	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
 }
 
-bool AWeapon::OutOfAmmo() const
+void AWeapon::ChangeActiveState(const bool AmIActive)
 {
-	return CurrentTotalAmmo <= 0;
-}
-
-void AWeapon::AddAmmo(const float AmmoPercent)
-{
-	CurrentTotalAmmo = FMath::Min(CurrentTotalAmmo + (int32)(MaxAmmo * AmmoPercent), MaxAmmo);
-}
-
-GunType AWeapon::GetGunType() const
-{
-	return myWeaponType;
-}
-
-FName AWeapon::GetWeaponName() const
-{
-	return WeaponName;
+	if (AmIActive)
+	{
+		FTimerDelegate TimerParam;
+		GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
+	}
 }

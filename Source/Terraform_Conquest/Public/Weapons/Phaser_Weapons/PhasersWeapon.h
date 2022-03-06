@@ -16,8 +16,6 @@ class TERRAFORM_CONQUEST_API APhasersWeapon : public AWeapon
 
 private:
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileType", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class AProjectile> ProjectileBlueprint = nullptr;
 
 protected:
 
@@ -25,21 +23,15 @@ protected:
 		class UParticleSystem* HitEffect = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Damage")
-		int32 Damage;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Range")
-		float Range;
+		int32 Damage = 1;
 
 protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire() override;
+	virtual void Fire_Implementation() override;
 
 public:
 
 	APhasersWeapon();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-
 };

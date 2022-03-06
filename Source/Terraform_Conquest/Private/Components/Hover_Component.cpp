@@ -37,7 +37,11 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!bIsHoverEnabled) { return; }
+	if (!bIsHoverEnabled || 
+		!Cast<APawn>(GetOwner())->IsLocallyControlled()) 
+	{ 
+		return; 
+	}
 
 	HoverCalc();
 
@@ -72,6 +76,7 @@ void UHover_Component::HoverCalc()
 		// Get a counter-acting up force
 		FVector NF = GetUpVector() * DistanceNormal * SupressionStiffness;
 		// get what we want the new vel to be for the point
+		// Times by the mass to be mass independent
 		FVector DF = (NF - CF) * MyPrimComponent->GetMass();
 
 		// Apply the force

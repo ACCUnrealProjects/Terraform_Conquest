@@ -23,12 +23,9 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire() override;
+	virtual void Fire_Implementation() override;
 
 public:
 
 	AMachineGun();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-
 };

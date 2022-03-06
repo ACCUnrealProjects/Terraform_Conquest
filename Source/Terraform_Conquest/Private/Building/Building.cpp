@@ -62,7 +62,7 @@ void ABuilding::StartDestroy()
 
 void ABuilding::DestroyCleanUp()
 {
-	for (int i = 0; i < TilesImOn.Num(); i++)
+	for (int32 i = 0; i < TilesImOn.Num(); i++)
 	{
 		TilesImOn[i]->SetAvailablity(true);
 	}

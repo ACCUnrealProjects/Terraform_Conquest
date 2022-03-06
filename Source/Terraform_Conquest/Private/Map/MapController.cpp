@@ -33,10 +33,10 @@ void AMapController::BeginPlay()
 
 	TArray<AMapTile*> WidthTiles;
 
-	for (int x = 0; x < MapWidth; x += TileSize)
+	for (int32 x = 0; x < MapWidth; x += TileSize)
 	{
 		WidthTiles.Empty();
-		for (int y = 0; y < MapHeight; y += TileSize)
+		for (int32 y = 0; y < MapHeight; y += TileSize)
 		{
 			AMapTile* NewTile = GetWorld()->SpawnActor<AMapTile>(TileBlueprint, FVector(FVector(StartingSpawnPos.X + x, StartingSpawnPos.Y + y, StartingSpawnPos.Z)), FRotator(0));
 			NewTile->SetIndex(x, y);

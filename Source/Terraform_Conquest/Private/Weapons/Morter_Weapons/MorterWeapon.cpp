@@ -12,6 +12,8 @@ AMorterWeapon::AMorterWeapon()
 	FireEffect->bAutoActivate = false;
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FireEffect->SetRelativeRotation(FRotator(0,-90.0f,0));
+
+	Range = 10000.0f;
 }
 
 void AMorterWeapon::BeginPlay()
@@ -19,27 +21,15 @@ void AMorterWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMorterWeapon::Fire()
+void AMorterWeapon::Fire_Implementation()
 {
-	//Fire Projectile
+	AWeapon::Fire_Implementation();
+
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile
 	AMorter_Projectile* MorterProjectile = GetWorld()->SpawnActor<AMorter_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
 	MorterProjectile->LaunchProjectile();
+	MorterProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	CurrentTotalAmmo--;
-
-	AWeapon::Fire();
-}
-
-void AMorterWeapon::ChangeActiveState(const bool AmIActive)
-{
-	if (AmIActive)
-	{
-		GetWorld()->GetTimerManager().SetTimer(AmmoRegenTimer, this, &AMorterWeapon::AmmoRegen, AmmoRegened, true);
-	}
-	else if (!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
 }

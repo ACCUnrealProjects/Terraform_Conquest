@@ -23,6 +23,8 @@ protected:
 
 	virtual void Shutdown() override;
 
+	virtual void StartGameInstance() override;
+
 public:
 
 

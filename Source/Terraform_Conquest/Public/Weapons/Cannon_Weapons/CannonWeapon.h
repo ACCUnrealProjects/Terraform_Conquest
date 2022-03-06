@@ -23,13 +23,10 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire() override;
+	virtual void Fire_Implementation() override;
 
 
 public:
 
 	ACannonWeapon();
-
-	virtual void ChangeActiveState(const bool AmIActive) override;
-
 };
