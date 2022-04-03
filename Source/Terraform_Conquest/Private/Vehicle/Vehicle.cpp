@@ -45,6 +45,8 @@ AVehicle::AVehicle()
 	VehicleWeaponControllerComp->bEditableWhenInherited = true;
 	VehicleWeaponControllerComp->SetIsReplicated(true);
 
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 	Tags.Add("Vehicle");
 }
 
