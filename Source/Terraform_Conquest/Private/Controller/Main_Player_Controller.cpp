@@ -8,7 +8,7 @@
 
 AMain_Player_Controller::AMain_Player_Controller()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	SetTeamID(ETeam::Neutral);
 }
 
@@ -16,11 +16,11 @@ void AMain_Player_Controller::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AActor* MapControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapControllerV2::StaticClass());
+	/*AActor* MapControllerActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapControllerV2::StaticClass());
 	if (ensure(MapControllerActor))
 	{
 		MapController = Cast<AMapControllerV2>(MapControllerActor);
-	}
+	}*/
 
 	FTimerHandle MiniMapIconSetUp;
 	GetWorld()->GetTimerManager().SetTimer(MiniMapIconSetUp, this, &AMain_Player_Controller::MiniMapIconSetUp, 0.5f, false);
