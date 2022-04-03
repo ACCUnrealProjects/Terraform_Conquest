@@ -5,6 +5,7 @@
 #include "Components/Health_Component.h"
 #include "Components/Weapon_Controller_Component.h"
 #include "Components/RectLightComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -28,13 +29,13 @@ AVehicle::AVehicle()
 
 	FPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyFPSCam"));
 	FPSCamera->bUsePawnControlRotation = false;
-	FPSCamera->SetupAttachment(MyMesh);
+	FPSCamera->SetupAttachment(GetRootComponent());
 
 	TPSCameraSpring = CreateDefaultSubobject<USpringArmComponent>(TEXT("TPSCamSpring"));
 	TPSCameraSpring->bUsePawnControlRotation = false;
 	TPSCameraSpring->bEnableCameraLag = true;
 	TPSCameraSpring->bEnableCameraRotationLag = true;
-	TPSCameraSpring->SetupAttachment(MyMesh);
+	TPSCameraSpring->SetupAttachment(GetRootComponent());
 
 	TPSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("MyTPSCam"));
 	TPSCamera->bUsePawnControlRotation = false;

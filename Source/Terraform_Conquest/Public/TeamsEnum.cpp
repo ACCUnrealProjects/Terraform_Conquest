@@ -17,3 +17,8 @@ bool TeamTagCheck(const ETeam TeamENum, const TArray<FString> Tags)
 
 	return false;
 }
+
+FColor GetTeamColour(ETeam Team)
+{
+	return TeamColours[Team];
+}

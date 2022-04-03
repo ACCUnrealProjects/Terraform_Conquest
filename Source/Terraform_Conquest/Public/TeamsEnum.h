@@ -17,6 +17,15 @@ enum class ETeam : uint8
 	Last = 4
 };
 
+static const TMap<ETeam, FColor> TeamColours
+{
+	{ETeam::Neutral, FColor(1, 1, 1)},
+	{ETeam::Team1, FColor(1, 0, 0)},
+	{ETeam::Team2, FColor(0, 1, 0)}
+};
+
 FString GetTeamName(const ETeam TeamENum);
 
 bool TeamTagCheck(const ETeam TeamENum, const TArray<FString> Tags);
+
+FColor GetTeamColour(ETeam Team);

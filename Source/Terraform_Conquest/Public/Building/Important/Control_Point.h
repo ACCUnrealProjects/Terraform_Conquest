@@ -15,7 +15,7 @@ class TERRAFORM_CONQUEST_API AControl_Point : public AActor
 private:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Capture", meta = (AllowPrivateAccess = "true"))
 	float CapPercentage = 0.0f;
-
+	
 	const float FullCap = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Capture", meta = (AllowPrivateAccess = "true"))

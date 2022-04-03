@@ -11,12 +11,15 @@ AProjectile::AProjectile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicateMovement(true);
 }
 
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	if (ProjectileLifeTime > 0.0f && GetWorld())
+	if (ProjectileLifeTime > 0.0f && HasAuthority())
 	{
 		GetWorld()->GetTimerManager().SetTimer(LifeTimer, this, &AProjectile::Death, ProjectileLifeTime, false);
 	}
@@ -24,11 +27,15 @@ void AProjectile::BeginPlay()
 
 void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if(ImpactBlast)
+	if (ImpactBlast)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactBlast, Hit.Location + Hit.ImpactNormal, FRotator());
 	}
-	Death();
+
+	if (HasAuthority())
+	{
+		Death();
+	}
 }
 
 void AProjectile::Death()
