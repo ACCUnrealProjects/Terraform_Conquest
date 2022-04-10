@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/Health_Component.h"
 #include "Components/Weapon_Controller_Component.h"
+#include "Components/MiniMapIcon_Component.h"
 #include "Components/RectLightComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Blueprint/UserWidget.h"
@@ -44,6 +45,10 @@ AVehicle::AVehicle()
 	VehicleWeaponControllerComp = CreateDefaultSubobject<UWeapon_Controller_Component>(TEXT("VehicleWeaponSystem"));
 	VehicleWeaponControllerComp->bEditableWhenInherited = true;
 	VehicleWeaponControllerComp->SetIsReplicated(true);
+
+	MiniMapIconComp = CreateDefaultSubobject<UMiniMapIcon_Component>(TEXT("MyMiniMapIcon"));
+	MiniMapIconComp->bEditableWhenInherited = true;
+	MiniMapIconComp->SetIsReplicated(true);
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 

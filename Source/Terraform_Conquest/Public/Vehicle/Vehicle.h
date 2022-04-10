@@ -78,6 +78,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "WeaponController")
 	class UWeapon_Controller_Component* VehicleWeaponControllerComp = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "MiniMapIcon")
+	class UMiniMapIcon_Component* MiniMapIconComp = nullptr;
+
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Lights")
 	TArray<class URectLightComponent*> Lights;
 

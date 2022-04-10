@@ -81,7 +81,10 @@ void AWeapon::Fire_Implementation()
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
-	FireEffect->Activate();
+	if (FireEffect)
+	{
+		FireEffect->Activate();
+	}
 
 	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
 	if (!ExternalRegenOn)

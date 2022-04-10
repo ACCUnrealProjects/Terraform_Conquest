@@ -119,20 +119,19 @@ void UWeapon_Controller_Component::SwitchWeapon()
 
 	if (ActiveWeapon && (uint8)ActiveWeapon->WeaponsType)
 	{ 
-		CurrectGunNum = SearchGunNum = (uint8)ActiveWeapon->WeaponsType; 
+		CurrectGunNum = SearchGunNum = (uint8)ActiveWeapon->WeaponsType;
 	}
 
 	while (!FinishedLooking)
 	{
+		SearchGunNum++;
 		if (SearchGunNum >= (uint8)GunType::End) { (uint8)GunType::None + 1; }
-
 		//We have looped back to our original weapon, so nothing to switch to
 		if (SearchGunNum == CurrectGunNum) 
 		{ 
 			FinishedLooking = true; 
 			break; 
 		}
-
 		for (auto GunSet : AllGuns)
 		{
 			if (GunSet->WeaponsType == (GunType)SearchGunNum)

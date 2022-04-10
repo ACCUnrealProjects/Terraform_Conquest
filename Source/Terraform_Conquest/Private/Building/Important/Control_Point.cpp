@@ -2,6 +2,7 @@
 
 #include "Building/Important/Control_Point.h"
 #include "Components/PointLightComponent.h"
+#include "Components/MiniMapIcon_Component.h"
 #include "Gamestate/Conquest_GameState.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -34,6 +35,10 @@ AControl_Point::AControl_Point()
 	CaptureIcon = CreateDefaultSubobject<UWidgetComponent>(FName(TEXT("CaptureIcon")));
 	CaptureIcon->AttachToComponent(CapturePointFlag, FAttachmentTransformRules::KeepRelativeTransform);
 	CaptureIcon->SetIsReplicated(true);
+
+	MiniMapIconComp = CreateDefaultSubobject<UMiniMapIcon_Component>(TEXT("MyMiniMapIcon"));
+	MiniMapIconComp->bEditableWhenInherited = true;
+	MiniMapIconComp->SetIsReplicated(true);
 
 	Contesters.Add(TTuple<ETeam, int32>(ETeam::Team1, 0));
 	Contesters.Add(TTuple<ETeam, int32>(ETeam::Team2, 0));

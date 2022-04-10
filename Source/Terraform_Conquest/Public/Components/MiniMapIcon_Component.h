@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "PointOfInterest_Component.generated.h"
+#include "MiniMapIcon_Component.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TERRAFORM_CONQUEST_API UPointOfInterest_Component : public UActorComponent
+class TERRAFORM_CONQUEST_API UMiniMapIcon_Component : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -30,7 +30,7 @@ protected:
 public:	
 
 	// Sets default values for this component's properties
-	UPointOfInterest_Component();
+	UMiniMapIcon_Component();
 
 	void SetUp(bool bAmIStatic, UTexture2D* Texture2d);
 };

@@ -45,6 +45,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* CaptureIcon = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "MiniMapIcon", meta = (AllowPrivateAccess = "true"))
+	class UMiniMapIcon_Component* MiniMapIconComp = nullptr;
+
 	UPROPERTY(Replicated, VisibleAnywhere, BluePrintReadOnly, Category = "Teams", meta = (AllowPrivateAccess = "true"))
 	ETeam CurrentTeamControl = ETeam::Neutral;
 
@@ -59,6 +62,7 @@ private:
 	FTimerHandle PointsTickTimer;
 
 	FTimerHandle CaptureTickTimer;
+
 
 private:
 
