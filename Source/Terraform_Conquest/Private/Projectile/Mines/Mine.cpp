@@ -24,10 +24,14 @@ AMine::AMine()
 
 	MyHealthComp = CreateDefaultSubobject<UHealth_Component>(FName(TEXT("Health Comp")));
 	MyHealthComp->bEditableWhenInherited = true;
-
+	MyHealthComp->SetIsReplicated(true);
 	MyHealthComp->SetUp(1, 0);
 
 	Tags.Add("Mine");
+
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicateMovement(true);
 }
 
 
@@ -72,6 +76,8 @@ void AMine::Trigger()
 
 void AMine::MineOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!HasAuthority()) { return; }
+
 	for (auto myTag : Tags)
 	{
 		for (auto OtherTag : OtherActor->Tags)
@@ -90,8 +96,11 @@ void AMine::MineOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
 void AMine::Death()
 {
-	FTimerHandle DeathTimer;
-	GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AMine::DestoryMe, DestroyTime, false);
+	if (HasAuthority())
+	{
+		FTimerHandle DeathTimer;
+		GetWorld()->GetTimerManager().SetTimer(DeathTimer, this, &AMine::DestoryMe, DestroyTime, false);
+	}
 }
 
 void AMine::DestoryMe()

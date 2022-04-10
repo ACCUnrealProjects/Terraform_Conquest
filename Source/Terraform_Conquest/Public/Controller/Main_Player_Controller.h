@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
+#include "TeamsEnum.h"
 #include "Main_Player_Controller.generated.h"
 
 /**
@@ -19,7 +20,11 @@ private:
 
 	class AMapControllerV2* MapController = nullptr;
 
-	FGenericTeamId TeamId;
+	ETeam TeamId;
+	
+	TArray<TPair<AActor*,bool>> NewMiniMapIcon;
+
+private:
 
 	UFUNCTION()
 	void MyPawnHasDied();
@@ -30,6 +35,17 @@ protected:
 
 	virtual void SetupInputComponent() override;
 
+	UFUNCTION()
+	void MiniMapIconSetUp();
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "AddActorMarkerToMap"))
+	void AddActorMarkerToMap(bool bIsStatic, AActor* OwnerActor);
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UISetup")
+	bool bMiniMapSetUp = false;
+
 public:
 
 	AMain_Player_Controller();
@@ -38,8 +54,13 @@ public:
 
 	virtual void SetPawn(APawn* InPawn) override;
 
-	void SetTeamID(FGenericTeamId TeamID);
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "NewActorForMap"))
+	void NewActorForMap(bool bIsStatic, AActor *OwnerActor);
 
-	FGenericTeamId GetTeamId() const;
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "SetTeamID"))
+	void SetTeamID(ETeam TeamID);
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "GetTeamId"))
+	ETeam GetTeamId() const;
 	
 };

@@ -15,7 +15,7 @@ class TERRAFORM_CONQUEST_API AControl_Point : public AActor
 private:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Capture", meta = (AllowPrivateAccess = "true"))
 	float CapPercentage = 0.0f;
-
+	
 	const float FullCap = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Capture", meta = (AllowPrivateAccess = "true"))
@@ -45,6 +45,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	class UWidgetComponent* CaptureIcon = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "MiniMapIcon", meta = (AllowPrivateAccess = "true"))
+	class UMiniMapIcon_Component* MiniMapIconComp = nullptr;
+
 	UPROPERTY(Replicated, VisibleAnywhere, BluePrintReadOnly, Category = "Teams", meta = (AllowPrivateAccess = "true"))
 	ETeam CurrentTeamControl = ETeam::Neutral;
 
@@ -59,6 +62,7 @@ private:
 	FTimerHandle PointsTickTimer;
 
 	FTimerHandle CaptureTickTimer;
+
 
 private:
 

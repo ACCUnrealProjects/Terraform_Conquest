@@ -33,6 +33,7 @@ void ATank::BeginPlay()
 	MainHoverComp->SetUp(50.0f, 5000.0f, 6.0f);
 	MyHealth->SetUp(150.0f, 100.0f);
 	VehicleWeaponControllerComp->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
-	VehicleWeaponControllerComp->AddWeapon(CannonGunBlueprint, GunType::MachineGun);
-	VehicleWeaponControllerComp->AddWeapon(MineGunBlueprint, GunType::MachineGun);
+	VehicleWeaponControllerComp->AddWeapon(CannonGunBlueprint, GunType::Cannon);
+	VehicleWeaponControllerComp->AddWeapon(MineGunBlueprint, GunType::Mine);
+	VehicleWeaponControllerComp->ServerChangeWeapon(GunType::MachineGun);
 }

@@ -25,4 +25,5 @@ ASpeeder::ASpeeder()
 void ASpeeder::BeginPlay()
 {
 	Super::BeginPlay();
+	VehicleWeaponControllerComp->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
 }

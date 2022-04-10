@@ -2,6 +2,7 @@
 
 #include "Vehicle/HoverVehicles/Scout.h"
 #include "Components/Hover_Component.h"
+#include "Components/Health_Component.h"
 #include "Weapons/Machine_Guns/MachineGun.h"
 #include "Components/Weapon_Controller_Component.h"
 #include "WeaponTypeEnum.h"
@@ -26,5 +27,6 @@ void AScout::BeginPlay()
 {
 	Super::BeginPlay();
 	MainHoverComp->SetUp(50.0f, 5000.0f, 6.0f);
+	MyHealth->SetUp(100.0f, 100.0f);
 	VehicleWeaponControllerComp->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
 }
