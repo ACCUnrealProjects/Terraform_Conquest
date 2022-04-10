@@ -19,6 +19,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "StartingWeapon", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class AMachineGun> MachineGunBlueprint = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "StartingWeapon", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class AMineWeapon> MineGunBlueprint = nullptr;
+
 protected:
 	
 	virtual void BeginPlay() override;

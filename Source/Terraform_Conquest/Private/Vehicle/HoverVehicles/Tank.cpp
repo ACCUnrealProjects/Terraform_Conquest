@@ -11,10 +11,10 @@
 
 ATank::ATank()
 {
-	ForwardThrust = 800.0f;
+	ForwardThrust = 900.0f;
 	VehicleName = "Hover_Tank";
 
-	const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObj(TEXT("/Game/Meshes/Ships/craft_cargoA"));
+	const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObj(TEXT("/Game/Meshes/Ships/craft_miner"));
 	if (MeshObj.Succeeded())
 	{
 		MyMesh->SetStaticMesh(MeshObj.Object);
@@ -22,7 +22,7 @@ ATank::ATank()
 	SetUpLights();
 
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
-	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Cannon, TArray<FName>{"CannonGun_1"});
+	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Cannon, TArray<FName>{"CannonGun_1", "CannonGun_2"});
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Mine, TArray<FName>{"MineSlot"});
 	VehicleWeaponControllerComp->ServerSetWeaponSlots(TArray<GunType>{GunType::MachineGun, GunType::Cannon, GunType::Mine});
 }
@@ -31,7 +31,7 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 	MainHoverComp->SetUp(50.0f, 5000.0f, 6.0f);
-	MyHealth->SetUp(150.0f, 100.0f);
+	MyHealth->SetUp(125.0f, 125.0f);
 	VehicleWeaponControllerComp->AddWeapon(MachineGunBlueprint, GunType::MachineGun);
 	VehicleWeaponControllerComp->AddWeapon(CannonGunBlueprint, GunType::Cannon);
 	VehicleWeaponControllerComp->AddWeapon(MineGunBlueprint, GunType::Mine);

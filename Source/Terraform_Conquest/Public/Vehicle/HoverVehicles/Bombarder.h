@@ -20,7 +20,7 @@ private:
 		TSubclassOf<class AMachineGun> MachineGunBlueprint = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "StartingWeapon", meta = (AllowPrivateAccess = "true"))
-		TSubclassOf<class ACannonWeapon> CannonGunBlueprint = nullptr;
+		TSubclassOf<class AMorterWeapon> MorterGunBlueprint = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "StartingWeapon", meta = (AllowPrivateAccess = "true"))
 		TSubclassOf<class AMineWeapon> MineGunBlueprint = nullptr;
