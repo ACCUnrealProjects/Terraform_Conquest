@@ -22,9 +22,3 @@ void APowerPlant::TickPower()
 {
 	//add power to team
 }
-
-void APowerPlant::StartDestroy()
-{
-	Super::StartDestroy();
-	GetWorld()->GetTimerManager().ClearTimer(PowerTickTimer);
-}

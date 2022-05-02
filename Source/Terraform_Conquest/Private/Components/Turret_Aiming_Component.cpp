@@ -1,8 +1,9 @@
 //Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Components/Turret_Aiming_Component.h"
-#include "../../Public/MeshComponents/Barrel_Mesh.h"
-#include "../../Public/MeshComponents/Turret_Mesh.h"
+#include "Components/Turret_Aiming_Component.h"
+#include "MeshComponents/Barrel_Mesh.h"
+#include "MeshComponents/Turret_Mesh.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UTurret_Aiming_Component::UTurret_Aiming_Component()
@@ -15,15 +16,43 @@ UTurret_Aiming_Component::UTurret_Aiming_Component()
 void UTurret_Aiming_Component::BeginPlay()
 {
 	Super::BeginPlay();
+	SetIsReplicated(true);
+}
+
+void UTurret_Aiming_Component::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	DOREPLIFETIME(UTurret_Aiming_Component, DegreesCloseToShot);
+	DOREPLIFETIME(UTurret_Aiming_Component, ActorTurretMesh);
+	DOREPLIFETIME(UTurret_Aiming_Component, ActorBarrelMesh);
+
+	//Replicate to owner client and server only
+
+	//Replicate to none owner client and server only
 }
 
 void UTurret_Aiming_Component::SetUp(UTurret_Mesh* MyTurret, UBarrel_Mesh* MyBarrel)
 {
-	ActorTurretMesh = MyTurret;
-	ActorBarrelMesh = MyBarrel;
+	if (GetOwner()->HasAuthority())
+	{
+		ActorTurretMesh = MyTurret;
+		ActorBarrelMesh = MyBarrel;
+	}
 }
 
 void UTurret_Aiming_Component::AimToTarget(FVector TargetPosition)
+{
+	ServerAimToTarget(TargetPosition);
+}
+
+bool UTurret_Aiming_Component::ServerAimToTarget_Validate(FVector TargetPosition)
+{
+	return false;
+}
+
+void UTurret_Aiming_Component::ServerAimToTarget_Implementation(FVector TargetPosition)
 {
 	if (!ActorTurretMesh || !ActorBarrelMesh) { return; }
 

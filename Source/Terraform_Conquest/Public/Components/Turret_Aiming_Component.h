@@ -14,10 +14,12 @@ class TERRAFORM_CONQUEST_API UTurret_Aiming_Component : public UActorComponent
 
 private:
 
+	UPROPERTY(Replicated)
 	class UTurret_Mesh* ActorTurretMesh = nullptr;
+	UPROPERTY(Replicated)
 	class UBarrel_Mesh* ActorBarrelMesh = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, Category = "AimingShot", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "AimingShot", meta = (AllowPrivateAccess = "true"))
 		float DegreesCloseToShot = 5.0f;
 
 protected:
@@ -30,7 +32,13 @@ public:
 
 	void SetUp(class UTurret_Mesh* MyTurret, class UBarrel_Mesh* MyBarrel);
 
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const;
+
 	void AimToTarget(FVector TargetPosition);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerAimToTarget(FVector TargetPosition);
+	virtual bool ServerAimToTarget_Validate(FVector TargetPosition);
+	virtual void ServerAimToTarget_Implementation(FVector TargetPosition);
 
 	bool CloseToHittingTarget(FVector TargetPosition);
 };

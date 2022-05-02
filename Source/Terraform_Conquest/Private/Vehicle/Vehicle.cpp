@@ -165,10 +165,21 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Lights"), EInputEvent::IE_Pressed, this, &AVehicle::ToggleLights);
 }
 
-void AVehicle::SetTeamID(ETeam TeamID)
+void AVehicle::SetTeamID(ETeam NewTeamID)
 {
-	TeamId = TeamID;
-	Tags.Add(FName(GetTeamName(TeamID)));
+	ServerSetTeamID(NewTeamID);
+}
+
+bool AVehicle::ServerSetTeamID_Validate(ETeam NewTeamID)
+{
+	return true;
+}
+
+void AVehicle::ServerSetTeamID_Implementation(ETeam NewTeamID)
+{
+	Tags.Remove(FName(GetTeamName(TeamId)));
+	TeamId = NewTeamID;
+	Tags.Add(FName(GetTeamName(TeamId)));
 }
 
 void AVehicle::CameraChange()

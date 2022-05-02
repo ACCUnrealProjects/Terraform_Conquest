@@ -25,7 +25,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "BarrelMovement", meta = (AllowPrivateAccess = "true"))
 	float MaxTurn = 40.0f;
 
+protected:
+
+	void BeginPlay();
+
 public:
+
+	/* Property replication */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	void RotateBarrel(float ElevateSpeed);
 	
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "TeamsEnum.h"
+#include "Utility/PID_Controller.h"
 #include "Vehicle.generated.h"
 
 UCLASS()
@@ -25,6 +26,8 @@ private:
 	ETeam TeamId = ETeam::None;
 
 	bool bAreLightsOn = false;
+
+	PID_Controller AIRotationPid;
 
 private:
 
@@ -127,7 +130,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void SetTeamID(ETeam TeamID);
+	void SetTeamID(ETeam NewTeamID);
+	UFUNCTION(reliable, server, WithValidation)
+	void ServerSetTeamID(ETeam NewTeamID);
+	virtual bool ServerSetTeamID_Validate(ETeam NewTeamID);
+	virtual void ServerSetTeamID_Implementation(ETeam NewTeamID);
 
 	virtual void Fire();
 

@@ -86,12 +86,12 @@ void ABuildController::CancelBuild()
 	BuildingToBuild = nullptr;
 }
 
-void ABuildController::SetTeamID(FGenericTeamId TeamID)
+void ABuildController::SetTeamID(ETeam TeamID)
 {
 	TeamId = TeamID;
 }
 
-FGenericTeamId ABuildController::GetTeamId() const
+ETeam ABuildController::GetTeamId() const
 {
 	return TeamId;
 }

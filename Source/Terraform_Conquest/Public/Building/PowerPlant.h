@@ -33,6 +33,4 @@ public:
 	UFUNCTION()
 	void TickPower();
 
-	virtual void StartDestroy() override;
-	
 };

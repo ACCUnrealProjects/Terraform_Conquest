@@ -1,6 +1,24 @@
 //Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/MeshComponents/Turret_Mesh.h"
+#include "MeshComponents/Turret_Mesh.h"
+
+void UTurret_Mesh::BeginPlay()
+{
+	Super::BeginPlay();
+	SetIsReplicated(true);
+}
+
+void UTurret_Mesh::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	//DOREPLIFETIME(AVehicle, MyPosition);
+
+	//Replicate to owner client and server only
+
+	//Replicate to none owner client and server only
+}
 
 void UTurret_Mesh::RotateTurret(float TurnSpeed)
 {

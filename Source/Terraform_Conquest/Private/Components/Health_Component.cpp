@@ -1,6 +1,6 @@
 //Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Components/Health_Component.h"
+#include "Components/Health_Component.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 

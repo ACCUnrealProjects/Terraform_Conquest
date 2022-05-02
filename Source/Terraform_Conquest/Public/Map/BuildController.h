@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Actor.h"
-#include "../Map/TileIndex.h"
+#include "Map/TileIndex.h"
+#include "TeamsEnum.h"
 #include "BuildController.generated.h"
 
 UCLASS()
@@ -15,7 +16,7 @@ class TERRAFORM_CONQUEST_API ABuildController : public AActor
 	
 private:	
 
-	FGenericTeamId TeamId;
+	ETeam TeamId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MapController", meta = (AllowPrivateAccess = "true"))
 	class AMapController* MapController = nullptr;
@@ -43,7 +44,7 @@ public:
 
 	void CancelBuild();
 
-	void SetTeamID(FGenericTeamId TeamID);
+	void SetTeamID(ETeam TeamID);
 
-	FGenericTeamId GetTeamId() const;
+	ETeam GetTeamId() const;
 };

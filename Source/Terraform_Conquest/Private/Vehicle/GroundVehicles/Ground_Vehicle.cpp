@@ -1,6 +1,5 @@
 // Alex Chatt Terraform_Conquest 2020
 
-
 #include "Vehicle/GroundVehicles/Ground_Vehicle.h"
 #include "Components/WidgetComponent.h"
 #include "Blueprint/UserWidget.h"

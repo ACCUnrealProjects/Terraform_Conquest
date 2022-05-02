@@ -27,8 +27,13 @@ private:
 
 protected:
 
+	void BeginPlay();
+
 public:
 
 	void RotateTurret(float TurnSpeed);
+
+	/* Property replication */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 };
