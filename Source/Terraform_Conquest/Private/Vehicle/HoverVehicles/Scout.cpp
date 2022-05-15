@@ -7,7 +7,7 @@
 #include "Weapons/Cannon_Weapons/CannonWeapon.h"
 #include "Weapons/Mine_Weapons/MineWeapon.h"
 #include "Components/Weapon_Controller_Component.h"
-#include "WeaponTypeEnum.h"
+#include "Utility/WeaponTypeEnum.h"
 
 AScout::AScout()
 {

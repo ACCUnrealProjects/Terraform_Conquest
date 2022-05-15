@@ -7,7 +7,7 @@
 #include "Weapons/Mine_Weapons/MineWeapon.h"
 #include "Weapons/Morter_Weapons/MorterWeapon.h"
 #include "Components/Weapon_Controller_Component.h"
-#include "WeaponTypeEnum.h"
+#include "Utility/WeaponTypeEnum.h"
 
 ABombarder::ABombarder()
 {

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "WeaponTypeEnum.h"
+#include "Utility/WeaponTypeEnum.h"
 #include "Weapon_Controller_Component.generated.h"
 
 class AWeapon;

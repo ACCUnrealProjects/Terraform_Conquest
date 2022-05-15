@@ -7,7 +7,7 @@
 #include "Weapons/Machine_Guns/MachineGun.h"
 #include "Weapons/Cannon_Weapons/CannonWeapon.h"
 #include "Weapons/Mine_Weapons/MineWeapon.h"
-#include "WeaponTypeEnum.h"
+#include "Utility/WeaponTypeEnum.h"
 
 ATank::ATank()
 {

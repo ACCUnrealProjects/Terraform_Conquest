@@ -49,7 +49,7 @@ void ABuilding::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//Replicate everywhere
-	DOREPLIFETIME(ABuilding, TeamId);
+	//DOREPLIFETIME(ABuilding, );
 
 	//Replicate to owner client and server only
 
@@ -66,28 +66,6 @@ void ABuilding::Tick(float DeltaTime)
 void ABuilding::SetTilesImOn(TArray<AMapTile*> BuiltTiles)
 {
 	TilesImOn = BuiltTiles;
-}
-
-void ABuilding::SetTeamID(ETeam NewTeamID)
-{
-	ServerSetTeamID(NewTeamID);
-}
-
-bool ABuilding::ServerSetTeamID_Validate(ETeam NewTeamID)
-{
-	return true;
-}
-
-void ABuilding::ServerSetTeamID_Implementation(ETeam NewTeamID)
-{
-	Tags.Remove(FName(GetTeamName(TeamId)));
-	TeamId = NewTeamID;
-	Tags.Add(FName(GetTeamName(TeamId)));
-}
-
-ETeam ABuilding::GetTeamId() const
-{
-	return TeamId;
 }
 
 float ABuilding::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

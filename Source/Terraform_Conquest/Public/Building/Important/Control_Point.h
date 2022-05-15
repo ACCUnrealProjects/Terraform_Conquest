@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TeamsEnum.h"
+#include "Utility/TeamsEnum.h"
 #include "Control_Point.generated.h"
 
 UCLASS()
@@ -56,6 +56,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Teams", meta = (AllowPrivateAccess = "true"))
 	TMap<ETeam, int32> Contesters;
+
+	TArray<class ATurret*> MyTurrets;
 
 	class AConquest_GameState* PlayingGameState = nullptr;
 

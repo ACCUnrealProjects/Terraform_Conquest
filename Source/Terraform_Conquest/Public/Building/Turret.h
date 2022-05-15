@@ -26,7 +26,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class AWeapon> WeaponBlueprint;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
-	int32 TurretGuns = 2;
+	int32 TurretGuns = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = "true"))
 	class UTurret_Aiming_Component* MyAimingComp = nullptr;

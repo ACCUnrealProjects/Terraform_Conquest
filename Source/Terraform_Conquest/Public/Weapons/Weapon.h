@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "WeaponTypeEnum.h"
-#include "TeamsEnum.h"
+#include "Utility/WeaponTypeEnum.h"
+#include "Utility/TeamsEnum.h"
 #include "Weapon.generated.h"
 
 class USoundBase;

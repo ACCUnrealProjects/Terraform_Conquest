@@ -6,7 +6,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Actor.h"
 #include "Map/TileIndex.h"
-#include "TeamsEnum.h"
+#include "Utility/TeamsEnum.h"
 #include "BuildController.generated.h"
 
 UCLASS()

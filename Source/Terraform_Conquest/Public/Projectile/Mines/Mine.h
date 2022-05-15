@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Actor/TeamActionActor.h"
 #include "Mine.generated.h"
 
 UCLASS()
-class TERRAFORM_CONQUEST_API AMine : public AActor
+class TERRAFORM_CONQUEST_API AMine : public ATeamActionActor
 {
 	GENERATED_BODY()
 	
@@ -39,7 +39,6 @@ protected:
 	float LifeTime = 1.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
 	float DestroyTime = 1.0f;
-
 
 private:
 

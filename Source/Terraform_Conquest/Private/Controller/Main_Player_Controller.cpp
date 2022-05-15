@@ -79,16 +79,6 @@ void AMain_Player_Controller::SetupInputComponent()
 	EnableInput(this);
 }
 
-void AMain_Player_Controller::SetTeamID(ETeam TeamID)
-{
-	TeamId = TeamID;
-}
-
-ETeam AMain_Player_Controller::GetTeamId() const
-{
-	return TeamId;
-}
-
 void AMain_Player_Controller::MyPawnHasDied()
 {
 	StartSpectatingOnly();

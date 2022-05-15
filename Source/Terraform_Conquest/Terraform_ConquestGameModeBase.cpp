@@ -3,6 +3,7 @@
 
 #include "Terraform_ConquestGameModeBase.h"
 #include "Gamestate/Conquest_GameState.h"
+#include "MyGameSettings.h"
 
 ATerraform_ConquestGameModeBase::ATerraform_ConquestGameModeBase()
 {
@@ -12,4 +13,5 @@ ATerraform_ConquestGameModeBase::ATerraform_ConquestGameModeBase()
 void ATerraform_ConquestGameModeBase::StartPlay()
 {
 	Super::StartPlay();
+	FGenericTeamId::SetAttitudeSolver(&UMyGameSettings::GetAttitude);
 }

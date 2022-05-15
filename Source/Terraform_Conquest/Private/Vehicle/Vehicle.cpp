@@ -1,13 +1,13 @@
 // Alex Chatt Terraform_Conquest 2020
 
 #include "Vehicle/Vehicle.h"
-#include "Net/UnrealNetwork.h"
 #include "Components/Health_Component.h"
 #include "Components/Weapon_Controller_Component.h"
 #include "Components/MiniMapIcon_Component.h"
 #include "Components/RectLightComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Blueprint/UserWidget.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
@@ -94,14 +94,12 @@ void AVehicle::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifeti
 	//Replicate everywhere
 	DOREPLIFETIME(AVehicle, MyPosition);
 	DOREPLIFETIME(AVehicle, MyRotation);
-	DOREPLIFETIME(AVehicle, TeamId);
 
 	//Replicate to owner client and server only
 	DOREPLIFETIME_CONDITION(AVehicle, WantToFire, COND_OwnerOnly);
 
 	//Replicate to none owner client and server only
 }
-
 
 // Called every frame
 void AVehicle::Tick(float DeltaTime)
@@ -163,23 +161,6 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("RightClickAction"), EInputEvent::IE_Pressed, this, &AVehicle::ChangeWeapon);
 	//Lights
 	PlayerInputComponent->BindAction(TEXT("Lights"), EInputEvent::IE_Pressed, this, &AVehicle::ToggleLights);
-}
-
-void AVehicle::SetTeamID(ETeam NewTeamID)
-{
-	ServerSetTeamID(NewTeamID);
-}
-
-bool AVehicle::ServerSetTeamID_Validate(ETeam NewTeamID)
-{
-	return true;
-}
-
-void AVehicle::ServerSetTeamID_Implementation(ETeam NewTeamID)
-{
-	Tags.Remove(FName(GetTeamName(TeamId)));
-	TeamId = NewTeamID;
-	Tags.Add(FName(GetTeamName(TeamId)));
 }
 
 void AVehicle::CameraChange()

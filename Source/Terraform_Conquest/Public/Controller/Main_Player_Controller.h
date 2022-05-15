@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
-#include "TeamsEnum.h"
+#include "Utility/TeamsEnum.h"
 #include "Main_Player_Controller.generated.h"
 
 /**
@@ -58,9 +58,8 @@ public:
 	void NewActorForMap(bool bIsStatic, AActor *OwnerActor);
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "SetTeamID"))
-	void SetTeamID(ETeam TeamID);
+	void SetTeamID(ETeam TeamID) { TeamId = TeamID; };
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "GetTeamId"))
-	ETeam GetTeamId() const;
-	
+	ETeam GetTeamId() const { return TeamId; };
 };

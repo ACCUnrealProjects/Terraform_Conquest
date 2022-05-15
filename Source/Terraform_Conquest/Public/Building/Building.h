@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TeamsEnum.h"
-#include "GameFramework/Pawn.h"
+#include "Utility/TeamsEnum.h"
+#include "Pawns/TeamActionPawn.h"
 #include "Building.generated.h"
 
 UCLASS()
-class TERRAFORM_CONQUEST_API ABuilding : public APawn
+class TERRAFORM_CONQUEST_API ABuilding : public ATeamActionPawn
 {
 	GENERATED_BODY()
 	
@@ -19,9 +19,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "OverlapSpace", meta = (AllowPrivateAccess = "true"))
 	class UBoxComponent* BuildOverlapSpace = nullptr;
-
-	UPROPERTY(Replicated)
-	ETeam TeamId = ETeam::None;
 
 protected:
 
@@ -61,13 +58,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetTilesImOn(TArray<AMapTile*> BuiltTiles);
-
-	void SetTeamID(ETeam NewTeamID);
-	UFUNCTION(reliable, server, WithValidation)
-	void ServerSetTeamID(ETeam NewTeamID);
-	virtual bool ServerSetTeamID_Validate(ETeam NewTeamID);
-	virtual void ServerSetTeamID_Implementation(ETeam NewTeamID);
-
-	ETeam GetTeamId() const;
 
 };

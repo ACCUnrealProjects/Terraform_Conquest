@@ -114,29 +114,29 @@ void UWeapon_Controller_Component::SwitchWeapon()
 	// If we only have 1 gun then we cant really switch to another
 	if (AllGuns.Num() <= 1) { return; }
 
-	bool FinishedLooking = false;
-	uint8 SearchGunNum, CurrectGunNum = 0;
+	bool bFinishedLooking = false;
+	uint8 SearchGunNum = 0, CurrectGunNum = 0;
 
 	if (ActiveWeapon && (uint8)ActiveWeapon->WeaponsType)
 	{ 
 		CurrectGunNum = SearchGunNum = (uint8)ActiveWeapon->WeaponsType;
 	}
 
-	while (!FinishedLooking)
+	while (!bFinishedLooking)
 	{
 		SearchGunNum++;
 		if (SearchGunNum >= (uint8)GunType::End) { (uint8)GunType::None + 1; }
 		//We have looped back to our original weapon, so nothing to switch to
 		if (SearchGunNum == CurrectGunNum) 
 		{ 
-			FinishedLooking = true; 
+			bFinishedLooking = true;
 			break; 
 		}
 		for (auto GunSet : AllGuns)
 		{
 			if (GunSet->WeaponsType == (GunType)SearchGunNum)
 			{
-				FinishedLooking = true;
+				bFinishedLooking = true;
 				ServerChangeWeapon((GunType)SearchGunNum);
 				break;
 			}

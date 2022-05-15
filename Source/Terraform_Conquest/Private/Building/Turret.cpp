@@ -38,9 +38,16 @@ void ATurret::BeginPlay()
 	Super::BeginPlay();
 	if (HasAuthority())
 	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = GetOwner();
+		SpawnParams.Instigator = Cast<APawn>(SpawnParams.Owner);
+
 		for (int32 i = 0; i < TurretGuns; i++)
 		{
-
+			AWeapon* NewGun = GetWorld()->SpawnActor<AWeapon>(WeaponBlueprint, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation(), SpawnParams);
+			NewGun->AttachToComponent(MyBarrel, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), "FireLocation");
+			NewGun->ChangeActiveState(true);
+			TurretWeapons.Add(NewGun);
 		}
 		MyAimingComp->SetUp(MyTurret, MyBarrel);
 	}

@@ -7,6 +7,7 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "MyGameSettings.h"
 
 ACombat_AI_Con::ACombat_AI_Con()
 {
@@ -43,6 +44,15 @@ void ACombat_AI_Con::OnPossess(APawn* const InPawn)
 	}
 }
 
+void ACombat_AI_Con::SetGenericTeamId(const FGenericTeamId& InTeamID)
+{
+	AITeamID = (ETeam)InTeamID.GetId();
+}
+
+FGenericTeamId ACombat_AI_Con::GetGenericTeamId() const
+{
+	return uint8(AITeamID);
+}
 
 UBlackboardComponent* ACombat_AI_Con::GetBlackboard() const
 {

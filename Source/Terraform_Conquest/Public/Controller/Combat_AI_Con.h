@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "Perception/AIPerceptionTypes.h"
+#include "Utility/TeamsEnum.h"
 #include "Combat_AI_Con.generated.h"
 
 /**
@@ -16,6 +17,9 @@ class TERRAFORM_CONQUEST_API ACombat_AI_Con : public AAIController
 	GENERATED_BODY()
 
 private:
+
+	UPROPERTY(Category = "AI", BlueprintReadWrite, EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	ETeam AITeamID;
 
 protected:
 
@@ -41,6 +45,10 @@ public:
 
 	ACombat_AI_Con();
 
-	class UBlackboardComponent* GetBlackboard() const;
+	virtual void SetGenericTeamId(const FGenericTeamId& InTeamID) override;
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
 	
+	class UBlackboardComponent* GetBlackboard() const;
+
 };

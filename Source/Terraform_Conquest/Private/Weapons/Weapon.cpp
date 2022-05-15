@@ -31,12 +31,15 @@ void AWeapon::BeginPlay()
 	ActorParams.Owner = GetOwner();
 	ActorParams.Instigator = Cast<APawn>(GetOwner());
 
-	AmmoRegenStartTimerParam.BindUFunction(this, FName("StartRegenAmmo"), false);
+	if (HasAuthority())
+	{
+		AmmoRegenStartTimerParam.BindUFunction(this, FName("StartRegenAmmo"), false);
+		CurrentTotalAmmo = MaxAmmo;
+		AmmoRegened = MaxAmmo * AmmoRegenPercentage;
 
-	CurrentTotalAmmo = MaxAmmo;
-	AmmoRegened = MaxAmmo * AmmoRegenPercentage;
-	
-	GetTeam();
+		GetTeam();
+	}
+
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -60,14 +63,12 @@ void AWeapon::GetTeam()
 
 	for (auto tag : GetOwner()->Tags)
 	{
-		for (uint8 i = 0; i < (uint8)ETeam::Last; i++)
+		if (tag.ToString().Contains("Team"))
 		{
-			if (GetTeamName(ETeam(i)) == tag.ToString())
-			{
-				TeamId = ETeam(i);
-			}
+			GetTeamFromString(tag.ToString());
 		}
 	}
+
 }
 
 bool AWeapon::Fire_Validate()
