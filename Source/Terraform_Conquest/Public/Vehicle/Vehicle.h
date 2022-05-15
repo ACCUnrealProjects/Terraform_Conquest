@@ -29,6 +29,8 @@ private:
 
 private:
 
+	void SetUpMyStimulis();
+
 	void ChangeWeapon();
 
 	void DestoryMe();
@@ -84,6 +86,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Lights")
 	TArray<class URectLightComponent*> Lights;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AI")
+	class UAIPerceptionStimuliSourceComponent* Stimulus = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
 	float DestroyTime = 1.0f;

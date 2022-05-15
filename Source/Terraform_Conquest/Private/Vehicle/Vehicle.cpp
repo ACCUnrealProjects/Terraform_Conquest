@@ -9,6 +9,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 #include "Camera/CameraComponent.h"
 
 // Sets default values
@@ -51,8 +53,16 @@ AVehicle::AVehicle()
 	MiniMapIconComp->SetIsReplicated(true);
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	SetUpMyStimulis();
 
 	Tags.Add("Vehicle");
+}
+
+void AVehicle::SetUpMyStimulis()
+{
+	Stimulus = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("MyAIStim"));
+	Stimulus->RegisterForSense(TSubclassOf<UAISense_Sight>());
+	Stimulus->RegisterWithPerceptionSystem();
 }
 
 // Called when the game starts or when spawned

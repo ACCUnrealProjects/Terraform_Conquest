@@ -5,6 +5,8 @@
 #include "Components/Health_Component.h"
 #include "MeshComponents/Barrel_Mesh.h"
 #include "MeshComponents/Turret_Mesh.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapons/Weapon.h"
 
@@ -29,7 +31,17 @@ ATurret::ATurret()
 	MyBarrel->SetStaticMesh(BarrelAsset.Object);
 	MyBarrel->SetupAttachment(BuildingMesh, "Barrel");
 
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	SetUpMyStimulis();
+
 	Tags.Add("Turret");
+}
+
+void ATurret::SetUpMyStimulis()
+{
+	Stimulus = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("MyAIStim"));
+	Stimulus->RegisterForSense(TSubclassOf<UAISense_Sight>());
+	Stimulus->RegisterWithPerceptionSystem();
 }
 
 // Called when the game starts or when spawned

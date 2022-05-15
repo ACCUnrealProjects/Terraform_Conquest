@@ -37,6 +37,13 @@ private:
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "ActiveStatus", meta = (AllowPrivateAccess = "true"))
 	bool bActivated = false;
 
+private:
+	void SetUpMyStimulis();
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "AI")
+	class UAIPerceptionStimuliSourceComponent* Stimulus = nullptr;
+
 protected:
 
 	// Called when the game starts or when spawned
