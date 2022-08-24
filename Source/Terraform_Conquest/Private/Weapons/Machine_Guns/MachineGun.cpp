@@ -10,6 +10,7 @@ AMachineGun::AMachineGun()
 
 	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Tracer Fire Effect"));
 	FireEffect->bAutoActivate = false;
+	FireEffect->SetIsReplicated(true);
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FireEffect->SetRelativeRotation(FRotator(0, -90.0f, 0));
 
@@ -21,10 +22,8 @@ void AMachineGun::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMachineGun::Fire_Implementation()
+void AMachineGun::FireWeapon()
 {
-	AWeapon::Fire_Implementation();
-
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile 

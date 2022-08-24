@@ -3,6 +3,7 @@
 #include "Weapons/Weapon.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "Pawns/TeamActionPawn.h"
 #include "Particles/ParticleSystemComponent.h"
 
 
@@ -27,19 +28,17 @@ AWeapon::AWeapon()
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	ShotParams.AddIgnoredActor(GetOwner());
-	ActorParams.Owner = GetOwner();
-	ActorParams.Instigator = Cast<APawn>(GetOwner());
 
 	if (HasAuthority())
 	{
+		ShotParams.AddIgnoredActor(GetOwner());
+		ActorParams.Owner = this;
+		ActorParams.Instigator = Cast<APawn>(GetOwner());
 		AmmoRegenStartTimerParam.BindUFunction(this, FName("StartRegenAmmo"), false);
 		CurrentTotalAmmo = MaxAmmo;
 		AmmoRegened = MaxAmmo * AmmoRegenPercentage;
-
 		GetTeam();
 	}
-
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -49,7 +48,6 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 	//Replicate everywhere
 	DOREPLIFETIME(AWeapon, WeaponName);
 	DOREPLIFETIME(AWeapon, myWeaponType);
-	DOREPLIFETIME(AWeapon, TeamId);
 	DOREPLIFETIME(AWeapon, CurrentTotalAmmo);
 	DOREPLIFETIME(AWeapon, MaxAmmo);
 
@@ -61,23 +59,32 @@ void AWeapon::GetTeam()
 {
 	if (!GetOwner()) { return; }
 
-	for (auto tag : GetOwner()->Tags)
+	auto TeamPawn = Cast<ATeamActionPawn>(GetOwner());
+	if (TeamPawn)
 	{
-		if (tag.ToString().Contains("Team"))
+		TeamId = TeamPawn->GetTeamId();
+	}
+}
+
+void AWeapon::Fire()
+{
+	if (CurrentTotalAmmo <= 0)
+	{
+		if (DryClipSound)
 		{
-			GetTeamFromString(tag.ToString());
+			UGameplayStatics::PlaySoundAtLocation(this, DryClipSound, GetActorLocation());
+			return;
 		}
 	}
 
-}
+	if (GetWorld()->GetRealTimeSeconds() - LastFire < FireRate)
+	{
+		return;
+	}
+	ServerFire();
+	LastFire = GetWorld()->GetRealTimeSeconds();
 
-bool AWeapon::Fire_Validate()
-{
-	return true;
-}
-
-void AWeapon::Fire_Implementation()
-{
+	CurrentTotalAmmo--;
 	if (FireSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
@@ -86,45 +93,66 @@ void AWeapon::Fire_Implementation()
 	{
 		FireEffect->Activate();
 	}
-
-	GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
-	if (!ExternalRegenOn)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
-	}
-	GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
 }
 
-void AWeapon::AttemptToFire()
+bool AWeapon::ServerFire_Validate()
 {
-	ServerAttemptToFire();
-}
-
-bool AWeapon::ServerAttemptToFire_Validate()
-{
-	if (GetWorld()->GetRealTimeSeconds() - LastFire < FireRate)
-	{
-		return false;
-	}
-
 	return true;
 }
 
-void AWeapon::ServerAttemptToFire_Implementation()
+void AWeapon::ServerFire_Implementation()
 {
-	LastFire = GetWorld()->GetRealTimeSeconds();
 	if (CurrentTotalAmmo <= 0)
 	{
-		if (DryClipSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, DryClipSound, GetActorLocation());
-		}
+		MRPC_PlaySound(GetActorLocation(), DryClipSound, true);
 		return;
 	}
-	else if (CurrentTotalAmmo > 0)
+	else
 	{
-		Fire();
+		if (GetWorld()->GetRealTimeSeconds() - LastFire < (FireRate/2.0f))
+		{
+			return;
+		}
+		LastFire = GetWorld()->GetRealTimeSeconds();
+
+		MRPC_PlaySound(GetActorLocation(), FireSound, true);
+		MRPC_PlayEffect(FireEffect, true);
+		FireWeapon();
+
+		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
+		if (!ExternalRegenOn)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(AmmoRegenTimer);
+		}
+		GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
+	}
+}
+
+void AWeapon::MRPC_PlaySound_Implementation(FVector SoundLocation, USoundBase* Sound, bool bDontPlayForOwner)
+{
+	if (bDontPlayForOwner && GetInstigatorController() && 
+		GetInstigatorController()->IsLocalController())
+	{
 		return;
+	}
+
+	if (Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, Sound, SoundLocation);
+	}
+}
+
+void AWeapon::MRPC_PlayEffect_Implementation(UParticleSystemComponent* Effect, bool bDontPlayForOwner)
+{
+	if (bDontPlayForOwner && GetInstigatorController() &&
+		GetInstigatorController()->IsLocalController())
+	{
+		return;
+	}
+
+	if (Effect)
+	{
+		Effect->Activate();
 	}
 }
 
@@ -174,7 +202,6 @@ void AWeapon::ChangeActiveState(const bool AmIActive)
 {
 	if (AmIActive)
 	{
-		FTimerDelegate TimerParam;
 		GetWorld()->GetTimerManager().SetTimer(AmmoRegenStartTimer, AmmoRegenStartTimerParam, TimeTillAmmoRegenStarts, false);
 	}
 }

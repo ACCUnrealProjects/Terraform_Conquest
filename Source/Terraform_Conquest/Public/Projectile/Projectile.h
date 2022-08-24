@@ -24,17 +24,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 		float Damage = 10.0f;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Effects", meta = (AllowPrivateAccess = "true"))
-		class UParticleSystem* ImpactBlast = nullptr;
+	UPROPERTY(EditDefaultsOnly, Category = "Effect")
+		TSubclassOf<class AImpact_Effect> MyImpactEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
 		float ProjectileLifeTime = 4.0f;
+
+	FHitResult SavedHit;
+
+	bool bHaveHitSomething;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) ;
+
+	void Destroyed() override;
 
 public:	
 	// Sets default values for this actor's properties

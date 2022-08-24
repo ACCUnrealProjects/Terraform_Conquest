@@ -22,10 +22,23 @@ void PID_Controller::SetMinMax(float Min, float Max)
 	MinMaxActive = true;
 }
 
-float PID_Controller::Calculate(float target, float current, float DT)
+float PID_Controller::Calculate(float target, float current, float DT, bool bIsAngleValue)
 {
 	// Get the error
 	float proportional = target - current;
+	if (bIsAngleValue)
+	{
+		proportional = (((int32)proportional % 360) + 360) % 360;
+		if (proportional < -180.0f)
+		{
+			proportional += 360.0f;
+		}
+		else if (proportional > 180.0f)
+		{
+			proportional -= 360.0f;
+		}
+	}
+
 	float derivitive = (proportional - fLastProportional) / DT;
 	// store last error after using for derivitive
 	fLastProportional = proportional;
@@ -45,6 +58,7 @@ FVector PID_Controller::Calculate(FVector target, FVector current, float DT)
 {
 	// Get the error
 	FVector proportional = target - current;
+
 	FVector derivitive = (proportional - vLastProportional) / DT;
 	// store last error after using for derivitive
 	vLastProportional = proportional;

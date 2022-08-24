@@ -5,22 +5,22 @@
 
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
-#include "TeamAttitude.generated.h"
+#include "TeamAttitudeSystem.generated.h"
 
 /**
  * 
  */
 USTRUCT(BlueprintType)
-struct FTeamAttitude
+struct FTeamAttitudeSystem
 {
     GENERATED_BODY()
 public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere)
         TArray<TEnumAsByte<ETeamAttitude::Type>> Attitude;
 
-    FTeamAttitude() {};
+    FTeamAttitudeSystem() {};
 
-    FTeamAttitude(std::initializer_list<TEnumAsByte<ETeamAttitude::Type>> attitudes) :
+    FTeamAttitudeSystem(std::initializer_list<TEnumAsByte<ETeamAttitude::Type>> attitudes) :
         Attitude(std::move(attitudes))
     { };
 };

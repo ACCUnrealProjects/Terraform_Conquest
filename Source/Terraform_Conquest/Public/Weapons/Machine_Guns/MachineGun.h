@@ -23,9 +23,9 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire_Implementation() override;
-
 public:
 
 	AMachineGun();
+
+	virtual void FireWeapon() override;
 };

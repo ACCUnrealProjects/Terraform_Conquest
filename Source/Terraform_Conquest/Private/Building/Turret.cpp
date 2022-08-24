@@ -87,7 +87,7 @@ void ATurret::Fire(AActor* Target)
 
 	for (auto Gun : TurretWeapons)
 	{
-		Gun->AttemptToFire();
+		Gun->Fire();
 	}
 }
 

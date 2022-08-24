@@ -10,6 +10,7 @@ UHealth_Component::UHealth_Component()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
 }
 
 void UHealth_Component::PostInitProperties()
@@ -27,7 +28,6 @@ void UHealth_Component::PostInitProperties()
 void UHealth_Component::BeginPlay()
 {
 	Super::BeginPlay();
-	SetIsReplicated(true);
 }
 
 void UHealth_Component::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

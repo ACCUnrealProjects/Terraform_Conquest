@@ -23,10 +23,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire_Implementation() override;
-
-
 public:
-
 	ACannonWeapon();
+
+	virtual void FireWeapon() override;
 };

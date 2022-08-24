@@ -18,15 +18,18 @@ ATracer_Round::ATracer_Round()
 	ProjectileMesh->SetCollisionProfileName("NoCollision");
 	SetRootComponent(ProjectileMesh);
 
-	ImpactBlast = CreateDefaultSubobject<UParticleSystem>(FName(TEXT("Impact Blast")));
-
 	ProjectileLifeTime = 15.0f;
 }
 
 void ATracer_Round::BeginPlay()
 {
 	Super::BeginPlay();
-	ShotParams.AddIgnoredActor(GetOwner());
+	HitTarget = false;
+	if (HasAuthority()) 
+	{
+		ShotParams.AddIgnoredActor(GetOwner());
+		ShotParams.AddIgnoredActor(GetOwner()->GetOwner());
+	}
 }
 
 void ATracer_Round::Tick(float DeltaTime)
@@ -38,25 +41,33 @@ void ATracer_Round::Tick(float DeltaTime)
 	FVector RayStart = GetActorLocation();
 	FVector Velocity = (GetActorForwardVector() * TracerSpeed) + (FVector(0, 0, GetWorld()->GetGravityZ()) * DeltaTime);
 	FVector RayEnd = RayStart + (Velocity * DeltaTime);
+	if (HasAuthority())
+	{
+		SetActorLocation(RayEnd);
+	}
+	
 
 	if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
 	{
 		HitTarget = true;
+		SetActorLocation(ShotHit.Location);
 		HitResponse(ShotHit.Component.Get(), ShotHit.Actor.Get(), nullptr, ShotHit.ImpactNormal, ShotHit);
 	}
-
-	SetActorLocation(RayEnd);
 }
 
 void ATracer_Round::LaunchProjectile()
 {
-
+	return;
 }
 
 void ATracer_Round::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!OtherActor || !GetOwner()) { return; }
+	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-	UGameplayStatics::ApplyDamage(OtherActor, Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);	
+	if (!OtherActor || !HasAuthority()) { return; }
+
+	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ? 
+		GetInstigator()->GetController() : nullptr;
+
+	UGameplayStatics::ApplyDamage(OtherActor, Damage, DamageDealer, this, UDamageType::StaticClass());
 }

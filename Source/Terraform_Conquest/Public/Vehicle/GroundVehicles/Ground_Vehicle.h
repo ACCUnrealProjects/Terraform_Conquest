@@ -17,20 +17,21 @@ class TERRAFORM_CONQUEST_API AGround_Vehicle : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float MaxMinPitchLook = 30.0f;
+		float MaxMinPitchLook = 30.0f;
 
 private:
+
 	//Rotation
-	void Rotation(float DeltaTime);
+	void InputPitch(float Amount);
+	void InputYaw(float Amount);
 	//Movement
-	void ForwardMovement(float Amount);
+	void InputForwardMovement(float Amount);
+	void InputTurn(float Amount);
 
 protected:
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float ForwardThrust = 500000.0f;
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
-	float BackWardsThrust = ForwardThrust * 0.3f;
+	
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "GroundSetUp")
+	class UTracks_Move_Component* GroundMovementComp = nullptr;
 
 protected:
 	// Called when the game starts or when spawned

@@ -11,13 +11,13 @@
 UWeapon_Controller_Component::UWeapon_Controller_Component()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 }
 
 // Called when the game starts
 void UWeapon_Controller_Component::BeginPlay()
 {
 	Super::BeginPlay();
-	SetIsReplicated(true);
 
 	SpawnParams.Owner = GetOwner();
 	SpawnParams.Instigator = Cast<APawn>(SpawnParams.Owner);
@@ -257,11 +257,16 @@ void UWeapon_Controller_Component::FireCurrent()
 
 	for (auto Gun : ActiveWeapon->WeaponsList)
 	{
-		Gun->AttemptToFire();
+		Gun->Fire();
 	}
 }
 
-void UWeapon_Controller_Component::RotateCurrentWeapons(FVector CamPos, FVector CamDirection)
+bool UWeapon_Controller_Component::ServerRotateCurrentWeapons_Validate(FVector CamPos, FVector CamDirection)
+{
+	return true;
+}
+
+void UWeapon_Controller_Component::ServerRotateCurrentWeapons_Implementation(FVector CamPos, FVector CamDirection)
 {
 	if (!ActiveWeapon || ActiveWeapon->WeaponsType == GunType::Mine) { return; }
 
@@ -279,7 +284,6 @@ void UWeapon_Controller_Component::RotateCurrentWeapons(FVector CamPos, FVector 
 		FRotator RotationChange = AimDir.Rotation() - Gun->GetActorForwardVector().Rotation();
 		Gun->AddActorLocalRotation(FRotator(RotationChange.Pitch, RotationChange.Yaw, 0));
 	}
-
 }
 
 TArray<AWeapon*> UWeapon_Controller_Component::GetCurrentGuns() const

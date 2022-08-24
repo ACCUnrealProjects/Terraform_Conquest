@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "Utility/TeamAttitude.h"
+#include "Utility/TeamAttitudeSystem.h"
 #include "GenericTeamAgentInterface.h"
 #include "MyGameSettings.generated.h"
 
@@ -19,7 +19,7 @@ class TERRAFORM_CONQUEST_API UMyGameSettings : public UDeveloperSettings
 public:
 
     UPROPERTY(Category = "Artificial Intelligence", EditAnywhere, BlueprintReadOnly, Config)
-       TArray<FTeamAttitude> TeamAttitudes;
+       TArray<FTeamAttitudeSystem> TeamAttitudes;
 
 public:
 

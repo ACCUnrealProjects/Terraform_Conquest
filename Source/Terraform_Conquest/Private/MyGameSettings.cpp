@@ -1,6 +1,5 @@
 // Alex Chatt Terraform_Conquest 2020
 
-
 #include "MyGameSettings.h"
 
 UMyGameSettings::UMyGameSettings(const FObjectInitializer& ObjectInitializer)
@@ -22,7 +21,7 @@ const UMyGameSettings* UMyGameSettings::Get()
 
 ETeamAttitude::Type UMyGameSettings::GetAttitude(FGenericTeamId Of, FGenericTeamId Towards)
 {
-    const TArray<FTeamAttitude>& teamAttitudes = UMyGameSettings::Get()->TeamAttitudes;
+    const TArray<FTeamAttitudeSystem>& teamAttitudes = UMyGameSettings::Get()->TeamAttitudes;
     bool ofValid = teamAttitudes.IsValidIndex(Of.GetId());
     bool towardsValid = teamAttitudes.IsValidIndex(Towards.GetId());
 

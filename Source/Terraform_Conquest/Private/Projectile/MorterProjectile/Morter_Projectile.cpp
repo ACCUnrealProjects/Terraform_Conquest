@@ -32,9 +32,8 @@ AMorter_Projectile::AMorter_Projectile()
 
 	TrailEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Trace Effect")));
 	TrailEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	TrailEffect->SetIsReplicated(true);
 	TrailEffect->bAutoActivate = true;
-
-	ImpactBlast = CreateDefaultSubobject<UParticleSystem>(FName(TEXT("Impact Blast")));
 
 	ProjectileLifeTime = 300.0f;
 }
@@ -43,7 +42,10 @@ AMorter_Projectile::AMorter_Projectile()
 void AMorter_Projectile::BeginPlay()
 {
 	AProjectile::BeginPlay();
-	SphereCollider->OnComponentHit.AddDynamic(this, &AMorter_Projectile::OnHit);
+	if (HasAuthority())
+	{
+		SphereCollider->OnComponentHit.AddDynamic(this, &AMorter_Projectile::OnHit);
+	}
 }
 
 void AMorter_Projectile::LaunchProjectile()
@@ -53,14 +55,18 @@ void AMorter_Projectile::LaunchProjectile()
 
 void AMorter_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor == GetOwner()) { return; }
+	if (OtherActor == GetOwner() || !HasAuthority()) { return; }
 	HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
 
 void AMorter_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!OtherActor) { return; }
+	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), false, Cast<APawn>(GetOwner())->GetController(), true, ECC_Visibility);
-	AProjectile::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	if (!HasAuthority()) { return; }
+
+	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ?
+		GetInstigator()->GetController() : nullptr;
+
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), this, DamageDealer, false, ECC_Visibility);
 }

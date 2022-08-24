@@ -66,9 +66,7 @@ public:
 
 	void SetActiveState(bool bAmIActive);
 	UFUNCTION(reliable, server, WithValidation)
-	void ServerSetActiveState(bool bAmIActive);
-	virtual bool ServerSetActiveState_Validate(bool bAmIActive);
-	virtual void ServerSetActiveState_Implementation(bool bAmIActive);
+		void ServerSetActiveState(bool bAmIActive);
 
 	bool GetActiveState();
 };

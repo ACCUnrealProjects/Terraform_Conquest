@@ -17,10 +17,8 @@ void AMineWeapon::BeginPlay()
 	Range = 150.0f;
 }
 
-void AMineWeapon::Fire_Implementation()
+void AMineWeapon::FireWeapon()
 {
-	AWeapon::Fire_Implementation();
-
 	if (!ProjectileBlueprint) { return; }
 
 	FVector DownVector = -GetActorUpVector();
@@ -39,6 +37,7 @@ void AMineWeapon::Fire_Implementation()
 	}
 
 	Mine->Tags.Add(FName(GetTeamName(TeamId)));
+	CurrentTotalAmmo--;
 }
 
 

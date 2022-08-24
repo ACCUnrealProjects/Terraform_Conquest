@@ -9,6 +9,7 @@
 UTurret_Aiming_Component::UTurret_Aiming_Component()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 }
 
 
@@ -16,7 +17,6 @@ UTurret_Aiming_Component::UTurret_Aiming_Component()
 void UTurret_Aiming_Component::BeginPlay()
 {
 	Super::BeginPlay();
-	SetIsReplicated(true);
 }
 
 void UTurret_Aiming_Component::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

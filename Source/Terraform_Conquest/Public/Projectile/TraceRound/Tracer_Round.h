@@ -27,6 +27,7 @@ private:
 
 private:
 
+
 protected:
 
 	FCollisionQueryParams ShotParams;

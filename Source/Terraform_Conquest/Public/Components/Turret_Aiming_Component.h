@@ -35,10 +35,8 @@ public:
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const;
 
 	void AimToTarget(FVector TargetPosition);
-	UFUNCTION(reliable, server, WithValidation)
-	void ServerAimToTarget(FVector TargetPosition);
-	virtual bool ServerAimToTarget_Validate(FVector TargetPosition);
-	virtual void ServerAimToTarget_Implementation(FVector TargetPosition);
+	UFUNCTION(Unreliable, server, WithValidation)
+		void ServerAimToTarget(FVector TargetPosition);
 
 	bool CloseToHittingTarget(FVector TargetPosition);
 };

@@ -92,7 +92,6 @@ void AVehicle::SetUpLights()
 			NewLight->SetupAttachment(MyMesh, LightName);
 			NewLight->SetVisibility(bAreLightsOn);
 			NewLight->SetIsReplicated(true);
-			Lights.Add(NewLight);
 		}
 	}
 }
@@ -104,9 +103,10 @@ void AVehicle::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifeti
 	//Replicate everywhere
 	DOREPLIFETIME(AVehicle, MyPosition);
 	DOREPLIFETIME(AVehicle, MyRotation);
+	DOREPLIFETIME(AVehicle, Lights);
 
 	//Replicate to owner client and server only
-	DOREPLIFETIME_CONDITION(AVehicle, WantToFire, COND_OwnerOnly);
+	//DOREPLIFETIME_CONDITION(AVehicle, WantToFire, COND_OwnerOnly);
 
 	//Replicate to none owner client and server only
 }
@@ -116,7 +116,7 @@ void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (WantToFire)
+	if (WantToFire && IsLocallyControlled())
 	{
 		VehicleWeaponControllerComp->FireCurrent();
 	}
@@ -228,9 +228,14 @@ void AVehicle::ServerToggleLights_Implementation(bool bLightState)
 
 void AVehicle::MultiToggleLights_Implementation(bool bLightState)
 {
+	auto test = GetNetMode();
+
 	for (auto Light : Lights)
 	{
-		Light->SetVisibility(bLightState);
+		if (Light)
+		{
+			Light->SetVisibility(bLightState);
+		}
 	}
 }
 

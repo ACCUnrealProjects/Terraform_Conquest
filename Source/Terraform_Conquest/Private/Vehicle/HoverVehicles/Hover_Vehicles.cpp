@@ -1,6 +1,7 @@
 // Alex Chatt Terraform_Conquest 2020
 
 #include "Vehicle/HoverVehicles/Hover_Vehicles.h"
+#include "Components/Hover_Move_Component.h"
 #include "Components/Hover_Component.h"
 #include "Components/Weapon_Controller_Component.h"
 #include "Components/WidgetComponent.h"
@@ -18,6 +19,9 @@ AHover_Vehicles::AHover_Vehicles()
 	MainHoverComp = CreateDefaultSubobject<UHover_Component>(TEXT("MainHoverComp"));
 	MainHoverComp->bEditableWhenInherited = true;
 	MainHoverComp->SetupAttachment(MyMesh);
+
+	HoverMoveComp = CreateDefaultSubobject<UHover_Move_Component>(TEXT("HoverMoveComp"));
+	HoverMoveComp->bEditableWhenInherited = true;
 
 	MyMesh->SetSimulatePhysics(true);
 	MyMesh->SetLinearDamping(1.0f);
@@ -37,8 +41,6 @@ void AHover_Vehicles::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BackWardsThrust = ForwardThrust * 0.5f;
-	StrafeThrust = ForwardThrust * 0.60f;
 	RestrictedPitch = 0.0f;
 }
 
@@ -47,21 +49,23 @@ void AHover_Vehicles::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	switch (CurrentMoveState)
+	if (IsLocallyControlled())
 	{
-	case MovementState::Hovering:
-		RotationCorrection(DeltaTime);
-		break;
-	case MovementState::Flying:
-		FlightMovement(DeltaTime);
-		break;
+		switch (HoverMoveComp->GetMoveState())
+		{
+		case HoverMovementState::Hovering:
+			RotationCorrection(DeltaTime);
+			break;
+		case HoverMovementState::Flying:
+			FlightMovement(DeltaTime);
+			break;
+		}
 	}
+
 }
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)
 {
-	if (!IsLocallyControlled()) { return; }
-
 	FRotator CurrentRotation = MyMesh->GetComponentRotation();
 	// start to correct roll of ship when we are hovering
 	if (MainHoverComp && MainHoverComp->AmIHovering())
@@ -87,18 +91,11 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 
 void AHover_Vehicles::FlightMovement(float dt)
 {
-	if (!IsLocallyControlled()) { return; }
-
 	//Check is speed is below certain ammount
 	//If so, re-enable gravity on ship so it starts to drop
-	if (GetVelocity().Size() >= GravitySpeedCutoff)
-	{
-		MyMesh->SetEnableGravity(false);
-	}
-	else
-	{
-		MyMesh->SetEnableGravity(true);
-	}
+	HoverMoveComp->FlightGravityToggle();
+
+	ChangeCamerasPitch(false, dt);
 
 	FRotator CameraRotation = FPSCamera->GetRelativeRotation();
 	CameraRotation.Pitch = FMath::FInterpTo(CameraRotation.Pitch, 0.0f, dt, 0.1f);
@@ -117,8 +114,8 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(TEXT("LookRight"), this, &AHover_Vehicles::YawLook);
 	PlayerInputComponent->BindAxis(TEXT("Roll"), this, &AHover_Vehicles::RollLook);
 	//Movement
-	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &AHover_Vehicles::Trusters);
-	PlayerInputComponent->BindAxis(TEXT("Right"), this, &AHover_Vehicles::Strafe);
+	PlayerInputComponent->BindAxis(TEXT("Forward"), this, &AHover_Vehicles::TrusterInput);
+	PlayerInputComponent->BindAxis(TEXT("Right"), this, &AHover_Vehicles::StrafeInput);
 	//HoverControl
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::IncreaseJumpHeight);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AHover_Vehicles::DecreaseJumpHeight);
@@ -154,50 +151,33 @@ void AHover_Vehicles::DeactivateHoverSystem()
 
 void AHover_Vehicles::SwitchMovementMode()
 {
-	switch (CurrentMoveState)
+	HoverMoveComp->SwitchMovementMode();
+
+	switch (HoverMoveComp->GetMoveState())
 	{
-	case MovementState::Hovering:
-		CurrentMoveState = MovementState::Flying;
+	case HoverMovementState::Flying:
 		GetWorld()->GetTimerManager().SetTimer(HoverSwitchHandle, this, 
 			&AHover_Vehicles::DeactivateHoverSystem, HoverDisengageTime, false);
-		ForwardThrust *= ForwardThrustMulti;
 		break;
-	case MovementState::Flying:
-		CurrentMoveState = MovementState::Hovering;
-		ForwardThrust /= ForwardThrustMulti;
+	case HoverMovementState::Hovering:
 		ActivateHoverSystem();
-		MyMesh->SetEnableGravity(true);
 		break;
 	}
 }
 
-void AHover_Vehicles::Trusters(float Amount)
+void AHover_Vehicles::TrusterInput(float Amount)
 {
-	FVector GroundForwardVector = MyMesh->GetForwardVector();
-	if (Amount > 0.1)
-	{
-		MyMesh->AddForce(GroundForwardVector * (ForwardThrust * Amount) * MyMesh->GetMass());
-	}
-	if (Amount < -0.1 && CurrentMoveState == MovementState::Hovering)
-	{
-		MyMesh->AddForce(GroundForwardVector * (BackWardsThrust * Amount) * MyMesh->GetMass());
-	}
+	HoverMoveComp->Trusters(Amount);
 }
 
-void AHover_Vehicles::Strafe(float Amount)
+void AHover_Vehicles::StrafeInput(float Amount)
 {
-	if (!MainHoverComp || !MainHoverComp->GetbIsHoverEnabled()) { return; }
-
-	if (Amount > 0.1 || Amount < -0.1)
-	{
-		MyMesh->AddForce(MyMesh->GetRightVector() * (StrafeThrust * Amount) * MyMesh->GetMass());
-	}
+	HoverMoveComp->Strafe(Amount);
 }
 
 void AHover_Vehicles::YawLook(float Amount)
 {
-	MyMesh->AddTorqueInDegrees((Amount * TorqueSense * DefaultTorqueForce) 
-		* GetActorUpVector(), NAME_None, true); //Yaw
+	HoverMoveComp->YawLook(Amount);
 	SetWeaponRotation();
 }
 
@@ -205,33 +185,24 @@ void AHover_Vehicles::PitchLook(float Amount)
 {
 	if (!GetWorld()) { return; }
 
-	if (CurrentMoveState == MovementState::Hovering)
+	if (HoverMoveComp->GetMoveState() == HoverMovementState::Hovering)
 	{
 		RestrictedPitch += (Amount * CamSense * DefaultCameraRotation)
 			* GetWorld()->GetDeltaSeconds();
 		RestrictedPitch = FMath::Clamp(RestrictedPitch, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
 		// For hover mode, we should move the camera up and rotate the ship up/down to match the forward
-		FRotator CameraRotation = FPSCamera->GetRelativeRotation();
-		CameraRotation.Pitch = RestrictedPitch;
-		FPSCamera->SetRelativeRotation(CameraRotation);
-		CameraRotation.Pitch = RestrictedPitch + -TPSCameraSpring->GetRelativeRotation().Pitch;
-		TPSCamera->SetRelativeRotation(CameraRotation);
+		ChangeCamerasPitch(true, 0.0f);
 	}
-	else if (CurrentMoveState == MovementState::Flying)
+	else if (HoverMoveComp->GetMoveState() == HoverMovementState::Flying)
 	{
-		MyMesh->AddTorqueInDegrees(((Amount * TorqueSense * DefaultTorqueForce)
-			* -1.0f) * GetActorRightVector(), NAME_None, true); //Pitch
+		HoverMoveComp->PitchLook(Amount);
 	}
 	SetWeaponRotation();
 }
 
 void AHover_Vehicles::RollLook(float Amount)
 {
-	if(CurrentMoveState == MovementState::Flying)
-	{
-		MyMesh->AddTorqueInDegrees((Amount * TorqueSense * DefaultTorqueForce)
-			* GetActorForwardVector(), NAME_None, true); //Roll
-	}
+	HoverMoveComp->RollLook(Amount);
 }
 
 void AHover_Vehicles::SetWeaponRotation()
@@ -248,7 +219,7 @@ void AHover_Vehicles::SetWeaponRotation()
 		CamDir = TPSCamera->GetForwardVector();
 	}
 
-	VehicleWeaponControllerComp->RotateCurrentWeapons(CamPos, CamDir);
+	VehicleWeaponControllerComp->ServerRotateCurrentWeapons(CamPos, CamDir);
 }
 
 void AHover_Vehicles::Fire()
@@ -266,4 +237,48 @@ void AHover_Vehicles::DecreaseJumpHeight()
 {
 	if (!MainHoverComp) { return; }
 	MainHoverComp->DecreaseHoverHeight();
+}
+
+bool AHover_Vehicles::PitchLookAtTarget(FVector Target)
+{
+	if (HoverMoveComp->GetMoveState() != HoverMovementState::Hovering)
+	{
+		return false;
+	}
+
+	FRotator FowardRotation = GetActorForwardVector().Rotation();
+	FRotator WantedRotation = (Target - FPSCamera->GetComponentLocation()).Rotation();
+	float PitchOffset = WantedRotation.Pitch - FowardRotation.Pitch;
+	if (PitchOffset > HoverMaxMinPitchLook || -PitchOffset < HoverMaxMinPitchLook)
+	{
+		return false;
+	}
+
+	RestrictedPitch = PitchOffset;
+	ChangeCamerasPitch(true,0.0f);
+	SetWeaponRotation();
+
+	return true;
+}
+
+
+void AHover_Vehicles::ChangeCamerasPitch(bool bAmIRestricted, float dt)
+{
+	FRotator newFPSCameraRot = FPSCamera->GetRelativeRotation();
+	FRotator newTPSCameraRot = FPSCamera->GetRelativeRotation();
+
+	if (bAmIRestricted)
+	{
+		newFPSCameraRot.Pitch = RestrictedPitch;
+		newTPSCameraRot.Pitch += -TPSCameraSpring->GetRelativeRotation().Pitch;
+	}
+	else
+	{
+		newFPSCameraRot.Pitch = FMath::FInterpTo(newFPSCameraRot.Pitch, 0.0f, dt, 0.1f);
+		newTPSCameraRot.Pitch = FMath::FInterpTo(newTPSCameraRot.Pitch +
+			-TPSCameraSpring->GetRelativeRotation().Pitch, 0.0f, dt, 0.1f);
+	}
+
+	FPSCamera->SetRelativeRotation(newFPSCameraRot);
+	TPSCamera->SetRelativeRotation(newTPSCameraRot);
 }
