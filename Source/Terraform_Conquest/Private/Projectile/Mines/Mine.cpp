@@ -75,18 +75,16 @@ void AMine::MineOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 {
 	if (!HasAuthority()) { return; }
 
-	for (auto myTag : Tags)
+	ATeamActionActor* ActorTeam = Cast<ATeamActionActor>(OtherActor);
+
+	if (ActorTeam)
 	{
-		for (auto OtherTag : OtherActor->Tags)
+		if (ActorTeam->GetTeamId() == GetTeamId())
 		{
-			// Check to make sure we are not blowing up on a Friendly
-			if (myTag == OtherTag &&
-				myTag.ToString().Find("ETeam"))
-			{
-				return;
-			}
+			return;
 		}
 	}
+
 	Trigger();
 }
 

@@ -19,12 +19,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TracerSpeed", meta = (AllowPrivateAccess = "true"))
 	float TracerSpeed = 10000.0f;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* ProjectileMesh = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Collison", meta = (AllowPrivateAccess = "true"))
-	bool HitTarget = false;
-
 private:
 
 

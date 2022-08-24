@@ -37,22 +37,23 @@ void ATracer_Round::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (HitTarget) { return; }
 
-	FHitResult ShotHit;
-	FVector RayStart = GetActorLocation();
-	FVector Velocity = (GetActorForwardVector() * TracerSpeed) + (FVector(0, 0, GetWorld()->GetGravityZ()) * DeltaTime);
-	FVector RayEnd = RayStart + (Velocity * DeltaTime);
 	if (HasAuthority())
 	{
-		SetActorLocation(RayEnd);
+	  FHitResult ShotHit;
+	  FVector RayStart = GetActorLocation();
+	  FVector Velocity = (GetActorForwardVector() * TracerSpeed) + (FVector(0, 0, GetWorld()->GetGravityZ()) * DeltaTime);
+	  FVector RayEnd = RayStart + (Velocity * DeltaTime);
+      SetActorLocation(RayEnd);
+
+	  if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
+	  {
+		  HitTarget = true;
+		  SetActorLocation(ShotHit.Location);
+		  HitResponse(ShotHit.Component.Get(), ShotHit.Actor.Get(), nullptr, ShotHit.ImpactNormal, ShotHit);
+	  }
+
 	}
 	
-
-	if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
-	{
-		HitTarget = true;
-		SetActorLocation(ShotHit.Location);
-		HitResponse(ShotHit.Component.Get(), ShotHit.Actor.Get(), nullptr, ShotHit.ImpactNormal, ShotHit);
-	}
 }
 
 void ATracer_Round::LaunchProjectile()

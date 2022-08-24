@@ -21,13 +21,22 @@ void AProjectile::BeginPlay()
 	Super::BeginPlay();
 	if (ProjectileLifeTime > 0.0f && HasAuthority())
 	{
-		GetWorld()->GetTimerManager().SetTimer(LifeTimer, this, &AProjectile::Death, ProjectileLifeTime, false);
+		SetLifeSpan(ProjectileLifeTime);
 	}
+}
+
+void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	DOREPLIFETIME(AProjectile, HitTarget);
+	DOREPLIFETIME(AProjectile, SavedHit);
 }
 
 void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	bHaveHitSomething = true;
+	HitTarget = true;
 	SavedHit = Hit;
 
 	if (HasAuthority())
@@ -38,13 +47,15 @@ void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 void AProjectile::Death()
 {
-	Destroy();
+	// Give time to replicate to clients 
+	SetLifeSpan(ProjectileLifeTime);
+	ProjectileMesh->SetVisibility(false);
 }
 
 void AProjectile::Destroyed()
 {
 	// Only Spawn Effect/Sound if we have actually Hit something
-	if (MyImpactEffect && bHaveHitSomething)
+	if (MyImpactEffect && HitTarget)
 	{
 		FTransform const SpawnTransform(SavedHit.ImpactNormal.Rotation(), SavedHit.Location);
 		AImpact_Effect* EffectActor = GetWorld()->SpawnActorDeferred<AImpact_Effect>(MyImpactEffect, SpawnTransform);

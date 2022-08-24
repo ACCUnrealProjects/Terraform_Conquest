@@ -55,7 +55,7 @@ void AMorter_Projectile::LaunchProjectile()
 
 void AMorter_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor == GetOwner() || !HasAuthority()) { return; }
+	if (OtherActor == GetOwner() || HitTarget) { return; }
 	HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
 
@@ -69,4 +69,7 @@ void AMorter_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* Other
 		GetInstigator()->GetController() : nullptr;
 
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), Damage, GetActorLocation(), DamageRadius, UDamageType::StaticClass(), TArray<AActor*>(), this, DamageDealer, false, ECC_Visibility);
+
+	SphereCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ProjectileMovement->StopMovementImmediately();
 }

@@ -13,8 +13,6 @@ class TERRAFORM_CONQUEST_API AProjectile : public AActor
 	
 private:
 
-	FTimerHandle LifeTimer;
-
 private:
 
 	void Death();
@@ -24,6 +22,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 		float Damage = 10.0f;
 
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Collison", meta = (AllowPrivateAccess = "true"))
+		bool HitTarget = false;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh")
+		class UStaticMeshComponent* ProjectileMesh = nullptr;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Effect")
 		TSubclassOf<class AImpact_Effect> MyImpactEffect;
 
@@ -31,8 +35,6 @@ protected:
 		float ProjectileLifeTime = 4.0f;
 
 	FHitResult SavedHit;
-
-	bool bHaveHitSomething;
 
 protected:
 	// Called when the game starts or when spawned
@@ -45,6 +47,9 @@ protected:
 public:	
 	// Sets default values for this actor's properties
 	AProjectile();
+
+	/** Property replication */
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void LaunchProjectile() PURE_VIRTUAL( AProjectile::LaunchProjectile, );
 

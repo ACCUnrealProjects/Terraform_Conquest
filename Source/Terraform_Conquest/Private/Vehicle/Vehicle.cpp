@@ -74,6 +74,7 @@ void AVehicle::BeginPlay()
 	if (HasAuthority())
 	{
 		MyHealth->IHaveDied.AddUniqueDynamic(this, &AVehicle::Death);
+		GetComponents<URectLightComponent>(Lights);
 	}
 }
 

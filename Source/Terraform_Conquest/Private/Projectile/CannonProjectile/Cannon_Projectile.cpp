@@ -56,7 +56,7 @@ void ACannon_Projectile::LaunchProjectile()
 
 void ACannon_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor == GetOwner()) { return; }
+	if (OtherActor == GetOwner() || HitTarget) { return; }
 
 	HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
@@ -71,4 +71,7 @@ void ACannon_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* Other
 		GetInstigator()->GetController() : nullptr;
 
 	UGameplayStatics::ApplyDamage(OtherActor, Damage, DamageDealer, this, UDamageType::StaticClass());
+
+	SphereCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ProjectileMovement->StopMovementImmediately();
 }
