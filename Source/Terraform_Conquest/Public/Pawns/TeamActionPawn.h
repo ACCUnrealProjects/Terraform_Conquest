@@ -34,6 +34,7 @@ public:
 	virtual bool ServerSetTeamID_Validate(ETeam NewTeamID);
 	virtual void ServerSetTeamID_Implementation(ETeam NewTeamID);
 
+	UFUNCTION(BlueprintCallable)
 	ETeam GetTeamId() const { return TeamId; }
 	virtual FGenericTeamId GetGenericTeamId() const override { return uint8(TeamId); };
 };

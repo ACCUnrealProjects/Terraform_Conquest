@@ -177,6 +177,8 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AVehicle::CameraChange()
 {
 	BIs1stPersonCamera = !BIs1stPersonCamera;
+	FPSCamera->SetActive(BIs1stPersonCamera);
+	TPSCamera->SetActive(!BIs1stPersonCamera);
 	ServerCameraChange(BIs1stPersonCamera);
 }
 

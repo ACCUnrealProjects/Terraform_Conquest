@@ -21,6 +21,7 @@ AMorter_Projectile::AMorter_Projectile()
 	ProjectileMesh->SetRelativeLocation(FVector(0, 0, 0));
 	ProjectileMesh->SetNotifyRigidBodyCollision(true);
 	ProjectileMesh->SetVisibility(false);
+	ProjectileMesh->SetIsReplicated(true);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(FName(TEXT("Projectile Move Comp")));
 	ProjectileMovement->bAutoActivate = true;

@@ -16,6 +16,7 @@ ATracer_Round::ATracer_Round()
 	ProjectileMesh->SetNotifyRigidBodyCollision(true);
 	ProjectileMesh->SetVisibility(true);
 	ProjectileMesh->SetCollisionProfileName("NoCollision");
+	ProjectileMesh->SetIsReplicated(true);
 	SetRootComponent(ProjectileMesh);
 
 	ProjectileLifeTime = 15.0f;

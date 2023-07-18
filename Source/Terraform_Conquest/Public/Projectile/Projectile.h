@@ -17,6 +17,11 @@ private:
 
 	void Death();
 
+	UFUNCTION()
+		void OnRep_SaveHit();
+
+	void SpawnEffect();
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
@@ -32,17 +37,19 @@ protected:
 		TSubclassOf<class AImpact_Effect> MyImpactEffect;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Death")
-		float ProjectileLifeTime = 4.0f;
+		float ProjectileLifeTime = 5.0f;
 
-	FHitResult SavedHit;
+	UPROPERTY(EditDefaultsOnly, Category = "Death")
+		float DestroyTime = 1.0f;
+
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_SaveHit)
+		FHitResult SavedHit;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) ;
-
-	void Destroyed() override;
 
 public:	
 	// Sets default values for this actor's properties

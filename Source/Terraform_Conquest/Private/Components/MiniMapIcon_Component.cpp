@@ -38,8 +38,8 @@ void UMiniMapIcon_Component::CreateIcon()
 
 	// Dont add mark for my own actor
 	auto LocalPlayerActor = GetWorld()->GetFirstPlayerController();
-	auto OwnerActor = GetOwner()->GetOwner();
-	if (LocalPlayerActor == OwnerActor)
+	auto MyActorController = GetOwner()->GetOwner();
+	if (LocalPlayerActor == MyActorController)
 	{
 		return;
 	}

@@ -6,6 +6,7 @@
 #include "Actor/Effects/Impact_Effect.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -30,8 +31,16 @@ void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	//Replicate everywhere
-	DOREPLIFETIME(AProjectile, HitTarget);
 	DOREPLIFETIME(AProjectile, SavedHit);
+}
+
+void AProjectile::OnRep_SaveHit()
+{
+	if (!HasAuthority())
+	{
+		SpawnEffect();
+		Destroy();
+	}
 }
 
 void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -45,22 +54,26 @@ void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	}
 }
 
-void AProjectile::Death()
-{
-	// Give time to replicate to clients 
-	SetLifeSpan(ProjectileLifeTime);
-	ProjectileMesh->SetVisibility(false);
-}
-
-void AProjectile::Destroyed()
-{
+void AProjectile::SpawnEffect()
+{	
 	// Only Spawn Effect/Sound if we have actually Hit something
-	if (MyImpactEffect && HitTarget)
+	if (MyImpactEffect && SavedHit.Actor.IsValid())
 	{
 		FTransform const SpawnTransform(SavedHit.ImpactNormal.Rotation(), SavedHit.Location);
 		AImpact_Effect* EffectActor = GetWorld()->SpawnActorDeferred<AImpact_Effect>(MyImpactEffect, SpawnTransform);
 		EffectActor->Set_HitResult(SavedHit);
+		UGameplayStatics::FinishSpawningActor(EffectActor, SpawnTransform);
 	}
+
 }
+
+void AProjectile::Death()
+{
+	// Give time to replicate to clients 
+	SetLifeSpan(DestroyTime);
+	ProjectileMesh->DestroyComponent();
+	SpawnEffect();
+}
+
 
 
