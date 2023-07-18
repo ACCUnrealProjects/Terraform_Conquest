@@ -12,6 +12,7 @@ void UWeaponContainerV2::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 	DOREPLIFETIME(UWeaponContainerV2, WeaponsType);
 	DOREPLIFETIME(UWeaponContainerV2, WeaponsList);
+	DOREPLIFETIME(UWeaponContainerV2, bReplicatedFlag);
 }
 
 void UWeaponContainerV2::ChangeActiveStateOfGuns(const bool bAmActive)

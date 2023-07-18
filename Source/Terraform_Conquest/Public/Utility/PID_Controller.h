@@ -29,7 +29,7 @@ public:
 	void SetGains(float gainP, float gainI, float gainD);
 	void SetMinMax(float Min, float Max);
 
-	float Calculate(float target, float current, float DT);
+	float Calculate(float target, float current, float DT, bool bIsAngleValue);
 	FVector Calculate(FVector target, FVector current, float DT);
 
 	void Reset();

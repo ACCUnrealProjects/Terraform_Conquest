@@ -6,13 +6,6 @@
 #include "Vehicle/Vehicle.h"
 #include "Hover_Vehicles.generated.h"
 
-UENUM(BlueprintType)
-enum class MovementState : uint8
-{
-	Flying,
-	Hovering
-};
-
 UCLASS()
 class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 {
@@ -21,26 +14,19 @@ class TERRAFORM_CONQUEST_API AHover_Vehicles : public AVehicle
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "LookControl", meta = (AllowPrivateAccess = "true"))
-	float HoverMaxMinPitchLook = 15.0f;
-
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	MovementState CurrentMoveState = MovementState::Hovering;
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Trusters", meta = (AllowPrivateAccess = "true"))
-	TArray<class UParticleSystemComponent*> TrusterEffects;
+		float HoverMaxMinPitchLook = 15.0f;
+	float RestrictedPitch = 0.0f;
 
 	//Time handler for Hover booster to turn off
 	FTimerHandle HoverSwitchHandle;
-
-	float RestrictedPitch = 0.0f;
 
 private:
 
 	//Movement and flight
 	void FlightMovement(float dt);
 	//Movement
-	void Trusters(float Amount);
-	void Strafe(float Amount);
+	void TrusterInput(float Amount);
+	void StrafeInput(float Amount);
 	//Rotation
 	void YawLook(float Amount);
 	void PitchLook(float Amount);
@@ -48,6 +34,8 @@ private:
 	void SetWeaponRotation();
 	// Rotation correction for hover mode
 	void RotationCorrection(float DeltaTime);
+	//Rotate the pitch of the Cameras
+	void ChangeCamerasPitch(bool bAmIRestricted, float dt);
 	//Activate/Deactivate Hover
 	UFUNCTION()
 	void ActivateHoverSystem();
@@ -56,27 +44,17 @@ private:
 protected:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
-	class UHover_Component* MainHoverComp;
+		class UHover_Move_Component* HoverMoveComp = nullptr;
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
-	TArray<class UHover_Component*> SupportHoverComps;
+		class UHover_Component* MainHoverComp = nullptr;
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "HoverSetUp")
+		TArray<class UHover_Component*> SupportHoverComps;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
-	TArray<class UParticleSystemComponent*> TrusterEffect;
+		TArray<class UParticleSystemComponent*> TrusterEffect;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float ForwardThrust = 500.0f;
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
-	float BackWardsThrust = ForwardThrust * 0.3f;
-	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "Movement")
-	float StrafeThrust = ForwardThrust * 0.50f;
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float ForwardThrustMulti = 2.5f;
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float HoverDisengageTime = 2.0f;
-
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Movement")
-	float GravitySpeedCutoff = 1000.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "MoveSwitch")
+		float HoverDisengageTime = 2.0f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -98,10 +76,12 @@ public:
 	//Fire Override
 	virtual void Fire() override;
 
+	//Camera LookAt (Pitch)
+	bool PitchLookAtTarget(FVector Target);
+
 	//Hover Control
 	void IncreaseJumpHeight();
 	void DecreaseJumpHeight();
 
 	void SwitchMovementMode();
-
 };

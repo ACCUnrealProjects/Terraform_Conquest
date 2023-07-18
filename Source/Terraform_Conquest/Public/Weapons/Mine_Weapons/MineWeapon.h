@@ -23,9 +23,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire_Implementation() override;
-
 public:
-
 	AMineWeapon();
+
+	virtual void FireWeapon() override;
 };

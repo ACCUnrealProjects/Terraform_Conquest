@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
-#include "TeamsEnum.h"
+#include "Utility/TeamsEnum.h"
 #include "Conquest_GameState.generated.h"
 
 /**

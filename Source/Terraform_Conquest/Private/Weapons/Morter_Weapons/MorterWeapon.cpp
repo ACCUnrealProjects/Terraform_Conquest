@@ -10,6 +10,7 @@ AMorterWeapon::AMorterWeapon()
 
 	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Morter Fire Effect"));
 	FireEffect->bAutoActivate = false;
+	FireEffect->SetIsReplicated(true);
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FireEffect->SetRelativeRotation(FRotator(0,-90.0f,0));
 
@@ -21,10 +22,8 @@ void AMorterWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMorterWeapon::Fire_Implementation()
+void AMorterWeapon::FireWeapon()
 {
-	AWeapon::Fire_Implementation();
-
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile

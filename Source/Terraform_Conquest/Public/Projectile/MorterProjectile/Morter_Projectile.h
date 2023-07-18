@@ -16,9 +16,6 @@ class TERRAFORM_CONQUEST_API AMorter_Projectile : public AProjectile
 	
 private:
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-		class UStaticMeshComponent* ProjectileMesh = nullptr;
-
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileMovement", meta = (AllowPrivateAccess = "true"))
 		class UProjectileMovementComponent* ProjectileMovement = nullptr;
 

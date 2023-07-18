@@ -10,6 +10,7 @@ ACannonWeapon::ACannonWeapon()
 
 	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName("Cannon Fire Effect"));
 	FireEffect->bAutoActivate = false;
+	FireEffect->SetIsReplicated(true);
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	FireEffect->SetRelativeRotation(FRotator(0, -90.0f, 0));
 
@@ -21,10 +22,8 @@ void ACannonWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ACannonWeapon::Fire_Implementation()
+void ACannonWeapon::FireWeapon()
 {
-	AWeapon::Fire_Implementation();
-
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile

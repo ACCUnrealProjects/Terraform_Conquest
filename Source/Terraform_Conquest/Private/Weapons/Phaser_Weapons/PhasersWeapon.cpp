@@ -12,6 +12,7 @@ APhasersWeapon::APhasersWeapon()
 
 	FireEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Phasers Fire Effect")));
 	FireEffect->bAutoActivate = false;
+	FireEffect->SetIsReplicated(true);
 	FireEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
 	FParticleSysParam Source;
@@ -37,10 +38,8 @@ void APhasersWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void APhasersWeapon::Fire_Implementation()
+void APhasersWeapon::FireWeapon()
 {
-	AWeapon::Fire_Implementation();
-
 	if (!GetWorld()) { return; }
 
 	//Raycast fire, also fire projectile flash or laser 

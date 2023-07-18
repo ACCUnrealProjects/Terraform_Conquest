@@ -38,7 +38,7 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (!bIsHoverEnabled || 
-		!Cast<APawn>(GetOwner())->IsLocallyControlled()) 
+		!Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{ 
 		return; 
 	}
@@ -98,7 +98,7 @@ void UHover_Component::HoverCalcPid(float DT)
 	{
 		HoverGrounded = true;
 		//Get percentage of force to add
-		float ForcePercentage = HoverPid.Calculate(HoverLenght, DownRayCast.Distance,DT);
+		float ForcePercentage = HoverPid.Calculate(HoverLenght, DownRayCast.Distance, DT, false);
 		float ForceToAdd = SupressionStiffness * ForcePercentage * MyPrimComponent->GetMass();
 		// Apply the force
 		MyPrimComponent->AddForce(ForceToAdd * GetUpVector());

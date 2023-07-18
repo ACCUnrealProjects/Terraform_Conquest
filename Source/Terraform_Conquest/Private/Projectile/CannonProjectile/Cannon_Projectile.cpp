@@ -22,6 +22,7 @@ ACannon_Projectile::ACannon_Projectile()
 	ProjectileMesh->SetRelativeLocation(FVector(0, 0, 0));
 	ProjectileMesh->SetNotifyRigidBodyCollision(true);
 	ProjectileMesh->SetVisibility(false);
+	ProjectileMesh->SetIsReplicated(true);
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(FName(TEXT("Projectile Move Comp")));
 	ProjectileMovement->bAutoActivate = true;
@@ -33,9 +34,8 @@ ACannon_Projectile::ACannon_Projectile()
 
 	TrailEffect = CreateDefaultSubobject<UParticleSystemComponent>(FName(TEXT("Trace Effect")));
 	TrailEffect->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	TrailEffect->SetIsReplicated(true);
 	TrailEffect->bAutoActivate = true;
-
-	ImpactBlast = CreateDefaultSubobject<UParticleSystem>(FName(TEXT("Impact Blast")));
 
 	ProjectileLifeTime = 50.0f;
 }
@@ -44,7 +44,10 @@ ACannon_Projectile::ACannon_Projectile()
 void ACannon_Projectile::BeginPlay()
 {
 	AProjectile::BeginPlay();
-	SphereCollider->OnComponentHit.AddDynamic(this, &ACannon_Projectile::OnHit);
+	if (HasAuthority())
+	{
+		SphereCollider->OnComponentHit.AddDynamic(this, &ACannon_Projectile::OnHit);
+	}
 }
 
 void ACannon_Projectile::LaunchProjectile()
@@ -54,14 +57,22 @@ void ACannon_Projectile::LaunchProjectile()
 
 void ACannon_Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor == GetOwner()) { return; }
+	if (OtherActor == GetOwner() || HitTarget) { return; }
+
 	HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 }
 
 void ACannon_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!OtherActor) { return; }
+	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-	UGameplayStatics::ApplyDamage(OtherActor, Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-	AProjectile::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
+	if (!OtherActor || !HasAuthority()) { return; }
+
+	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ?
+		GetInstigator()->GetController() : nullptr;
+
+	UGameplayStatics::ApplyDamage(OtherActor, Damage, DamageDealer, this, UDamageType::StaticClass());
+
+	SphereCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ProjectileMovement->StopMovementImmediately();
 }

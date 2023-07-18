@@ -29,9 +29,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void Fire_Implementation() override;
-
 public:
-
 	APhasersWeapon();
+
+	virtual void FireWeapon() override;
 };

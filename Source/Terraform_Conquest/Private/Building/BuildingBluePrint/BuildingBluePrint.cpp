@@ -47,7 +47,7 @@ void ABuildingBluePrint::SetAreTilesAvailable(bool bTilesAvailable)
 	bAreTilesAvailable = bTilesAvailable;
 }
 
-bool ABuildingBluePrint::BuildAttempt(FGenericTeamId TeamID, TArray<AMapTile*> Tiles)
+bool ABuildingBluePrint::BuildAttempt(ETeam TeamID, TArray<AMapTile*> Tiles)
 {
 	if (!bAreTilesAvailable || BlockingMeshes.Num() > 0)
 	{ 

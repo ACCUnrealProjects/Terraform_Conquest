@@ -1,10 +1,11 @@
 // Alex Chatt Terraform_Conquest 2020
 // https://forums.unrealengine.com/development-discussion/c-gameplay-programming/1569711-how-do-i-use-the-ai-perception-teams
 
-
-#include "../../Public/Building/Building.h"
-#include "../../Public/Map/MapTile.h"
-#include "../../Public/Components/Health_Component.h"
+#include "Building/Building.h"
+#include "Map/MapTile.h"
+#include "Net/UnrealNetwork.h"
+#include "Components/Health_Component.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Components/BoxComponent.h"
 
 // Sets default values
@@ -12,6 +13,10 @@ ABuilding::ABuilding()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicateMovement(true);
 
 	BuildingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyMesh"));
 	SetRootComponent(BuildingMesh);
@@ -23,14 +28,32 @@ ABuilding::ABuilding()
 
 	MyHealthComp = CreateDefaultSubobject<UHealth_Component>(TEXT("MyHealthComp"));
 	MyHealthComp->bEditableWhenInherited = true;
+	MyHealthComp->SetIsReplicated(true);
 
+	Tags.Add("Building");
 }
 
 // Called when the game starts or when spawned
 void ABuilding::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (HasAuthority())
+	{
+		MyHealthComp->IHaveDied.AddUniqueDynamic(this, &ABuilding::Death);
+	}
+}
+
+void ABuilding::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	//DOREPLIFETIME(ABuilding, );
+
+	//Replicate to owner client and server only
+
+	//Replicate to none owner client and server only
 }
 
 // Called every frame
@@ -45,19 +68,23 @@ void ABuilding::SetTilesImOn(TArray<AMapTile*> BuiltTiles)
 	TilesImOn = BuiltTiles;
 }
 
-void ABuilding::SetTeamID(FGenericTeamId TeamID)
+float ABuilding::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	TeamId = TeamID;
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (MyHealthComp && HasAuthority())
+	{
+		return MyHealthComp->TakeDamage(DamageAmount);
+	}
+	else
+	{
+		return DamageAmount;
+	}
 }
 
-FGenericTeamId ABuilding::GetTeamId() const
+void ABuilding::Death()
 {
-	return TeamId;
-}
-
-void ABuilding::StartDestroy()
-{
-	
+	DestroyCleanUp();
 }
 
 void ABuilding::DestroyCleanUp()

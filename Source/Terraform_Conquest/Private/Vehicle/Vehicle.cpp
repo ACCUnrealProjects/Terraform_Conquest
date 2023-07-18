@@ -1,14 +1,16 @@
 // Alex Chatt Terraform_Conquest 2020
 
 #include "Vehicle/Vehicle.h"
-#include "Net/UnrealNetwork.h"
 #include "Components/Health_Component.h"
 #include "Components/Weapon_Controller_Component.h"
 #include "Components/MiniMapIcon_Component.h"
 #include "Components/RectLightComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Blueprint/UserWidget.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AISense_Sight.h"
 #include "Camera/CameraComponent.h"
 
 // Sets default values
@@ -51,8 +53,16 @@ AVehicle::AVehicle()
 	MiniMapIconComp->SetIsReplicated(true);
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	SetUpMyStimulis();
 
 	Tags.Add("Vehicle");
+}
+
+void AVehicle::SetUpMyStimulis()
+{
+	Stimulus = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("MyAIStim"));
+	Stimulus->RegisterForSense(TSubclassOf<UAISense_Sight>());
+	Stimulus->RegisterWithPerceptionSystem();
 }
 
 // Called when the game starts or when spawned
@@ -64,6 +74,7 @@ void AVehicle::BeginPlay()
 	if (HasAuthority())
 	{
 		MyHealth->IHaveDied.AddUniqueDynamic(this, &AVehicle::Death);
+		GetComponents<URectLightComponent>(Lights);
 	}
 }
 
@@ -82,7 +93,6 @@ void AVehicle::SetUpLights()
 			NewLight->SetupAttachment(MyMesh, LightName);
 			NewLight->SetVisibility(bAreLightsOn);
 			NewLight->SetIsReplicated(true);
-			Lights.Add(NewLight);
 		}
 	}
 }
@@ -94,21 +104,20 @@ void AVehicle::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifeti
 	//Replicate everywhere
 	DOREPLIFETIME(AVehicle, MyPosition);
 	DOREPLIFETIME(AVehicle, MyRotation);
-	DOREPLIFETIME(AVehicle, TeamId);
+	DOREPLIFETIME(AVehicle, Lights);
 
 	//Replicate to owner client and server only
-	DOREPLIFETIME_CONDITION(AVehicle, WantToFire, COND_OwnerOnly);
+	//DOREPLIFETIME_CONDITION(AVehicle, WantToFire, COND_OwnerOnly);
 
 	//Replicate to none owner client and server only
 }
-
 
 // Called every frame
 void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (WantToFire)
+	if (WantToFire && IsLocallyControlled())
 	{
 		VehicleWeaponControllerComp->FireCurrent();
 	}
@@ -165,15 +174,11 @@ void AVehicle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction(TEXT("Lights"), EInputEvent::IE_Pressed, this, &AVehicle::ToggleLights);
 }
 
-void AVehicle::SetTeamID(ETeam TeamID)
-{
-	TeamId = TeamID;
-	Tags.Add(FName(GetTeamName(TeamID)));
-}
-
 void AVehicle::CameraChange()
 {
 	BIs1stPersonCamera = !BIs1stPersonCamera;
+	FPSCamera->SetActive(BIs1stPersonCamera);
+	TPSCamera->SetActive(!BIs1stPersonCamera);
 	ServerCameraChange(BIs1stPersonCamera);
 }
 
@@ -226,9 +231,14 @@ void AVehicle::ServerToggleLights_Implementation(bool bLightState)
 
 void AVehicle::MultiToggleLights_Implementation(bool bLightState)
 {
+	auto test = GetNetMode();
+
 	for (auto Light : Lights)
 	{
-		Light->SetVisibility(bLightState);
+		if (Light)
+		{
+			Light->SetVisibility(bLightState);
+		}
 	}
 }
 

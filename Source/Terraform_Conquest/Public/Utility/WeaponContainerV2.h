@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "WeaponTypeEnum.h"
+#include "Utility/WeaponTypeEnum.h"
 #include "WeaponContainerV2.generated.h"
 
 /**

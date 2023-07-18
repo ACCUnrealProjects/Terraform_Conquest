@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Actor/TeamActionActor.h"
 #include "Mine.generated.h"
 
 UCLASS()
-class TERRAFORM_CONQUEST_API AMine : public AActor
+class TERRAFORM_CONQUEST_API AMine : public ATeamActionActor
 {
 	GENERATED_BODY()
 	
@@ -40,7 +40,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Death")
 	float DestroyTime = 1.0f;
 
-
 private:
 
 	UFUNCTION()
@@ -62,9 +61,6 @@ protected:
 public:	
 	// Sets default values for this actor's properties
 	AMine();
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
 	void MineOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

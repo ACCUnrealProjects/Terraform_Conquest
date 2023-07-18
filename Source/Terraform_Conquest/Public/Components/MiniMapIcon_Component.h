@@ -26,11 +26,12 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-
 public:	
 
 	// Sets default values for this component's properties
 	UMiniMapIcon_Component();
 
 	void SetUp(bool bAmIStatic, UTexture2D* Texture2d);
+
+	void CreateIcon();
 };

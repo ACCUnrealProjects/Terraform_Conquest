@@ -3,13 +3,20 @@
 #include "Controller/Main_Player_Controller.h"
 #include "Components/Health_Component.h"
 #include "Map/MapControllerV2.h"
+#include "Net/UnrealNetwork.h"
 #include "Vehicle/Vehicle.h"
+#include "GameModes/TerraformGameMode.h"
 #include "Kismet/GameplayStatics.h"
 
 AMain_Player_Controller::AMain_Player_Controller()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	SetTeamID(ETeam::Neutral);
+
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicateMovement(false);
+
+	TeamId = ETeam::Neutral;
 }
 
 void AMain_Player_Controller::BeginPlay()
@@ -24,20 +31,6 @@ void AMain_Player_Controller::BeginPlay()
 
 	FTimerHandle MiniMapIconSetUp;
 	GetWorld()->GetTimerManager().SetTimer(MiniMapIconSetUp, this, &AMain_Player_Controller::MiniMapIconSetUp, 0.5f, false);
-}
-
-void AMain_Player_Controller::MiniMapIconSetUp()
-{
-	for (const TPair<AActor*, bool>& NewIcon : NewMiniMapIcon)
-	{
-		AddActorMarkerToMap(NewIcon.Value, NewIcon.Key);
-	}
-	NewMiniMapIcon.Empty();
-}
-
-void AMain_Player_Controller::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void AMain_Player_Controller::SetPawn(APawn* InPawn)
@@ -58,11 +51,35 @@ void AMain_Player_Controller::SetPawn(APawn* InPawn)
 			NewVehicle->SetTeamID(TeamId);
 		}
 	}
-
 }
+
+void AMain_Player_Controller::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	DOREPLIFETIME(AMain_Player_Controller, TeamId);
+
+	//Replicate to owner client and server only
+	//DOREPLIFETIME_CONDITION(AWeapon, , COND_OwnerOnly);
+}
+
+void AMain_Player_Controller::MiniMapIconSetUp()
+{
+	if (!IsLocalPlayerController()) { return; }
+
+	for (const TPair<AActor*, bool>& NewIcon : NewMiniMapIcon)
+	{
+		AddActorMarkerToMap(NewIcon.Value, NewIcon.Key);
+	}
+	NewMiniMapIcon.Empty();
+}
+
 
 void AMain_Player_Controller::NewActorForMap(bool bIsStatic, AActor* OwnerActor)
 {
+	if (!IsLocalPlayerController()) { return; }
+
 	if (!bMiniMapSetUp)
 	{
 		NewMiniMapIcon.Add(TPair<AActor*, bool>(OwnerActor, bIsStatic));
@@ -79,14 +96,25 @@ void AMain_Player_Controller::SetupInputComponent()
 	EnableInput(this);
 }
 
-void AMain_Player_Controller::SetTeamID(ETeam TeamID)
+void AMain_Player_Controller::ServerSetTeamID_Implementation(ETeam NewTeamID)
 {
-	TeamId = TeamID;
+	TeamId = NewTeamID;
 }
 
-ETeam AMain_Player_Controller::GetTeamId() const
+void AMain_Player_Controller::ServerCreateNewPawn_Implementation(TSubclassOf <class APawn> PawnType, FTransform SpawnTransform)
 {
-	return TeamId;
+	if (!GetWorld()) { return; }
+
+	APawn* CurrentPawn = GetPawn();
+
+	ATerraformGameMode* TGameMode = Cast<ATerraformGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (!TGameMode) { return; }
+	TGameMode->CreatePlayerPawn(PawnType, this, SpawnTransform);
+
+	if (CurrentPawn)
+	{
+		CurrentPawn->Destroy();
+	}
 }
 
 void AMain_Player_Controller::MyPawnHasDied()

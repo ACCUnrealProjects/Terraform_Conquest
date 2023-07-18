@@ -6,6 +6,7 @@
 #include "Gamestate/Conquest_GameState.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Building/Turret.h"
 #include "Vehicle/Vehicle.h"
 
 // Sets default values
@@ -63,6 +64,14 @@ void AControl_Point::BeginPlay()
 	if(HasAuthority())
 	{ 
 		GetWorldTimerManager().SetTimer(CaptureTickTimer, this, &AControl_Point::CapturingPoint, CaptureTickTime, true);
+		for (auto Turret : MyTurrets)
+		{
+			Turret->SetTeamID(CurrentTeamControl);
+			if (CurrentTeamControl != ETeam::Neutral)
+			{
+				Turret->SetActiveState(true);
+			}
+		}
 	}
 }
 
@@ -72,10 +81,18 @@ void AControl_Point::CapturedPoint(ETeam TeamThatCaptured)
 	if (CurrentTeamControl != ETeam::Neutral)
 	{
 		GetWorldTimerManager().SetTimer(PointsTickTimer, this, &AControl_Point::ScorePoints, PointsTickTime, true);
+		for (auto Turret : MyTurrets)
+		{
+			Turret->SetTeamID(TeamThatCaptured);
+			Turret->SetActiveState(true);
+		}
 	}
 	else
 	{
-
+		for (auto Turret : MyTurrets)
+		{
+			Turret->SetActiveState(false);
+		}
 	}
 }
 

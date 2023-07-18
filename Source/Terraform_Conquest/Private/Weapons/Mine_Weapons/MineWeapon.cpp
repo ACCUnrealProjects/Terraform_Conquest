@@ -17,16 +17,14 @@ void AMineWeapon::BeginPlay()
 	Range = 150.0f;
 }
 
-void AMineWeapon::Fire_Implementation()
+void AMineWeapon::FireWeapon()
 {
-	AWeapon::Fire_Implementation();
-
 	if (!ProjectileBlueprint) { return; }
 
 	FVector DownVector = -GetActorUpVector();
 	FVector DownPlacement = GetActorLocation() + (DownVector.GetSafeNormal() * Range);
 	FHitResult DownCast;
-	AActor* Mine = nullptr;
+	AMine* Mine = nullptr;
 
 	if (GetWorld()->LineTraceSingleByChannel(DownCast, GetActorLocation(), DownPlacement, ECollisionChannel::ECC_Camera, ShotParams))
 	{
@@ -35,9 +33,11 @@ void AMineWeapon::Fire_Implementation()
 	else
 	{
 		Mine = GetWorld()->SpawnActor<AMine>(ProjectileBlueprint, DownPlacement, GetActorRotation(), ActorParams);
+		Mine->SetTeamID(TeamId);
 	}
 
 	Mine->Tags.Add(FName(GetTeamName(TeamId)));
+	CurrentTotalAmmo--;
 }
 
 

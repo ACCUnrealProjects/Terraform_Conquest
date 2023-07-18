@@ -11,6 +11,9 @@ AMine::AMine()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
+	bNetLoadOnClient = true;
+	SetReplicateMovement(true);
 
 	TriggerSphere = CreateDefaultSubobject<USphereComponent>(FName(TEXT("Collision Mesh")));
 	SetRootComponent(TriggerSphere);
@@ -28,10 +31,6 @@ AMine::AMine()
 	MyHealthComp->SetUp(1, 0);
 
 	Tags.Add("Mine");
-
-	bReplicates = true;
-	bNetLoadOnClient = true;
-	SetReplicateMovement(true);
 }
 
 
@@ -44,16 +43,14 @@ void AMine::BeginPlay()
 	TriggerSphere->OnComponentBeginOverlap.AddDynamic(this, &AMine::MineOverlapped);
 	TriggerSphere->Deactivate();
 
-	MyHealthComp->IHaveDied.AddUniqueDynamic(this, &AMine::Death);
+	if (HasAuthority())
+	{
+		FTimerHandle ActivateTimer;
+		GetWorld()->GetTimerManager().SetTimer(ActivateTimer, this, &AMine::ActivateMine, ActivationTime, false);
 
-	FTimerHandle ActivateTimer;
-	GetWorld()->GetTimerManager().SetTimer(ActivateTimer, this, &AMine::ActivateMine, ActivationTime, false);
-}
+		MyHealthComp->IHaveDied.AddUniqueDynamic(this, &AMine::Death);
+	}
 
-// Called every frame
-void AMine::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void AMine::ActivateMine()
@@ -78,16 +75,13 @@ void AMine::MineOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 {
 	if (!HasAuthority()) { return; }
 
-	for (auto myTag : Tags)
+	ATeamActionActor* ActorTeam = Cast<ATeamActionActor>(OtherActor);
+
+	if (ActorTeam)
 	{
-		for (auto OtherTag : OtherActor->Tags)
+		if (ActorTeam->GetTeamId() == GetTeamId())
 		{
-			// Check to make sure we are not blowing up on a Friendly
-			if (myTag == OtherTag &&
-				myTag.ToString().Find("ETeam"))
-			{
-				return;
-			}
+			return;
 		}
 	}
 

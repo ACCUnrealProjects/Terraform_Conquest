@@ -16,9 +16,8 @@ ATracer_Round::ATracer_Round()
 	ProjectileMesh->SetNotifyRigidBodyCollision(true);
 	ProjectileMesh->SetVisibility(true);
 	ProjectileMesh->SetCollisionProfileName("NoCollision");
+	ProjectileMesh->SetIsReplicated(true);
 	SetRootComponent(ProjectileMesh);
-
-	ImpactBlast = CreateDefaultSubobject<UParticleSystem>(FName(TEXT("Impact Blast")));
 
 	ProjectileLifeTime = 15.0f;
 }
@@ -26,7 +25,12 @@ ATracer_Round::ATracer_Round()
 void ATracer_Round::BeginPlay()
 {
 	Super::BeginPlay();
-	ShotParams.AddIgnoredActor(GetOwner());
+	HitTarget = false;
+	if (HasAuthority()) 
+	{
+		ShotParams.AddIgnoredActor(GetOwner());
+		ShotParams.AddIgnoredActor(GetOwner()->GetOwner());
+	}
 }
 
 void ATracer_Round::Tick(float DeltaTime)
@@ -34,29 +38,38 @@ void ATracer_Round::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (HitTarget) { return; }
 
-	FHitResult ShotHit;
-	FVector RayStart = GetActorLocation();
-	FVector Velocity = (GetActorForwardVector() * TracerSpeed) + (FVector(0, 0, GetWorld()->GetGravityZ()) * DeltaTime);
-	FVector RayEnd = RayStart + (Velocity * DeltaTime);
-
-	if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
+	if (HasAuthority())
 	{
-		HitTarget = true;
-		HitResponse(ShotHit.Component.Get(), ShotHit.Actor.Get(), nullptr, ShotHit.ImpactNormal, ShotHit);
-	}
+	  FHitResult ShotHit;
+	  FVector RayStart = GetActorLocation();
+	  FVector Velocity = (GetActorForwardVector() * TracerSpeed) + (FVector(0, 0, GetWorld()->GetGravityZ()) * DeltaTime);
+	  FVector RayEnd = RayStart + (Velocity * DeltaTime);
+      SetActorLocation(RayEnd);
 
-	SetActorLocation(RayEnd);
+	  if (GetWorld()->LineTraceSingleByChannel(ShotHit, RayStart, RayEnd, ECollisionChannel::ECC_Camera, ShotParams))
+	  {
+		  HitTarget = true;
+		  SetActorLocation(ShotHit.Location);
+		  HitResponse(ShotHit.Component.Get(), ShotHit.Actor.Get(), nullptr, ShotHit.ImpactNormal, ShotHit);
+	  }
+
+	}
+	
 }
 
 void ATracer_Round::LaunchProjectile()
 {
-
+	return;
 }
 
 void ATracer_Round::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!OtherActor || !GetOwner()) { return; }
+	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-	UGameplayStatics::ApplyDamage(OtherActor, Damage, Cast<APawn>(GetOwner())->GetController(), GetOwner(), UDamageType::StaticClass());
-	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);	
+	if (!OtherActor || !HasAuthority()) { return; }
+
+	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ? 
+		GetInstigator()->GetController() : nullptr;
+
+	UGameplayStatics::ApplyDamage(OtherActor, Damage, DamageDealer, this, UDamageType::StaticClass());
 }

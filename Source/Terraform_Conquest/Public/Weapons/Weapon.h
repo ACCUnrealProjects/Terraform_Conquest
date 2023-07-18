@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "WeaponTypeEnum.h"
-#include "TeamsEnum.h"
+#include "Utility/WeaponTypeEnum.h"
+#include "Utility/TeamsEnum.h"
 #include "Weapon.generated.h"
 
 class USoundBase;
@@ -29,6 +29,12 @@ private:
 private:
 
 	void GetTeam();
+
+	UFUNCTION(NetMulticast, UnReliable)
+		void MRPC_PlaySound(FVector SoundLocation, USoundBase* Sound, bool bDontPlayForOwner);
+
+	UFUNCTION(NetMulticast, UnReliable)
+		void MRPC_PlayEffect(UParticleSystemComponent* Effect, bool bDontPlayForOwner);
 
 protected:
 
@@ -83,10 +89,10 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	UFUNCTION(reliable, server, WithValidation)
-	void Fire();
-	virtual bool Fire_Validate();
-	virtual void Fire_Implementation();
+	UFUNCTION(Unreliable, server, WithValidation)
+	void ServerFire();
+
+	virtual void FireWeapon() PURE_VIRTUAL(AWeapon::FireWeapon, );
 
 	UFUNCTION()
 	virtual void AmmoRegen();
@@ -99,13 +105,9 @@ public:
 	/** Property replication */
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void AttemptToFire();
-	UFUNCTION(reliable, server, WithValidation)
-	void ServerAttemptToFire();
-	virtual bool ServerAttemptToFire_Validate();
-	virtual void ServerAttemptToFire_Implementation();
-
 	virtual void ChangeActiveState(const bool AmIActive);
+
+	virtual void Fire();
 
 	UFUNCTION()
 	void StartRegenAmmo(const bool bExternalTrigger);
@@ -117,8 +119,6 @@ public:
 	void AddAmmo(const int32 AmmoAmount);
 	UFUNCTION(reliable, server, WithValidation)
 	void ServerAddAmmo(const int32 AmmoAmount);
-	virtual bool ServerAddAmmo_Validate(const int32 AmmoAmount);
-	virtual void ServerAddAmmo_Implementation(const int32 AmmoAmount);
 
 	float GetRange() const { return Range; }
 

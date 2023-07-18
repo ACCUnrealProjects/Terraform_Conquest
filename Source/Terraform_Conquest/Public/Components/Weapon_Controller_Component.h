@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "WeaponTypeEnum.h"
+#include "Utility/WeaponTypeEnum.h"
 #include "Weapon_Controller_Component.generated.h"
 
 class AWeapon;
@@ -65,17 +65,15 @@ public:
 
 	//Weapon Setup
 	void AddSocketsForWeapons(GunType WeaponType, TArray<FName> SlotNames);
+
 	// Guns im allowed
 	UFUNCTION(reliable, server, WithValidation)
-	void ServerSetWeaponSlots(const TArray<GunType> &WeaponsICanHave);
-	virtual bool ServerSetWeaponSlots_Validate(const TArray<GunType> &WeaponsICanHave);
-	virtual void ServerSetWeaponSlots_Implementation(const TArray<GunType> &WeaponsICanHave);
+		void ServerSetWeaponSlots(const TArray<GunType> &WeaponsICanHave);
+
 	//Adding Weapon
 	void AddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
 	UFUNCTION(reliable, server, WithValidation)
-	void ServerAddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
-	virtual bool ServerAddWeapon_Validate(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
-	virtual void ServerAddWeapon_Implementation(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
+		void ServerAddWeapon(TSubclassOf<AWeapon> NewWeapon, GunType WeaponType);
 
 	//Switch Weapons 
 	void SwitchWeapon();
@@ -83,12 +81,10 @@ public:
 	
 	//Change active weapon on server
 	UFUNCTION(reliable, server, WithValidation)
-	void ServerChangeWeapon(GunType NewWeapon);
-	virtual bool ServerChangeWeapon_Validate(GunType NewWeapon);
-	virtual void ServerChangeWeapon_Implementation(GunType NewWeapon);
+		void ServerChangeWeapon(GunType NewWeapon);
 
-	//Rotate Weapon
-	void RotateCurrentWeapons(FVector CamPos, FVector CamDirection);
+	UFUNCTION(unreliable, server, WithValidation)
+		void ServerRotateCurrentWeapons(FVector CamPos, FVector CamDirection);
 
 	//Adding Ammo And Different Guns
 	void StartRegenForGuns();

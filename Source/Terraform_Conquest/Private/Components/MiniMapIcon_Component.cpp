@@ -17,29 +17,41 @@ void UMiniMapIcon_Component::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AMain_Player_Controller* MPCon = nullptr;
-
-	// Dont add mark for my own actor
-	if (Cast<AActor>(GetWorld()->GetFirstPlayerController()->GetPawn()) == GetOwner())
-	{
-		return;
-	}
-
+	// Horrible to use a timer, new solution to problem needed where 
+	// owner is not yet the player controller at creation
 	if (GetWorld()->GetFirstPlayerController())
 	{
-		MPCon = Cast<AMain_Player_Controller>(GetWorld()->GetFirstPlayerController());
-		if (MPCon)
-		{
-			MPCon->NewActorForMap(bIsStatic, GetOwner());
-		}
+		FTimerHandle MiniMapIconSetUp;
+		GetWorld()->GetTimerManager().SetTimer(MiniMapIconSetUp, this, &UMiniMapIcon_Component::CreateIcon, 0.5f, false);
 	}
-
 }
 
 void UMiniMapIcon_Component::SetUp(bool bAmIStatic, UTexture2D* Texture2d)
 {
 	bIsStatic = bAmIStatic;
 	IconImage = Texture2d;
+}
+
+void UMiniMapIcon_Component::CreateIcon()
+{
+	AMain_Player_Controller* MPCon = nullptr;
+
+	// Dont add mark for my own actor
+	auto LocalPlayerActor = GetWorld()->GetFirstPlayerController();
+	auto MyActorController = GetOwner()->GetOwner();
+	if (LocalPlayerActor == MyActorController)
+	{
+		return;
+	}
+
+	if (LocalPlayerActor)
+	{
+		MPCon = Cast<AMain_Player_Controller>(LocalPlayerActor);
+		if (MPCon)
+		{
+			MPCon->NewActorForMap(bIsStatic, GetOwner());
+		}
+	}
 }
 
 

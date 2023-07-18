@@ -1,10 +1,12 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "../../Public/Projectile/Projectile.h"
+#include "Projectile/Projectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GameFramework/DamageType.h"
+#include "Actor/Effects/Impact_Effect.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -12,7 +14,6 @@ AProjectile::AProjectile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
-	bNetLoadOnClient = true;
 	SetReplicateMovement(true);
 }
 
@@ -21,16 +22,31 @@ void AProjectile::BeginPlay()
 	Super::BeginPlay();
 	if (ProjectileLifeTime > 0.0f && HasAuthority())
 	{
-		GetWorld()->GetTimerManager().SetTimer(LifeTimer, this, &AProjectile::Death, ProjectileLifeTime, false);
+		SetLifeSpan(ProjectileLifeTime);
+	}
+}
+
+void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate everywhere
+	DOREPLIFETIME(AProjectile, SavedHit);
+}
+
+void AProjectile::OnRep_SaveHit()
+{
+	if (!HasAuthority())
+	{
+		SpawnEffect();
+		Destroy();
 	}
 }
 
 void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (ImpactBlast)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactBlast, Hit.Location + Hit.ImpactNormal, FRotator());
-	}
+	HitTarget = true;
+	SavedHit = Hit;
 
 	if (HasAuthority())
 	{
@@ -38,8 +54,26 @@ void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	}
 }
 
+void AProjectile::SpawnEffect()
+{	
+	// Only Spawn Effect/Sound if we have actually Hit something
+	if (MyImpactEffect && SavedHit.Actor.IsValid())
+	{
+		FTransform const SpawnTransform(SavedHit.ImpactNormal.Rotation(), SavedHit.Location);
+		AImpact_Effect* EffectActor = GetWorld()->SpawnActorDeferred<AImpact_Effect>(MyImpactEffect, SpawnTransform);
+		EffectActor->Set_HitResult(SavedHit);
+		UGameplayStatics::FinishSpawningActor(EffectActor, SpawnTransform);
+	}
+
+}
+
 void AProjectile::Death()
 {
-	Destroy();
+	// Give time to replicate to clients 
+	SetLifeSpan(DestroyTime);
+	ProjectileMesh->DestroyComponent();
+	SpawnEffect();
 }
+
+
 

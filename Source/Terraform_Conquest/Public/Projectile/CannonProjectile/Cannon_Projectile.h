@@ -19,9 +19,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TracerSpeed", meta = (AllowPrivateAccess = "true"))
 		float CannonSpeed = 5000.0f;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
-		class UStaticMeshComponent* ProjectileMesh = nullptr;
-
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "ProjectileMovement", meta = (AllowPrivateAccess = "true"))
 		class UProjectileMovementComponent* ProjectileMovement = nullptr;
 
