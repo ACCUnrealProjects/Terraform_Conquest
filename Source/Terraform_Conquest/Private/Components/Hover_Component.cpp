@@ -75,6 +75,10 @@ void UHover_Component::HoverCalc()
 		float DistanceNormal = 1.0f - (DownRayCast.Distance / HoverLenght);
 		// Get a counter-acting up force
 		FVector NF = GetUpVector() * DistanceNormal * SupressionStiffness;
+		if (DownRayCast.Distance > OGHoverLenght) 
+		{
+			NF = GetUpVector() * DistanceNormal * (SupressionStiffness/2);
+		}
 		// get what we want the new vel to be for the point
 		// Times by the mass to be mass independent
 		FVector DF = (NF - CF) * MyPrimComponent->GetMass();

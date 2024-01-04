@@ -24,6 +24,11 @@ void AProjectile::BeginPlay()
 	{
 		SetLifeSpan(ProjectileLifeTime);
 	}
+
+	if (GetInstigator()->IsLocallyControlled() && !HasAuthority())
+	{
+		RootComponent->SetHiddenInGame(true);
+	}
 }
 
 void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -32,6 +37,11 @@ void AProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	//Replicate everywhere
 	DOREPLIFETIME(AProjectile, SavedHit);
+}
+
+void AProjectile::SetClientOnlyProjectile()
+{
+	bClientOnlyProjectile = true;
 }
 
 void AProjectile::OnRep_SaveHit()
@@ -71,7 +81,7 @@ void AProjectile::Death()
 {
 	// Give time to replicate to clients 
 	SetLifeSpan(DestroyTime);
-	ProjectileMesh->DestroyComponent();
+	ProjectileMesh->SetVisibleFlag(false);
 	SpawnEffect();
 }
 

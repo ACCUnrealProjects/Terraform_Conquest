@@ -52,7 +52,6 @@ void ATracer_Round::Tick(float DeltaTime)
 		  SetActorLocation(ShotHit.Location);
 		  HitResponse(ShotHit.Component.Get(), ShotHit.Actor.Get(), nullptr, ShotHit.ImpactNormal, ShotHit);
 	  }
-
 	}
 	
 }
@@ -66,9 +65,9 @@ void ATracer_Round::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor
 {
 	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-	if (!OtherActor || !HasAuthority()) { return; }
+	if (!OtherActor || !HasAuthority() || bClientOnlyProjectile) { return; }
 
-	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ? 
+	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ?
 		GetInstigator()->GetController() : nullptr;
 
 	UGameplayStatics::ApplyDamage(OtherActor, Damage, DamageDealer, this, UDamageType::StaticClass());

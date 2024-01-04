@@ -31,7 +31,7 @@ AScout::AScout()
 void AScout::BeginPlay()
 {
 	Super::BeginPlay();
-	MainHoverComp->SetUp(50.0f, 7000.0f, 6.0f);
+	MainHoverComp->SetUp(50.0f, 6000.0f, 5.0f);
 	HoverMoveComp->SetTrusterSpeed(1200.0f);
 	if (HasAuthority())
 	{

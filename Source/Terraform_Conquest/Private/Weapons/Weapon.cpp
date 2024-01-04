@@ -82,6 +82,11 @@ void AWeapon::Fire()
 		return;
 	}
 	ServerFire();
+	// if we are not the server/stand alone, fire a shot for just the player client
+	if (!HasAuthority())
+	{
+		FireWeapon(true);
+	}
 	LastFire = GetWorld()->GetRealTimeSeconds();
 
 	CurrentTotalAmmo--;
@@ -117,7 +122,7 @@ void AWeapon::ServerFire_Implementation()
 
 		MRPC_PlaySound(GetActorLocation(), FireSound, true);
 		MRPC_PlayEffect(FireEffect, true);
-		FireWeapon();
+		FireWeapon(false);
 
 		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
 		if (!ExternalRegenOn)

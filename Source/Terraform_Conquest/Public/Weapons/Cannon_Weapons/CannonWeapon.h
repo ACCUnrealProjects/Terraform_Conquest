@@ -26,5 +26,5 @@ protected:
 public:
 	ACannonWeapon();
 
-	virtual void FireWeapon() override;
+	virtual void FireWeapon(bool bClientOnlyFire) override;
 };

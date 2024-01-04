@@ -17,6 +17,16 @@ private:
 		float HoverMaxMinPitchLook = 15.0f;
 	float RestrictedPitch = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "RotationCorrection", meta = (AllowPrivateAccess = "true"))
+		float RollCorrectionSpeed = 2.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "RotationCorrection", meta = (AllowPrivateAccess = "true"))
+		float FallingRollCorrectionSpeed = 1.25f;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "RotationCorrection", meta = (AllowPrivateAccess = "true"))
+		float PitchCorrectionSpeed = 1.0f;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "RotationCorrection", meta = (AllowPrivateAccess = "true"))
+		float FallingPitchCorrectionSpeed = 0.75f;
+
 	//Time handler for Hover booster to turn off
 	FTimerHandle HoverSwitchHandle;
 
