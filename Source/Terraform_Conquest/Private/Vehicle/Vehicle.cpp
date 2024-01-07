@@ -117,6 +117,22 @@ void AVehicle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("actor location on owner: %s"), *GetActorLocation().ToString());
+	}
+	else
+	{
+		if (HasAuthority())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("actor location on server: %s"), *GetActorLocation().ToString());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("actor location on other: %s"), *GetActorLocation().ToString());
+		}
+	}
+
 	if (WantToFire && IsLocallyControlled())
 	{
 		VehicleWeaponControllerComp->FireCurrent();

@@ -20,12 +20,13 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	if (ProjectileLifeTime > 0.0f && HasAuthority())
+	if (ProjectileLifeTime > 0.0f && (HasAuthority() || bClientOnlyProjectile))
 	{
 		SetLifeSpan(ProjectileLifeTime);
 	}
 
-	if (GetInstigator()->IsLocallyControlled() && !HasAuthority())
+	if (GetInstigator() && RootComponent 
+		&& GetInstigator()->IsLocallyControlled() && !HasAuthority())
 	{
 		RootComponent->SetHiddenInGame(true);
 	}
@@ -60,7 +61,15 @@ void AProjectile::HitResponse(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 	if (HasAuthority())
 	{
-		Death();
+		if (!bClientOnlyProjectile)
+		{
+			Death();
+		}
+		else
+		{
+			// Just destroy us for clients
+			Destroy();
+		}
 	}
 }
 
@@ -81,7 +90,10 @@ void AProjectile::Death()
 {
 	// Give time to replicate to clients 
 	SetLifeSpan(DestroyTime);
-	ProjectileMesh->SetVisibleFlag(false);
+	if (ProjectileMesh) 
+	{ 
+		ProjectileMesh->SetVisibility(false);
+	}
 	SpawnEffect();
 }
 

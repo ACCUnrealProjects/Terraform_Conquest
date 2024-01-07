@@ -29,16 +29,17 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ShotParams.AddIgnoredActor(GetOwner());
+	ActorParams.Owner = this;
+	ActorParams.Instigator = Cast<APawn>(GetOwner());
 	if (HasAuthority())
 	{
-		ShotParams.AddIgnoredActor(GetOwner());
-		ActorParams.Owner = this;
-		ActorParams.Instigator = Cast<APawn>(GetOwner());
+		//Regen ammo server side
 		AmmoRegenStartTimerParam.BindUFunction(this, FName("StartRegenAmmo"), false);
 		CurrentTotalAmmo = MaxAmmo;
 		AmmoRegened = MaxAmmo * AmmoRegenPercentage;
-		GetTeam();
 	}
+	GetTeam();
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -82,9 +83,9 @@ void AWeapon::Fire()
 		return;
 	}
 	ServerFire();
-	// if we are not the server/stand alone, fire a shot for just the player client
 	if (!HasAuthority())
 	{
+		// if we are not the server/stand alone, fire a shot for just the player client
 		FireWeapon(true);
 	}
 	LastFire = GetWorld()->GetRealTimeSeconds();

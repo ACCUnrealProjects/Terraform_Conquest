@@ -26,7 +26,7 @@ void ATracer_Round::BeginPlay()
 {
 	Super::BeginPlay();
 	HitTarget = false;
-	if (HasAuthority()) 
+	if (HasAuthority() && GetOwner())
 	{
 		ShotParams.AddIgnoredActor(GetOwner());
 		ShotParams.AddIgnoredActor(GetOwner()->GetOwner());

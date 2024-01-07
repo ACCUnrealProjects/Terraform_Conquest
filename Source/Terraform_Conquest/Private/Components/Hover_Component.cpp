@@ -36,11 +36,11 @@ void UHover_Component::SetUp(float HoverHeight, float SupressionStiff, float Dam
 void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 	if (!bIsHoverEnabled || 
 		!Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{ 
-		return; 
+		return;
 	}
 
 	HoverCalc();

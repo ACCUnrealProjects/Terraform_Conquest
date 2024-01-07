@@ -7,6 +7,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/SceneComponent.h"
 
+#include "DrawDebugHelpers.h"
+
 // Sets default values for this component's properties
 UWeapon_Controller_Component::UWeapon_Controller_Component()
 {
@@ -279,7 +281,6 @@ void UWeapon_Controller_Component::ServerRotateCurrentWeapons_Implementation(FVe
 		{
 			AimPosition = RayHit.ImpactPoint;
 		}
-
 		FVector AimDir = (AimPosition - Gun->GetActorLocation()).GetSafeNormal();
 		FRotator RotationChange = AimDir.Rotation() - Gun->GetActorForwardVector().Rotation();
 		Gun->AddActorLocalRotation(FRotator(RotationChange.Pitch, RotationChange.Yaw, 0));

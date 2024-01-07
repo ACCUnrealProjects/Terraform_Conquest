@@ -94,4 +94,7 @@ public:
 	void DecreaseJumpHeight();
 
 	void SwitchMovementMode();
+
+	virtual void Restart() override;
+	virtual void UnPossessed() override;
 };

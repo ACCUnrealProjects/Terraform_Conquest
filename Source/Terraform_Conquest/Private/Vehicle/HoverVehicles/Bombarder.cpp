@@ -22,7 +22,7 @@ ABombarder::ABombarder()
 	SetUpLights();
 
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::MachineGun, TArray<FName>{"MachineGun_1", "MachineGun_2"});
-	VehicleWeaponControllerComp->AddSocketsForWeapons(c, TArray<FName>{"MineSlot"});
+	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Mine, TArray<FName>{"MineSlot"});
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Morter, TArray<FName>{"MorterGun"});
 	VehicleWeaponControllerComp->ServerSetWeaponSlots(TArray<GunType>{GunType::MachineGun, GunType::Morter, GunType::Mine});
 
