@@ -7,8 +7,6 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/SceneComponent.h"
 
-#include "DrawDebugHelpers.h"
-
 // Sets default values for this component's properties
 UWeapon_Controller_Component::UWeapon_Controller_Component()
 {
