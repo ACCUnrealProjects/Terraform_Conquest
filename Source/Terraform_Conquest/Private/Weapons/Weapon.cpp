@@ -29,16 +29,17 @@ void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ShotParams.AddIgnoredActor(GetOwner());
+	ActorParams.Owner = this;
+	ActorParams.Instigator = Cast<APawn>(GetOwner());
 	if (HasAuthority())
 	{
-		ShotParams.AddIgnoredActor(GetOwner());
-		ActorParams.Owner = this;
-		ActorParams.Instigator = Cast<APawn>(GetOwner());
+		//Regen ammo server side
 		AmmoRegenStartTimerParam.BindUFunction(this, FName("StartRegenAmmo"), false);
 		CurrentTotalAmmo = MaxAmmo;
 		AmmoRegened = MaxAmmo * AmmoRegenPercentage;
-		GetTeam();
 	}
+	GetTeam();
 }
 
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -82,9 +83,14 @@ void AWeapon::Fire()
 		return;
 	}
 	ServerFire();
+	if (!HasAuthority())
+	{
+		// if we are not the server/stand alone, fire a shot for just the player client
+		FireWeapon(true);
+		CurrentTotalAmmo--;
+	}
 	LastFire = GetWorld()->GetRealTimeSeconds();
 
-	CurrentTotalAmmo--;
 	if (FireSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
@@ -117,7 +123,7 @@ void AWeapon::ServerFire_Implementation()
 
 		MRPC_PlaySound(GetActorLocation(), FireSound, true);
 		MRPC_PlayEffect(FireEffect, true);
-		FireWeapon();
+		FireWeapon(false);
 
 		GetWorld()->GetTimerManager().ClearTimer(AmmoRegenStartTimer);
 		if (!ExternalRegenOn)

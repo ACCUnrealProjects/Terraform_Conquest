@@ -66,7 +66,7 @@ void ACannon_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* Other
 {
 	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-	if (!OtherActor || !HasAuthority()) { return; }
+	if (!OtherActor || !HasAuthority() || bClientOnlyProjectile) { return; }
 
 	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ?
 		GetInstigator()->GetController() : nullptr;

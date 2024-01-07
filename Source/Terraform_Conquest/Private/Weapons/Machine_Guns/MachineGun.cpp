@@ -22,13 +22,14 @@ void AMachineGun::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMachineGun::FireWeapon()
+void AMachineGun::FireWeapon(bool bClientOnlyFire)
 {
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile 
 	ATracer_Round* TracerProjectile = GetWorld()->SpawnActor<ATracer_Round>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
 	TracerProjectile->Tags.Add(FName(GetTeamName(TeamId)));
+	if (bClientOnlyFire) { TracerProjectile->SetClientOnlyProjectile(); }
 	TracerProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
 }

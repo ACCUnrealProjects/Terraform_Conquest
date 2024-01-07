@@ -38,9 +38,9 @@ void APhasersWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void APhasersWeapon::FireWeapon()
+void APhasersWeapon::FireWeapon(bool bClientOnlyFire)
 {
-	if (!GetWorld()) { return; }
+	if (!GetWorld() || bClientOnlyFire) { return; }
 
 	//Raycast fire, also fire projectile flash or laser 
 	FHitResult ShotHit;

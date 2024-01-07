@@ -279,7 +279,6 @@ void UWeapon_Controller_Component::ServerRotateCurrentWeapons_Implementation(FVe
 		{
 			AimPosition = RayHit.ImpactPoint;
 		}
-
 		FVector AimDir = (AimPosition - Gun->GetActorLocation()).GetSafeNormal();
 		FRotator RotationChange = AimDir.Rotation() - Gun->GetActorForwardVector().Rotation();
 		Gun->AddActorLocalRotation(FRotator(RotationChange.Pitch, RotationChange.Yaw, 0));

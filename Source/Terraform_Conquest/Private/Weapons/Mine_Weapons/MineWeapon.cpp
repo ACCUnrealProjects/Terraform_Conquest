@@ -17,9 +17,10 @@ void AMineWeapon::BeginPlay()
 	Range = 150.0f;
 }
 
-void AMineWeapon::FireWeapon()
+void AMineWeapon::FireWeapon(bool bClientOnlyFire)
 {
-	if (!ProjectileBlueprint) { return; }
+	// Dont spawn a client only mine
+	if (!ProjectileBlueprint || bClientOnlyFire) { return; }
 
 	FVector DownVector = -GetActorUpVector();
 	FVector DownPlacement = GetActorLocation() + (DownVector.GetSafeNormal() * Range);

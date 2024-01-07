@@ -92,7 +92,7 @@ protected:
 	UFUNCTION(Unreliable, server, WithValidation)
 	void ServerFire();
 
-	virtual void FireWeapon() PURE_VIRTUAL(AWeapon::FireWeapon, );
+	virtual void FireWeapon(bool bClientOnlyFire) PURE_VIRTUAL(AWeapon::FireWeapon, );
 
 	UFUNCTION()
 	virtual void AmmoRegen();

@@ -22,13 +22,14 @@ void ACannonWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ACannonWeapon::FireWeapon()
+void ACannonWeapon::FireWeapon(bool bClientOnlyFire)
 {
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile
 	ACannon_Projectile* CannonProjectile = GetWorld()->SpawnActor<ACannon_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
 	CannonProjectile->Tags.Add(FName(GetTeamName(TeamId)));
+	if (bClientOnlyFire) { CannonProjectile->SetClientOnlyProjectile(); }
 	CannonProjectile->LaunchProjectile();
 	CurrentTotalAmmo--;
 }

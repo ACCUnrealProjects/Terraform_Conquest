@@ -36,11 +36,12 @@ void UHover_Component::SetUp(float HoverHeight, float SupressionStiff, float Dam
 void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
+	// Only run if we have a local controlled owner and we should be hovering
 	if (!bIsHoverEnabled || 
 		!Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{ 
-		return; 
+		return;
 	}
 
 	HoverCalc();
@@ -75,6 +76,10 @@ void UHover_Component::HoverCalc()
 		float DistanceNormal = 1.0f - (DownRayCast.Distance / HoverLenght);
 		// Get a counter-acting up force
 		FVector NF = GetUpVector() * DistanceNormal * SupressionStiffness;
+		if (DownRayCast.Distance > OGHoverLenght) 
+		{
+			NF = GetUpVector() * DistanceNormal * (SupressionStiffness/2);
+		}
 		// get what we want the new vel to be for the point
 		// Times by the mass to be mass independent
 		FVector DF = (NF - CF) * MyPrimComponent->GetMass();

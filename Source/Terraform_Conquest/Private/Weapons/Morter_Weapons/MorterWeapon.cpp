@@ -22,13 +22,14 @@ void AMorterWeapon::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMorterWeapon::FireWeapon()
+void AMorterWeapon::FireWeapon(bool bClientOnlyFire)
 {
 	if (!ProjectileBlueprint) { return; }
 
 	//Fire Projectile
 	AMorter_Projectile* MorterProjectile = GetWorld()->SpawnActor<AMorter_Projectile>(ProjectileBlueprint, GetActorLocation(), GetActorRotation(), ActorParams);
 	MorterProjectile->LaunchProjectile();
+	if (bClientOnlyFire) { MorterProjectile->SetClientOnlyProjectile(); }
 	MorterProjectile->Tags.Add(FName(GetTeamName(TeamId)));
 	CurrentTotalAmmo--;
 }

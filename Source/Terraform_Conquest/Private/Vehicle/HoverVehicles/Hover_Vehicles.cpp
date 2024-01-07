@@ -24,6 +24,7 @@ AHover_Vehicles::AHover_Vehicles()
 	HoverMoveComp->bEditableWhenInherited = true;
 
 	MyMesh->SetSimulatePhysics(true);
+	MyMesh->SetEnableGravity(false);
 	MyMesh->SetLinearDamping(1.0f);
 	MyMesh->SetAngularDamping(1.0f);
 
@@ -40,6 +41,11 @@ AHover_Vehicles::AHover_Vehicles()
 void AHover_Vehicles::BeginPlay()
 {
 	Super::BeginPlay();
+	if (HasAuthority())
+	{
+		// the owner (server) should have gravity enabled by default until an owner comes
+		MyMesh->SetEnableGravity(true);
+	}
 
 	RestrictedPitch = 0.0f;
 }
@@ -61,7 +67,6 @@ void AHover_Vehicles::Tick(float DeltaTime)
 			break;
 		}
 	}
-
 }
 
 void AHover_Vehicles::RotationCorrection(float DeltaTime)
@@ -74,16 +79,16 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 		// Lerp Towards Pitch and Roll
 		// Get the Rotation for the roll on a surface, using the forward and the suface up to get the roll of the new vector (cross product again)
 		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
-		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, GroundPitch.Pitch, DeltaTime, 1.0f);
-		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, GroundRoll.Roll, DeltaTime, 2.0f);
+		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, GroundPitch.Pitch, DeltaTime, PitchCorrectionSpeed);
+		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, GroundRoll.Roll, DeltaTime, RollCorrectionSpeed);
 		FRotator NewRotation = FRotator(WantedGroundPitch, CurrentRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
 	else
 	{
 		//If we free falling, tilt the roll of the ship to 0 and reset the roll
-		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, 0, DeltaTime, 0.75f);
-		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, 0, DeltaTime, 1.25f);
+		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, 0, DeltaTime, FallingPitchCorrectionSpeed);
+		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, 0, DeltaTime, FallingRollCorrectionSpeed);
 		FRotator NewRotation = FRotator(WantedGroundPitch, CurrentRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}
@@ -121,7 +126,6 @@ void AHover_Vehicles::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AHover_Vehicles::DecreaseJumpHeight);
 	//Switch Movement Mode
 	PlayerInputComponent->BindAction(TEXT("SwitchMode"), EInputEvent::IE_Pressed, this, &AHover_Vehicles::SwitchMovementMode);
-
 }
 
 void AHover_Vehicles::CameraChange()
@@ -281,4 +285,40 @@ void AHover_Vehicles::ChangeCamerasPitch(bool bAmIRestricted, float dt)
 
 	FPSCamera->SetRelativeRotation(newFPSCameraRot);
 	TPSCamera->SetRelativeRotation(newTPSCameraRot);
+}
+
+void AHover_Vehicles::Restart()
+{
+	Super::Restart();
+	if (IsLocallyControlled())
+	{
+		MyMesh->SetEnableGravity(true);
+	}
+	else
+	{
+		MyMesh->SetEnableGravity(false);
+	}
+
+	if (HoverMoveComp->GetMoveState() == HoverMovementState::Hovering)
+	{
+		MainHoverComp->ChangeHoverState(true);
+	}
+}
+
+void AHover_Vehicles::UnPossessed()
+{
+	Super::UnPossessed();
+	if (GetWorld()->IsServer())
+	{
+		MyMesh->SetEnableGravity(true);
+	}
+	else
+	{
+		MyMesh->SetEnableGravity(false);
+	}
+
+	if (HoverMoveComp->GetMoveState() == HoverMovementState::Hovering)
+	{
+		MainHoverComp->ChangeHoverState(false);
+	}
 }
