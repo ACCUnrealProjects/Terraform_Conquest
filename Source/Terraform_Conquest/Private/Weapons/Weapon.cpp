@@ -87,10 +87,10 @@ void AWeapon::Fire()
 	{
 		// if we are not the server/stand alone, fire a shot for just the player client
 		FireWeapon(true);
+		CurrentTotalAmmo--;
 	}
 	LastFire = GetWorld()->GetRealTimeSeconds();
 
-	CurrentTotalAmmo--;
 	if (FireSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());

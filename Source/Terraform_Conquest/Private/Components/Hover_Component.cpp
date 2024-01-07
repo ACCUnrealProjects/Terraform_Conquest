@@ -37,6 +37,7 @@ void UHover_Component::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
+	// Only run if we have a local controlled owner and we should be hovering
 	if (!bIsHoverEnabled || 
 		!Cast<APawn>(GetOwner())->IsLocallyControlled())
 	{ 

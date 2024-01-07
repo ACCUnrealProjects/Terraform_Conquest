@@ -298,6 +298,11 @@ void AHover_Vehicles::Restart()
 	{
 		MyMesh->SetEnableGravity(false);
 	}
+
+	if (HoverMoveComp->GetMoveState() == HoverMovementState::Hovering)
+	{
+		MainHoverComp->ChangeHoverState(true);
+	}
 }
 
 void AHover_Vehicles::UnPossessed()
@@ -310,5 +315,10 @@ void AHover_Vehicles::UnPossessed()
 	else
 	{
 		MyMesh->SetEnableGravity(false);
+	}
+
+	if (HoverMoveComp->GetMoveState() == HoverMovementState::Hovering)
+	{
+		MainHoverComp->ChangeHoverState(false);
 	}
 }

@@ -143,7 +143,7 @@ void AVehicle::Tick(float DeltaTime)
 
 void AVehicle::UpdateTransform()
 {
-	if (IsLocallyControlled())
+	if (IsLocallyControlled() || (HasAuthority() && !GetController()))
 	{
 		if (HasAuthority())
 		{
