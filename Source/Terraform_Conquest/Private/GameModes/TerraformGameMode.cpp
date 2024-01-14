@@ -25,5 +25,6 @@ void ATerraformGameMode::CreatePlayerPawn(TSubclassOf <class APawn> PawnType, AP
 	FActorSpawnParameters PawnParams;
 	PawnParams.Owner = PCon;
 	APawn* SpawnPawn = GetWorld()->SpawnActor<APawn>(PawnType, SpawnTransform, PawnParams);
+	//SpawnPawn->GetController()->Destroy(); // remove the default AI controller
 	PCon->Possess(SpawnPawn);
 }

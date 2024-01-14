@@ -24,6 +24,9 @@ private:
 
 protected:
 
+	UPROPERTY(VisibleAnywhere, BluePrintReadOnly, Category = "multiplayer", meta = (AllowPrivateAccess = "true"))
+		bool bClientOnlyProjectile = false;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 		float Damage = 10.0f;
 
@@ -58,6 +61,7 @@ public:
 	/** Property replication */
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual void LaunchProjectile() PURE_VIRTUAL( AProjectile::LaunchProjectile, );
+	void SetClientOnlyProjectile();
 
+	virtual void LaunchProjectile() PURE_VIRTUAL( AProjectile::LaunchProjectile, );
 };

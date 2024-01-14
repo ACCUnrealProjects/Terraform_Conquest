@@ -64,7 +64,7 @@ void AMorter_Projectile::HitResponse(UPrimitiveComponent* HitComp, AActor* Other
 {
 	Super::HitResponse(HitComp, OtherActor, OtherComp, NormalImpulse, Hit);
 
-	if (!HasAuthority()) { return; }
+	if (!HasAuthority() || bClientOnlyProjectile) { return; }
 
 	auto DamageDealer = (GetInstigator() && GetInstigator()->GetController()) ?
 		GetInstigator()->GetController() : nullptr;

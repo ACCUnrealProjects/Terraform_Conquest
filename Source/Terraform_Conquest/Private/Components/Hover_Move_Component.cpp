@@ -101,7 +101,7 @@ void UHover_Move_Component::SwitchMovementMode()
 
 void UHover_Move_Component::FlightGravityToggle()
 {
-	//Check is speed is below certain ammount
+	//Check is speed is below certain amount
 	//If so, re-enable gravity on ship so it starts to drop
 	if (GetOwner()->GetVelocity().Size() >= GravitySpeedCutoff)
 	{
