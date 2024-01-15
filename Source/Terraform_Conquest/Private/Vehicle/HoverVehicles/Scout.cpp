@@ -25,14 +25,14 @@ AScout::AScout()
 	VehicleWeaponControllerComp->AddSocketsForWeapons(GunType::Mine, TArray<FName>{"MineSlot"});
 	VehicleWeaponControllerComp->ServerSetWeaponSlots(TArray<GunType>{GunType::MachineGun, GunType::Cannon, GunType::Mine});
 
-	HoverMoveComp->SetTrusterSpeed(1200.0f);
+	HoverMoveComp->SetTrusterSpeed(800.0f);
 }
 
 void AScout::BeginPlay()
 {
 	Super::BeginPlay();
 	MainHoverComp->SetUp(50.0f, 6000.0f, 5.0f);
-	HoverMoveComp->SetTrusterSpeed(1200.0f);
+	HoverMoveComp->SetTrusterSpeed(800.0f);
 	if (HasAuthority())
 	{
 		MyHealth->SetUp(100.0f, 100.0f);
