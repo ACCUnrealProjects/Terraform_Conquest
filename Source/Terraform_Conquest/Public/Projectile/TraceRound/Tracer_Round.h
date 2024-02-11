@@ -17,7 +17,7 @@ class TERRAFORM_CONQUEST_API ATracer_Round : public AProjectile
 private:
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "TracerSpeed", meta = (AllowPrivateAccess = "true"))
-	float TracerSpeed = 10000.0f;
+		float TracerSpeed = 10000.0f;
 
 private:
 

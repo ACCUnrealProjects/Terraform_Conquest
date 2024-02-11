@@ -21,7 +21,6 @@ void UHover_Component::BeginPlay()
 
 	HoverPid.SetMinMax(-1.0f, 1.0f);
 	HoverPid.SetGains(0.8f, 0.0002f, 0.2f);
-
 }
 
 void UHover_Component::SetUp(float HoverHeight, float SupressionStiff, float Dampmulti)

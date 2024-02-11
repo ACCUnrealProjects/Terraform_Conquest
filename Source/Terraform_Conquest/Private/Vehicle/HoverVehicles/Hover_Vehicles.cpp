@@ -81,6 +81,7 @@ void AHover_Vehicles::RotationCorrection(float DeltaTime)
 		FRotator GroundRoll = UKismetMathLibrary::MakeRotFromXZ(MyMesh->GetForwardVector(), MainHoverComp->GetGroundNormal());
 		float WantedGroundPitch = FMath::FInterpTo(CurrentRotation.Pitch, GroundPitch.Pitch, DeltaTime, PitchCorrectionSpeed);
 		float WantedGroundRoll = FMath::FInterpTo(CurrentRotation.Roll, GroundRoll.Roll, DeltaTime, RollCorrectionSpeed);
+		//Might be better to slerp this for smoother experiance
 		FRotator NewRotation = FRotator(WantedGroundPitch, CurrentRotation.Yaw, WantedGroundRoll);
 		MyMesh->SetWorldRotation(NewRotation);
 	}

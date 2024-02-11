@@ -16,6 +16,8 @@ void UHover_Move_Component::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
+	RotationPid.SetGains(0.05f, 0.01f, 0.03f);
+	HoverMovementPid.SetGains(0.05f, 0.005f, 0.01f);
 
 	if (!ensure(OwnerMesh)) { return; }
 }

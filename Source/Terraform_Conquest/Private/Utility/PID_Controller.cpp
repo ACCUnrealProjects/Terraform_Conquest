@@ -19,34 +19,67 @@ void PID_Controller::SetMinMax(float Min, float Max)
 {
 	fMin = Min;
 	fMax = Max;
-	MinMaxActive = true;
+	minMaxActive = true;
+}
+
+void PID_Controller::SetIntergralCap(float intCap)
+{
+	fIntegralCap = intCap;
 }
 
 float PID_Controller::Calculate(float target, float current, float DT, bool bIsAngleValue)
 {
+	float P, D, I;
+	float FinalValue;
+
 	// Get the error
-	float proportional = target - current;
+	float error = target - current;
 	if (bIsAngleValue)
 	{
-		proportional = (((int32)proportional % 360) + 360) % 360;
-		if (proportional < -180.0f)
+		error = (((int32)error % 360) + 360) % 360;
+		if (error < -180.0f)
 		{
-			proportional += 360.0f;
+			error += 360.0f;
 		}
-		else if (proportional > 180.0f)
+		else if (error > 180.0f)
 		{
-			proportional -= 360.0f;
+			error -= 360.0f;
 		}
 	}
+	// calculate P
+	P = gP * error;
 
-	float derivitive = (proportional - fLastProportional) / DT;
-	// store last error after using for derivitive
-	fLastProportional = proportional;
-	fIntegral += proportional * DT;
+	// calculate I
+	fIntegralStored = FMath::Clamp(fIntegralStored + (error * DT), -fIntegralCap, fIntegralCap);
+	I = gI * fIntegralStored;
 
-	float FinalValue = gP * proportional + gD * derivitive + gI * fIntegral;
+	// calculate D
+	float errorChangeRate = (error - fLastError) / DT;
+	fLastError = error;
 
-	if (MinMaxActive)
+	float rateOfChange = (current - fLastCurret);
+	fLastCurret = current;
+
+	float deriveMeasure = 0;
+	if (!firstTimeCal)
+	{
+		if (bIsAngleValue)
+		{
+			deriveMeasure = errorChangeRate;
+		}
+		else
+		{
+			deriveMeasure = -rateOfChange;
+		}
+	}
+	else
+	{
+		firstTimeCal = false;
+	}
+	D = gD * deriveMeasure;
+
+	FinalValue = P + I + D;
+	if (minMaxActive)
 	{
 		FinalValue = FMath::Clamp(FinalValue, fMin, fMax);
 	}
@@ -56,17 +89,39 @@ float PID_Controller::Calculate(float target, float current, float DT, bool bIsA
 
 FVector PID_Controller::Calculate(FVector target, FVector current, float DT)
 {
+	FVector P, D, I;
+	FVector FinalValue;
+
 	// Get the error
-	FVector proportional = target - current;
+	FVector error = target - current;
+	// calculate P
+	P = gP * error;
 
-	FVector derivitive = (proportional - vLastProportional) / DT;
-	// store last error after using for derivitive
-	vLastProportional = proportional;
-	vIntegral += proportional * DT;
+	// calculate I
+	vIntegralStored = vIntegralStored + (error * DT);
+	vIntegralStored = FinalValue.GetSafeNormal() * fIntegralCap;
+	I = gI * vIntegralStored;
 
-	FVector FinalValue = gP * proportional + gD * derivitive + gI * vIntegral;
+	// calculate D
+	FVector errorChangeRate = (error - vLastError) / DT;
+	vLastError = error;
 
-	if (MinMaxActive)
+	FVector rateOfChange = (current - vLastCurret) / DT;
+	vLastCurret = current;
+
+	FVector deriveMeasure = FVector::ZeroVector;
+	if (!firstTimeCal)
+	{
+		deriveMeasure = errorChangeRate;
+	}
+	else
+	{
+		firstTimeCal = false;
+	}
+	D = gD * deriveMeasure;
+
+	FinalValue = P + I + D;
+	if (minMaxActive)
 	{
 		float VectorSize = FMath::Clamp(FinalValue.Size(), fMin, fMax);
 		FinalValue = FinalValue.GetSafeNormal() * VectorSize;
@@ -77,7 +132,9 @@ FVector PID_Controller::Calculate(FVector target, FVector current, float DT)
 
 void PID_Controller::Reset()
 {
-	fIntegral = fMin = fMax = fLastProportional = 0.0f;
-	vIntegral = vLastProportional = FVector::ZeroVector;
-	MinMaxActive = false;
+	fIntegralStored = fMin = fMax = fLastError = fLastCurret = 0.0f;
+	vIntegralStored = vLastError = vLastCurret = FVector::ZeroVector;
+	fIntegralCap = 1.0f;
+	minMaxActive = false;
+	firstTimeCal = true;
 }

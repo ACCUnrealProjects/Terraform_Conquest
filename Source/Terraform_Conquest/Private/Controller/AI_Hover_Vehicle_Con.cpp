@@ -19,15 +19,14 @@ AAI_Hover_Vehicle_Con::AAI_Hover_Vehicle_Con()
 		BehaviorTree = obj.Object;
 	}
 	SetupPerceptionSystem();
-
 }
 
 void AAI_Hover_Vehicle_Con::OnTargetDetected(AActor* actor, FAIStimulus const stimulus)
 {
-	if (actor && actor == Cast<AActor>(GetWorld()->GetFirstPlayerController()->GetPawn()))
+	/*if (actor && actor == Cast<AActor>(GetWorld()->GetFirstPlayerController()->GetPawn()))
 	{
 		GetBlackboard()->SetValueAsBool(TEXT("CanSeePlayer"), stimulus.WasSuccessfullySensed());
-	}
+	}*/
 }
 
 void AAI_Hover_Vehicle_Con::SetupPerceptionSystem()
@@ -40,7 +39,7 @@ void AAI_Hover_Vehicle_Con::SetupPerceptionSystem()
 	AISightConfig->SetMaxAge(5.0f);
 	AISightConfig->AutoSuccessRangeFromLastSeenLocation = 1000.0f;
 	AISightConfig->DetectionByAffiliation.bDetectEnemies = true;
-	AISightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	AISightConfig->DetectionByAffiliation.bDetectFriendlies = false;
 	AISightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 
 	GetPerceptionComponent()->SetDominantSense(*AISightConfig->GetSenseImplementation());
