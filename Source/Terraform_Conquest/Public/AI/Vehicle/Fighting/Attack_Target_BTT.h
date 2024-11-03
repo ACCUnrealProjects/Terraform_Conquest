@@ -9,9 +9,15 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class TERRAFORM_CONQUEST_API UAttack_Target_BTT : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
-	
+
+protected:
+
+public:
+	UAttack_Target_BTT();
+
+	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& owner_comp, uint8* node_memory) override;
 };

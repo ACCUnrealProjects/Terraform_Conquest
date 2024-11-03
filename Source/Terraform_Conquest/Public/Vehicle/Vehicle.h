@@ -70,6 +70,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "WeaponController")
 		class UWeapon_Controller_Component* VehicleWeaponControllerComp = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+		float AiFireAngleCutoff = 10.0f;
+
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = "MiniMapIcon")
 		class UMiniMapIcon_Component* MiniMapIconComp = nullptr;
 
@@ -119,7 +122,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual bool ShouldIStartShooting(FVector TargetLocation) PURE_VIRTUAL(AVehicle::ShouldIStartShooting, return false;);
+
 	virtual void Fire();
+
+	virtual bool CanAimAtTarget(FVector targetpos) PURE_VIRTUAL(AVehicle::CanAimAtTarget, return false;);
 
 	void StopFiring();
 };

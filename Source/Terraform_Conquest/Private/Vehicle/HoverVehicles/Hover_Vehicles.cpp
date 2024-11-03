@@ -227,6 +227,34 @@ void AHover_Vehicles::SetWeaponRotation()
 	VehicleWeaponControllerComp->ServerRotateCurrentWeapons(CamPos, CamDir);
 }
 
+bool AHover_Vehicles::CanAimAtTarget(FVector targetpos)
+{
+	FRotator FowardRotation = GetActorForwardVector().Rotation();
+	FRotator WantedRotation = (targetpos - FPSCamera->GetComponentLocation()).Rotation();
+	float PitchOffset = WantedRotation.Pitch - FowardRotation.Pitch;
+	if (PitchOffset > HoverMaxMinPitchLook || PitchOffset < -HoverMaxMinPitchLook)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool AHover_Vehicles::ShouldIStartShooting(FVector targetpos)
+{
+	FVector TowardsTarget = (targetpos - FPSCamera->GetComponentLocation()).GetSafeNormal();
+	float AngleBetween = FMath::Acos(FVector::DotProduct(TowardsTarget, FPSCamera->GetForwardVector()));
+	AngleBetween = FMath::RadiansToDegrees(AngleBetween);
+
+	if (FMath::Abs(AngleBetween) < AiFireAngleCutoff)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AngleBetween = %f, Fire"), AngleBetween);
+		return true;
+	}
+
+	return false;
+}
+
 void AHover_Vehicles::Fire()
 {
 	Super::Fire();
@@ -244,26 +272,25 @@ void AHover_Vehicles::DecreaseJumpHeight()
 	MainHoverComp->DecreaseHoverHeight();
 }
 
-bool AHover_Vehicles::PitchLookAtTarget(FVector Target)
+void AHover_Vehicles::LookAtTarget(AActor* Target)
 {
+	if (!Target) { return; }
+
+	HoverMoveComp->VehicleLookAtTarget(Target);
+
 	if (HoverMoveComp->GetMoveState() != HoverMovementState::Hovering)
 	{
-		return false;
+		// Camera matches model pitch when flying (for now)
+		return;
 	}
 
 	FRotator FowardRotation = GetActorForwardVector().Rotation();
-	FRotator WantedRotation = (Target - FPSCamera->GetComponentLocation()).Rotation();
+	FRotator WantedRotation = (Target->GetActorLocation() - FPSCamera->GetComponentLocation()).Rotation();
 	float PitchOffset = WantedRotation.Pitch - FowardRotation.Pitch;
-	if (PitchOffset > HoverMaxMinPitchLook || -PitchOffset < HoverMaxMinPitchLook)
-	{
-		return false;
-	}
-
+	PitchOffset = FMath::Clamp(PitchOffset, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
 	RestrictedPitch = PitchOffset;
 	ChangeCamerasPitch(true,0.0f);
 	SetWeaponRotation();
-
-	return true;
 }
 
 
@@ -286,6 +313,12 @@ void AHover_Vehicles::ChangeCamerasPitch(bool bAmIRestricted, float dt)
 
 	FPSCamera->SetRelativeRotation(newFPSCameraRot);
 	TPSCamera->SetRelativeRotation(newTPSCameraRot);
+}
+
+
+void AHover_Vehicles::ResetPids()
+{
+	HoverMoveComp->ResetPids();
 }
 
 void AHover_Vehicles::Restart()

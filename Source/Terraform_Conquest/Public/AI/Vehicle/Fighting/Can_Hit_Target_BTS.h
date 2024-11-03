@@ -4,24 +4,29 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
-#include "Look_For_Target_BTS.generated.h"
+#include "Can_Hit_Target_BTS.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TERRAFORM_CONQUEST_API ULook_For_Target_BTS : public UBTService_BlackboardBase
+class TERRAFORM_CONQUEST_API UCan_Hit_Target_BTS : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
 
 private:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	float TimeOut = 60.0f;
+
 	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = "true"))
-	struct FBlackboardKeySelector CanSeeTargetBool;
+	struct FBlackboardKeySelector bCanHitTarget;
+
+protected:
 
 public:
 
-	ULook_For_Target_BTS();
+	UCan_Hit_Target_BTS();
 
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	

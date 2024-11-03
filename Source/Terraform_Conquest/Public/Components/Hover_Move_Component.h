@@ -93,10 +93,12 @@ public:
 	// Set Straf movement for AI
 	void SetAIStrafe(bool AIStrafe) { bAIStrafeMovement = AIStrafe; }
 
-	// Look at a target
-	void LookAtTarget(AActor *Target);
+	// Vehicle Model look at a target
+	void VehicleLookAtTarget(AActor *Target);
 	// Reset Target
-	void ResetTargetLook() { bIHaveTarget = false; }
+	void SetTargetLook(bool bTarget) { bIHaveTarget = bTarget; }
+
+	void ResetPids() { HoverMovementPid.Reset(); RotationPid.Reset(); }
 
 	HoverMovementState GetMoveState() const { return CurrentMoveState; }
 };

@@ -83,17 +83,24 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual bool CanAimAtTarget(FVector targetpos) override;
+
+	// ShouldIStartShooting implementation for hover 
+	virtual bool ShouldIStartShooting(FVector targetpos) override;
+
 	//Fire Override
 	virtual void Fire() override;
 
-	//Camera LookAt (Pitch)
-	bool PitchLookAtTarget(FVector Target);
+	//Get us to look at our target
+	void LookAtTarget(AActor* Target);
 
 	//Hover Control
 	void IncreaseJumpHeight();
 	void DecreaseJumpHeight();
 
 	void SwitchMovementMode();
+
+	void ResetPids();
 
 	virtual void Restart() override;
 	virtual void UnPossessed() override;

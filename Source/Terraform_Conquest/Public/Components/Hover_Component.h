@@ -63,5 +63,6 @@ public:
 	
 	bool GetbIsHoverEnabled() const { return bIsHoverEnabled; }
 	bool AmIHovering() const;
+	float GetHoverLenght() const { return HoverLenght; }
 	FVector GetGroundNormal() const;
 };
