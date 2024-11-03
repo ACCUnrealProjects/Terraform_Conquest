@@ -52,6 +52,16 @@ void AGround_Vehicle::CameraChange()
 	Super::CameraChange();
 }
 
+bool AGround_Vehicle::CanAimAtTarget(FVector targetpos)
+{
+	return true;
+}
+
+bool AGround_Vehicle::ShouldIStartShooting(FVector targetpos)
+{
+	return false;
+}
+
 void AGround_Vehicle::InputPitch(float Amount)
 {
 

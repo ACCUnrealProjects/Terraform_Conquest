@@ -44,6 +44,11 @@ public:
 	// Sets default values for this pawn's properties
 	AGround_Vehicle();
 
+	virtual bool CanAimAtTarget(FVector targetpos) override;
+
+	// ShouldIStartShooting implementation for Ground 
+	virtual bool ShouldIStartShooting(FVector targetpos) override;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

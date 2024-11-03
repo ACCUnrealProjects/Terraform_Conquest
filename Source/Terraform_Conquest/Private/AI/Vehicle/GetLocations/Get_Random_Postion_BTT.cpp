@@ -1,6 +1,6 @@
 // Alex Chatt Terraform_Conquest 2020
 
-#include "AI/Vehicle/Get_Random_Postion_BTT.h"
+#include "AI/Vehicle/GetLocations/Get_Random_Postion_BTT.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"

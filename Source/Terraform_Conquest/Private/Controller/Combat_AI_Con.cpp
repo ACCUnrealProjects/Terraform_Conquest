@@ -22,7 +22,6 @@ void ACombat_AI_Con::BeginPlay()
 	BehaviorTreeComp->StartTree(*BehaviorTree);
 }
 
-
 void ACombat_AI_Con::SetupPerceptionSystem()
 {
 	AISightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("AI Sight"));
@@ -32,7 +31,6 @@ void ACombat_AI_Con::SetupPerceptionSystem()
 void ACombat_AI_Con::SetPawn(APawn* const InPawn)
 {
 	Super::SetPawn(InPawn);
-
 }
 
 void ACombat_AI_Con::OnPossess(APawn* const InPawn)

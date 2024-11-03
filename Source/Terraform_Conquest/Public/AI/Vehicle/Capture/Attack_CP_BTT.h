@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
-#include "Find_CP_Defend_BTT.generated.h"
+#include "Attack_CP_BTT.generated.h"
 
 /**
  * 
  */
-UCLASS()
-class TERRAFORM_CONQUEST_API UFind_CP_Defend_BTT : public UBTTask_BlackboardBase
+UCLASS(Blueprintable)
+class TERRAFORM_CONQUEST_API UAttack_CP_BTT : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
 	

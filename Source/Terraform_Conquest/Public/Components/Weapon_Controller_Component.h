@@ -94,6 +94,8 @@ public:
 	//Weapon Controls
 	void FireCurrent();
 
+	bool DoIHaveWeapons() { return AllGuns.Num() > 0; }
+
 	UFUNCTION(BlueprintCallable, Category = "WeaponInfo")
 	TArray<AWeapon*> GetCurrentGuns() const;
 	UFUNCTION(BlueprintCallable, Category = "WeaponInfo")

@@ -17,7 +17,7 @@ void UHover_Move_Component::BeginPlay()
 
 	OwnerMesh = GetOwner()->FindComponentByClass<UStaticMeshComponent>();
 	RotationPid.SetGains(0.05f, 0.01f, 0.03f);
-	HoverMovementPid.SetGains(0.05f, 0.005f, 0.01f);
+	HoverMovementPid.SetGains(0.00015f, 0.0000001f, 0.00004f);
 
 	if (!ensure(OwnerMesh)) { return; }
 }
@@ -34,6 +34,7 @@ void UHover_Move_Component::Trusters(float Amount)
 	if (!ensure(OwnerMesh)) { return; }
 
 	Amount = FMath::Clamp<float>(Amount, -MaxAmount, MaxAmount);
+	//UE_LOG(LogTemp, Log, TEXT("Trust Amount = %f"), Amount);
 	FVector GroundForwardVector = OwnerMesh->GetForwardVector();
 	if (Amount > 0.1)
 	{
@@ -61,6 +62,7 @@ void UHover_Move_Component::YawLook(float Amount)
 	if (!ensure(OwnerMesh)) { return; }
 
 	Amount = FMath::Clamp<float>(Amount, -MaxAmount, MaxAmount);
+	//UE_LOG(LogTemp, Log, TEXT("Rotation Amount = %f"), Amount);
 	OwnerMesh->AddTorqueInDegrees((Amount * TorqueSense * DefaultTorqueForce)
 		* GetOwner()->GetActorUpVector(), NAME_None, true); //Yaw
 }
@@ -115,14 +117,18 @@ void UHover_Move_Component::FlightGravityToggle()
 	}
 }
 
-void UHover_Move_Component::LookAtTarget(AActor* Target)
+void UHover_Move_Component::VehicleLookAtTarget(AActor* Target)
 {
-	bIHaveTarget = true;
-	FVector DirToTarget = (Target->GetActorLocation() - GetOwner()->GetActorLocation()).GetSafeNormal();
-	float TargetYaw = DirToTarget.Rotation().Yaw;
-	float CurretYaw = GetOwner()->GetActorForwardVector().GetSafeNormal().Rotation().Yaw;
-	float YawChange = RotationPid.Calculate(TargetYaw, CurretYaw, GetWorld()->GetDeltaSeconds(), true);
-	YawLook(YawChange);
+	if (!Target) { return; }
+
+	if (CurrentMoveState == HoverMovementState::Hovering)
+	{
+		FVector DirToTarget = (Target->GetActorLocation() - GetOwner()->GetActorLocation()).GetSafeNormal();
+		float TargetYaw = DirToTarget.Rotation().Yaw;
+		float CurretYaw = GetOwner()->GetActorForwardVector().GetSafeNormal().Rotation().Yaw;
+		float YawChange = RotationPid.Calculate(TargetYaw, CurretYaw, GetWorld()->GetDeltaSeconds(), true);
+		YawLook(YawChange);
+	}
 }
 
 void UHover_Move_Component::RequestDirectMove(const FVector& MoveVelocity, bool bForceMaxSpeed)

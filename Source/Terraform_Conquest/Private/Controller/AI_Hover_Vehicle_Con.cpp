@@ -23,10 +23,10 @@ AAI_Hover_Vehicle_Con::AAI_Hover_Vehicle_Con()
 
 void AAI_Hover_Vehicle_Con::OnTargetDetected(AActor* actor, FAIStimulus const stimulus)
 {
-	/*if (actor && actor == Cast<AActor>(GetWorld()->GetFirstPlayerController()->GetPawn()))
+	if (actor && actor == Cast<AActor>(GetWorld()->GetFirstPlayerController()->GetPawn()))
 	{
-		GetBlackboard()->SetValueAsBool(TEXT("CanSeePlayer"), stimulus.WasSuccessfullySensed());
-	}*/
+		GetBlackboard()->SetValueAsBool(TEXT("bCanSeeTarget"), stimulus.WasSuccessfullySensed());
+	}
 }
 
 void AAI_Hover_Vehicle_Con::SetupPerceptionSystem()
