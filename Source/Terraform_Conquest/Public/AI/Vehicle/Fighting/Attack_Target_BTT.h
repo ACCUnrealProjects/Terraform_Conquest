@@ -14,10 +14,15 @@ class TERRAFORM_CONQUEST_API UAttack_Target_BTT : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
 
+private:
+	class AHover_Vehicles* HoverPawn = nullptr;
+	class AAI_Hover_Vehicle_Con* HoverAICon = nullptr;
+
 protected:
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 public:
 	UAttack_Target_BTT();
-
-	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& owner_comp, uint8* node_memory) override;
+	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

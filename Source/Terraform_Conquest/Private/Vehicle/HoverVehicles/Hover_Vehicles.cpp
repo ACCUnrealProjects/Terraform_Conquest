@@ -289,10 +289,9 @@ void AHover_Vehicles::LookAtTarget(AActor* Target)
 	float PitchOffset = WantedRotation.Pitch - FowardRotation.Pitch;
 	PitchOffset = FMath::Clamp(PitchOffset, -HoverMaxMinPitchLook, HoverMaxMinPitchLook);
 	RestrictedPitch = PitchOffset;
-	ChangeCamerasPitch(true,0.0f);
+	ChangeCamerasPitch(true, 0.0f);
 	SetWeaponRotation();
 }
-
 
 void AHover_Vehicles::ChangeCamerasPitch(bool bAmIRestricted, float dt)
 {

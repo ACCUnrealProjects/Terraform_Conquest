@@ -18,6 +18,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Location", meta = (AllowPrivateAccess = "true"))
 	float Radius = 2000;
 
+	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = "true"))
+	struct FBlackboardKeySelector TargetKey;
+
 protected:
 
 public:

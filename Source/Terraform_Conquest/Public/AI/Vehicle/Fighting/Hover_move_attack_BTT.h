@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_MoveTo.h"
-#include "Hover_MoveTo_BTT.generated.h"
+#include "Hover_move_attack_BTT.generated.h"
 
 /**
- * We have overridden this for hover vehicles as UE4's default move to is very
-  "damanding" on the Z axis, which is not great for a hover component
+ * 
  */
 UCLASS(Blueprintable)
-class TERRAFORM_CONQUEST_API UHover_MoveTo_BTT : public UBTTask_MoveTo
+class TERRAFORM_CONQUEST_API UHover_move_attack_BTT : public UBTTask_MoveTo
 {
 	GENERATED_BODY()
 
@@ -21,13 +20,21 @@ private:
 	class UHover_Component* HoverComp = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TargetType", meta = (AllowPrivateAccess = "true"))
-	bool TargetIsActor = false;
+	bool bTargetIsActor = false;
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard", meta = (AllowPrivateAccess = "true"))
+	struct FBlackboardKeySelector TargetKey;
+
+	void MoveZCheck(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
+	void Attack(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory);
 
 protected:
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& owner_comp, uint8* node_memory) override;
 
 public:
-	UHover_MoveTo_BTT();
+	UHover_move_attack_BTT();
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
 	
 };

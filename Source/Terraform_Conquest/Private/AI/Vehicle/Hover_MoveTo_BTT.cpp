@@ -27,8 +27,10 @@ EBTNodeResult::Type UHover_MoveTo_BTT::ExecuteTask(UBehaviorTreeComponent& Owner
 	HoverComp = HoverPawn->FindComponentByClass<UHover_Component>();
 	if (!HoverComp) { FinishLatentTask(OwnerComp, EBTNodeResult::Failed); }
 
+
 	return EBTNodeResult::InProgress;
 }
+
 
 void UHover_MoveTo_BTT::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
@@ -67,4 +69,3 @@ void UHover_MoveTo_BTT::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 
 	return;
 }
-
